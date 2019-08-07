@@ -1,4 +1,4 @@
-##ATMI - Annotation Tool for Medical Image## 
+# ATMI - Annotation Tool for Medical Image
 
 --------------------------------------
 
