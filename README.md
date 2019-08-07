@@ -1,6 +1,7 @@
-#ATMI - Annotation Tool for Medical Image
+##ATMI - Annotation Tool for Medical Image## 
 
---
+--------------------------------------
+
 The ATMI (Annotation Tool for Medical Image) provides a user friendly and comprehensive tool for medical annotation purpose. 
 
 The following features will be implemented in this system:
