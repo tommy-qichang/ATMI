@@ -6,7 +6,7 @@ The ATMI (Annotation Tool for Medical Image) provides a user friendly and compre
 
 The following features will be implemented in this system:
 
-1.	**One Click Install:** Install AMI just one click without install database, config environments etc. 
+1.	**One Click Install:** Install ATMI just one click without install database, config environments etc. 
 2.	**Multi-tasks capability:** Create multiple instance(tasks) under the same system. So, you don’t need to install multiple times.
 3.	**Audit process embeded:** Audit process embedded. Different annotators could contour one image multiple times and arbitrate by the auditors.
 4.	**Support comprehensive annotation methods:** Provide multiple annotation methods to meet the requirements of any medical annotation tasks, especially for machine learning settings. 

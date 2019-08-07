@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='ami',
+    name='atmi',
     version='0.0.1',
     description='Annotation tool for Medical Image',
     author='Qi Chang',

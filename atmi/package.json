@@ -1,0 +1,31 @@
+{
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "clean": "rm -rf dist"
+  },
+  "author": "Qi Chang <tommy.qichang@gmail.com> ",
+  "license": "GPL-3",
+  "dependencies": {
+    "babel-core": "6.26.3",
+    "babel-loader": "7.1.5",
+    "bootstrap": "^3.3.7",
+    "css-loader": "3.1.0",
+    "extract-text-webpack-plugin": "4.0.0-beta.0",
+    "manifest-revision-webpack-plugin": "0.4.1",
+    "mini-css-extract-plugin": "0.8.0",
+    "node-sass": "4.12.0",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
+    "sass-loader": "7.1.0",
+    "style-loader": "0.23.1"
+  },
+  "devDependencies": {
+    "babel-preset-env": "1.7.0",
+    "babel-preset-react": "6.24.1",
+    "jest": "^24.8.0",
+    "node-sass": "4.12.0",
+    "webpack": "4.39.1",
+    "webpack-cli": "3.3.6"
+  }
+}

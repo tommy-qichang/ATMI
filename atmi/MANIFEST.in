@@ -1,0 +1,4 @@
+include ./manifest.json
+
+recursive-include ./templates *.html
+recursive-include ./public *.js *.css
