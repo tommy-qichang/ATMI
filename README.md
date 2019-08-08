@@ -31,3 +31,7 @@ The following features will be implemented in this system:
 
     6.1 open another terminal, and run `npm run watch` to launch webpack. 
     6.2 run `python __init__.py`
+
+
+    Please open a new branch for new features, and pull request & rebase to stable branches.
+    **Don't commit directly to master, stable branches. ***
