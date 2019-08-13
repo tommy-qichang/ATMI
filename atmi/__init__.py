@@ -5,7 +5,7 @@ from flask import Flask, render_template, send_from_directory
 from flask_webpack import Webpack
 
 
-__version__ = pkg_resources.require("atmi")[0].version
+# __version__ = pkg_resources.require("atmi")[0].version
 here = path.abspath(path.dirname(__file__))
 
 app = Flask(__name__)
