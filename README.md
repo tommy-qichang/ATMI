@@ -1,4 +1,5 @@
-# ATMI - Annotation Tool for Medical Image [![CircleCI](https://circleci.com/gh/tommychang1983/ATMI/tree/master.svg?style=svg)](https://circleci.com/gh/tommychang1983/ATMI/tree/master)
+# ATMI - Annotation Tool for Medical Image
+[![CircleCI](https://circleci.com/gh/tommychang1983/ATMI.svg?style=svg&circle-token=dce76d841abb20aa48ea9fc8ac6841ef35641141)](https://circleci.com/gh/tommychang1983/ATMI)
 --------------------------------------
 
 The ATMI (Annotation Tool for Medical Image) provides a user friendly and comprehensive tool for medical annotation purpose. 
