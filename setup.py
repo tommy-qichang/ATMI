@@ -6,6 +6,8 @@ setup(
     description='Annotation tool for Medical Image',
     author='Qi Chang',
     author_email='tommy.qichang@gmail.com',
+    license='GPL',
+    home_page='',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
