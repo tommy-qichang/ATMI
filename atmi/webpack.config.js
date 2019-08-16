@@ -20,7 +20,14 @@ module.exports = {
             root + "/styles/main.scss"
         ]
     },
+
+    devtool: 'source-map',
+
     output: {
+        
+        //publicPath: '/',
+		devtoolModuleFilenameTemplate: '../[resource-path]',
+        
         path: path.resolve(__dirname, 'public'),
         publicPath: "/assets/",
         filename: "[name].[hash].js",

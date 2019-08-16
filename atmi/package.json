@@ -7,6 +7,7 @@
   "author": "Qi Chang <tommy.qichang@gmail.com> ",
   "license": "GPL-3",
   "dependencies": {
+    "antd": "^3.21.4",
     "babel-core": "6.26.3",
     "babel-loader": "7.1.5",
     "bootstrap": "^3.3.7",
