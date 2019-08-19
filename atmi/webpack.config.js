@@ -13,6 +13,7 @@ var root = "./static";
 
 module.exports = {
     entry: {
+        setup_js: [root + "/scripts/setup.js"],
         app_js: [
             root + "/scripts/app.js"
         ],
@@ -24,10 +25,10 @@ module.exports = {
     devtool: 'source-map',
 
     output: {
-        
+
         //publicPath: '/',
 		devtoolModuleFilenameTemplate: '../[resource-path]',
-        
+
         path: path.resolve(__dirname, 'public'),
         publicPath: "/assets/",
         filename: "[name].[hash].js",
@@ -63,14 +64,14 @@ module.exports = {
                         }
                     }
                 ]
-            }, 
-             {//loader for common css files 
+            },
+             {//loader for common css files
                 test: /\.css$/,
                 loader: "style-loader!css-loader?modules",
                 exclude: /node_modules/
             },
 
-            {//loader for antd css files 
+            {//loader for antd css files
               test:/\.css$/,
               exclude:/static/,
               use:[
@@ -90,7 +91,7 @@ module.exports = {
                     name: '/static/img/[name].[ext]?[hash]'
                 }
             }
-            
+
             /* {
                 test: /\.css$/,
                 use: [
@@ -117,7 +118,7 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: "babel-loader",
                 query: {
-                    presets: ['env', 'react']
+                    presets: ['@babel/preset-env', '@babel/preset-react']
                 }
             },  */
            /*  {
@@ -133,19 +134,17 @@ module.exports = {
                         }
                     }
                 ]
-            }, */ /* {
+            }, {
                 test: /\.css$/,
-                //loader: 'style-loader!css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'
-                //loader: 'style-loader!css-loader?modules&importLoaders=1'
-                loader: [
+                use: [
+                    'style-loader',
                     {
-                      loader: 'style-loader'
-                    },
-                    {
-                      loader: 'css-loader'
-                    }
-                  ]
-            } */
+                        loader: 'css-loader',
+                        options: {
+                            modules: true
+                        }
+                    }]
+            }*/
         ]
     },
     plugins: [
