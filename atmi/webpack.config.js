@@ -13,6 +13,7 @@ var root = "./static";
 
 module.exports = {
     entry: {
+        setup_js: [root + "/scripts/setup.js"],
         app_js: [
             root + "/scripts/app.js"
         ],
@@ -40,7 +41,7 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: "babel-loader",
                 query: {
-                    presets: ['env', 'react']
+                    presets: ['@babel/preset-env', '@babel/preset-react']
                 }
             }, {
                 test: /\.s(a|c)ss$/,
@@ -57,7 +58,14 @@ module.exports = {
                 ]
             }, {
                 test: /\.css$/,
-                loader: 'style!css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true
+                        }
+                    }]
             }
         ]
     },
