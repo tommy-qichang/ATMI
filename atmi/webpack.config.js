@@ -47,9 +47,28 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: "babel-loader",
                 query: {
+                    presets: ['@babel/preset-env', '@babel/preset-react']
+                }
+            },
+/*             {
+                test: /\.m?js$/,
+                exclude: /(node_modules|bower_components)/,
+                use: {
+                  loader: 'babel-loader',
+                  options: {
+                    presets: ['@babel/preset-env']
+                  }
+                }
+              }, */
+/*             {
+                test: /\.js$/i,
+                exclude: /node_modules/,
+                loader: "babel-loader",
+                query: {
                     presets: ['env', 'react']
                 }
-            }, {
+            },  */
+            {
                 test: /\.s(a|c)ss$/,
                 exclude: /\.module.(s(a|c)ss)$/,
                 loader: [

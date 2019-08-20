@@ -1,0 +1,18 @@
+.background {
+    width: 110%;
+    height: 100%;
+    background-color: #fff;
+    display: flex
+  } 
+  
+  .loginForm {
+      max-width: 300px;
+    }
+  
+    .loginFormForgot {
+      float: right;
+    }
+  
+    .loginFormButton {
+      width: 100%;
+    }

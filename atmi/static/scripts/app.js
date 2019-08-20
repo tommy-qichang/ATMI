@@ -1,13 +1,15 @@
 import React from 'react'
 import {render} from 'react-dom'
-import Game from "./demo";
+//import Game from "./demo";
+import IndexPage from "./index";
 
-render(
+/* render(
     <h2>Hello, World from WebPack!</h2>,
     document.getElementById("main")
-)
+) */
 
 render(
-  <Game />,
-  document.getElementById('root')
+  //<Game />,
+  <IndexPage  />,
+  document.getElementById("main")
 );
