@@ -5,6 +5,14 @@ import axios from 'axios';
 //import jwt from 'jsonwebtoken';
 
 class LoginForm extends React.Component {
+
+/*   constructor(props) {
+		super(props);
+		this.state = {
+      disableButton: true,
+      usernameValue: ""
+        };
+	} */
   
   validUsername = false;   //whether username is in right format
   validPassword = false;   //whether password is in right format
@@ -13,7 +21,7 @@ class LoginForm extends React.Component {
     disableButton: true,
     usernameValue: ""
   };
-  
+   
   handleSubmit = e => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {

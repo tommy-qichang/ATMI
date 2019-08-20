@@ -2,6 +2,10 @@ import React from 'react';
 import { Row, Col, Button } from 'antd';
 
 export default class ManagementPanel extends React.Component {
+/*     constructor(props) {
+		super(props);
+	}
+     */
     render() {
         return (
             <div>

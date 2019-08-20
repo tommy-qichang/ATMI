@@ -50,6 +50,30 @@ module.exports = {
                     presets: ['@babel/preset-env', '@babel/preset-react']
                 }
             },
+            {
+                test: /\.s(a|c)ss$/,
+                exclude: /\.module.(s(a|c)ss)$/,
+                loader: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sourceMap: isDevelopment
+                        }
+                    }
+                ]
+            }, {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: false
+                        }
+                    }]
+            }
 /*             {
                 test: /\.m?js$/,
                 exclude: /(node_modules|bower_components)/,
@@ -68,7 +92,7 @@ module.exports = {
                     presets: ['env', 'react']
                 }
             },  */
-            {
+           /*  {
                 test: /\.s(a|c)ss$/,
                 exclude: /\.module.(s(a|c)ss)$/,
                 loader: [
@@ -81,7 +105,7 @@ module.exports = {
                         }
                     }
                 ]
-            }, {
+            }, */ /* {
                 test: /\.css$/,
                 //loader: 'style-loader!css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'
                 //loader: 'style-loader!css-loader?modules&importLoaders=1'
@@ -93,7 +117,7 @@ module.exports = {
                       loader: 'css-loader'
                     }
                   ]
-            }
+            } */
         ]
     },
     plugins: [
