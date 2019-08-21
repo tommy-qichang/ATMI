@@ -1,6 +1,6 @@
 import React from 'react';
 //import styles from './index.css';
-import { Row, Col, Button } from 'antd';
+import { Row, Col, Button, message } from 'antd';
 import UserManagement from './components/UserManagement';
 //import 'antd/dist/antd.css';
 import styles from '../styles/index.css';
@@ -9,17 +9,29 @@ export default class IndexPage extends React.PureComponent {
     state = {
         hideUserManagement: false,   //Whether to hide UserManagement related components
         username: "",  //username logged in
-        loggedIn: false  //Whether the user has logged in
-
+        loggedIn: false,  //Whether the user has logged in
+        userManagementMode: "LoginForm"
     }
 
     onLoginSuccess = username => {
         this.setState({
             loggedIn: true,
-            username
+            username,
+            userManagementMode: "ManagementPanel"
         });
-
     }
+
+    
+  onLogoutButtonClick = e => {
+    //localStorage.removeItem('jwtToken');
+    message.success('Successfully logged out！', 2);
+    this.setState({
+      loggedIn: false,
+      hideUserManagement: false,
+      username: "",
+      userManagementMode: "LoginForm"
+    });
+  }
 
     render() {
         return (
@@ -45,6 +57,7 @@ export default class IndexPage extends React.PureComponent {
                     <Col span={24}>
                         <UserManagement
                             onLoginSuccess={this.onLoginSuccess}
+                            userManagementMode={this.state.userManagementMode}
                         />
                     </Col>
                 </Row>

@@ -7,23 +7,62 @@ import ManagementPanel from './ManagementPanel';
 
 
 export default class UserManagement extends React.PureComponent {
-/*     constructor(props) {
-		super(props);
-		this.state = {
-            hideLoginForm: false,   //Whether to hide LoginForm
-            hideLResetPasswordForm: true,   //Whether to hide ResetPasswordForm
-            hideLSettingPanel: true,   //Whether to hide SettingPanel
-            hideManagementPanel: true,   //Whether to hide ManagementPanel
-        };
-	} */
-    
+    /*     constructor(props) {
+            super(props);
+            this.state = {
+                hideLoginForm: false,   //Whether to hide LoginForm
+                hideLResetPasswordForm: true,   //Whether to hide ResetPasswordForm
+                hideLSettingPanel: true,   //Whether to hide SettingPanel
+                hideManagementPanel: true,   //Whether to hide ManagementPanel
+            };
+        } */
+
     state = {
         hideLoginForm: false,   //Whether to hide LoginForm
         hideLResetPasswordForm: true,   //Whether to hide ResetPasswordForm
         hideLSettingPanel: true,   //Whether to hide SettingPanel
         hideManagementPanel: true   //Whether to hide ManagementPanel
     };
-    
+
+    componentDidUpdate() {
+        switch (this.props.userManagementMode) {
+            case "LoginForm":
+                this.setState({
+                    hideLoginForm: false,
+                    hideLResetPasswordForm: true,
+                    hideLSettingPanel: true,
+                    hideManagementPanel: true
+                });
+                break;
+            case "ResetPasswordForm":
+                this.setState({
+                    hideLoginForm: true,
+                    hideLResetPasswordForm: false,
+                    hideLSettingPanel: true,
+                    hideManagementPanel: true
+                });
+                break;
+            case "LSettingPanel":
+                this.setState({
+                    hideLoginForm: true,
+                    hideLResetPasswordForm: true,
+                    hideLSettingPanel: false,
+                    hideManagementPanel: true
+                });
+                break;
+            case "ManagementPanel":
+                this.setState({
+                    hideLoginForm: true,
+                    hideLResetPasswordForm: true,
+                    hideLSettingPanel: true,
+                    hideManagementPanel: false
+                });
+                break;
+            default:
+                return;
+        }
+    }
+
     onLoginSuccess = username => {
         this.setState({
             hideLoginForm: true,
