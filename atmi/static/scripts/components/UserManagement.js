@@ -24,11 +24,14 @@ export default class UserManagement extends React.PureComponent {
         hideManagementPanel: true   //Whether to hide ManagementPanel
     };
     
-    onLoginSuccess = e => {
+    onLoginSuccess = username => {
         this.setState({
             hideLoginForm: true,
             hideManagementPanel: false
         });
+
+        this.props.onLoginSuccess(username);
+
     }
 
     render() {

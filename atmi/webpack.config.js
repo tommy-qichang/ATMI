@@ -63,17 +63,38 @@ module.exports = {
                         }
                     }
                 ]
-            }, {
+            }, 
+             {//loader for common css files 
+                test: /\.css$/,
+                loader: "style-loader!css-loader?modules",
+                exclude: /node_modules/
+            },
+
+            {//loader for antd css files 
+              test:/\.css$/,
+              exclude:/static/,
+              use:[
+                  { loader: "style-loader",},
+                  {
+                      loader: "css-loader",
+                      options:{
+                          importLoaders:1
+                      }
+                  }
+              ]
+            }
+            
+            /* {
                 test: /\.css$/,
                 use: [
                     'style-loader',
                     {
                         loader: 'css-loader',
                         options: {
-                            modules: false
+                            modules: true
                         }
                     }]
-            }
+            } */
 /*             {
                 test: /\.m?js$/,
                 exclude: /(node_modules|bower_components)/,
