@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Button } from 'antd';
+import { Row, Col, Button, Modal, Input, message } from 'antd';
 import LoginForm from './LoginForm';
 //import ResetPasswordForm from './ResetPasswordForm';
 //import SettingPanel from './SettingPanel';
@@ -21,7 +21,7 @@ export default class UserManagement extends React.PureComponent {
         hideLoginForm: false,   //Whether to hide LoginForm
         hideLResetPasswordForm: true,   //Whether to hide ResetPasswordForm
         hideLSettingPanel: true,   //Whether to hide SettingPanel
-        hideManagementPanel: true   //Whether to hide ManagementPanel
+        hideManagementPanel: true,   //Whether to hide ManagementPanel
     };
 
     componentDidUpdate() {
@@ -68,9 +68,7 @@ export default class UserManagement extends React.PureComponent {
             hideLoginForm: true,
             hideManagementPanel: false
         });
-
         this.props.onLoginSuccess(username);
-
     }
 
     render() {
@@ -78,7 +76,7 @@ export default class UserManagement extends React.PureComponent {
             <div style={{ height: "auto", width: "99%" }}>
                 <br />
                 <Row type="flex" justify="center" align="middle" hidden={this.state.hideLoginForm}>
-                    <Col span={6}>
+                    <Col>
                         <LoginForm
                             onLoginSuccess={this.onLoginSuccess}
                         />
