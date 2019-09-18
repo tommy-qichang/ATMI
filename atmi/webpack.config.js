@@ -13,7 +13,7 @@ var root = "./static";
 
 module.exports = {
     entry: {
-        setup_js: [root + "/scripts/setup.js"],
+        main_js: [root + "/scripts/main.js"],
         app_js: [
             root + "/scripts/app.js"
         ],
@@ -86,5 +86,8 @@ module.exports = {
         //         NODE_ENV: '"production"'
         //     }
         // })
-    ]
+    ],
+    node: {
+        fs: "empty"
+    }
 };
