@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col, Button, Modal, Input, message } from 'antd';
 import LoginForm from './LoginForm';
-//import ResetPasswordForm from './ResetPasswordForm';
+import ResetPasswordForm from './ResetPasswordForm';
 //import SettingPanel from './SettingPanel';
 import ManagementPanel from './ManagementPanel';
 
@@ -19,56 +19,79 @@ export default class UserManagement extends React.PureComponent {
 
     state = {
         hideLoginForm: false,   //Whether to hide LoginForm
-        hideLResetPasswordForm: true,   //Whether to hide ResetPasswordForm
-        hideLSettingPanel: true,   //Whether to hide SettingPanel
+        hideResetPasswordForm: true,   //Whether to hide ResetPasswordForm
+        hideSettingPanel: true,   //Whether to hide SettingPanel
         hideManagementPanel: true,   //Whether to hide ManagementPanel
+        ResetPasswordUsername: "",   //Username to be reset password for
     };
 
+    componentDidMount() {
+        if(window.location.search!=="") {
+            this.setState({
+                ResetPasswordUsername: window.location.search.substring(1),
+            });
+            this.toManagementMode("ResetPasswordForm");
+        }
+    }
+
     componentDidUpdate() {
-        switch (this.props.userManagementMode) {
+         switch (this.props.userManagementMode) {
             case "LoginForm":
                 this.setState({
                     hideLoginForm: false,
-                    hideLResetPasswordForm: true,
-                    hideLSettingPanel: true,
+                    hideResetPasswordForm: true,
+                    hideSettingPanel: true,
                     hideManagementPanel: true
                 });
                 break;
             case "ResetPasswordForm":
                 this.setState({
                     hideLoginForm: true,
-                    hideLResetPasswordForm: false,
-                    hideLSettingPanel: true,
+                    hideResetPasswordForm: false,
+                    hideSettingPanel: true,
                     hideManagementPanel: true
                 });
                 break;
-            case "LSettingPanel":
+            case "SettingPanel":
                 this.setState({
                     hideLoginForm: true,
-                    hideLResetPasswordForm: true,
-                    hideLSettingPanel: false,
+                    hideResetPasswordForm: true,
+                    hideSettingPanel: false,
                     hideManagementPanel: true
                 });
                 break;
             case "ManagementPanel":
                 this.setState({
                     hideLoginForm: true,
-                    hideLResetPasswordForm: true,
-                    hideLSettingPanel: true,
+                    hideResetPasswordForm: true,
+                    hideSettingPanel: true,
                     hideManagementPanel: false
                 });
                 break;
             default:
                 return;
-        }
+        } 
     }
 
     onLoginSuccess = username => {
-        this.setState({
+/*         this.setState({
             hideLoginForm: true,
             hideManagementPanel: false
-        });
+        });  */
         this.props.onLoginSuccess(username);
+        this.toManagementMode("ManagementPanel");
+    }
+
+    toManagementMode = mode => {
+       this.props.toManagementMode(mode);
+    }
+
+    onResetPasswordSucceed = e => {
+/*         this.setState({
+            hideLoginForm: false,
+            hideResetPasswordForm: true
+        }); */
+        this.toManagementMode("LoginForm");
     }
 
     render() {
@@ -80,14 +103,18 @@ export default class UserManagement extends React.PureComponent {
                         <LoginForm
                             onLoginSuccess={this.onLoginSuccess}
                         />
+                       {/*  <a href="javascript:;" onClick={this.toManagementMode("ResetPasswordForm")}>Reset Password</a> */}
                     </Col>
                 </Row>
-                {/* <Row type="flex" justify="center" align="middle" hidden={this.state.hideLResetPasswordForm}>
-                    <Col span={24}>
-                        <ResetPasswordForm />
+                <Row type="flex" justify="center" align="middle" hidden={this.state.hideResetPasswordForm}>
+                    <Col>
+                        <ResetPasswordForm
+                            onResetPasswordSucceed={this.onResetPasswordSucceed}
+                            username={this.state.ResetPasswordUsername}
+                        />
                     </Col>
                 </Row>
-                <Row type="flex" justify="center" align="middle" hidden={this.state.hideLSettingPanel}>
+                {/* <Row type="flex" justify="center" align="middle" hidden={this.state.hideLSettingPanel}>
                     <Col span={24}>
                         <SettingPanel />
                     </Col>

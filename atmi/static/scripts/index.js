@@ -33,23 +33,29 @@ export default class IndexPage extends React.PureComponent {
     });
   }
 
+  toManagementMode = mode => {
+    this.setState({
+        userManagementMode: mode
+      });
+  }
+
     render() {
         return (
-            <div style={{ height: "auto", width: "99%" }}>
+            <div /* style={{ height: "auto", width: "99%" }} */ className={styles.canvas}>
                 <br />
                 <Row type="flex" justify="center" align="middle">
                     <Col span={8}>
                     </Col>
                     <Col span={8}>
-                        <h1 style={{ color: "#0099FF" }}>Annotation Tool for Medical Image</h1>
+                        <h1 className={styles.font}>Annotation Tool for Medical Image</h1>
                     </Col>
                     <Col span={1}>
                     </Col>
                     <Col span={5}>
-                        <label hidden={!this.state.loggedIn}>{`Welcome，${this.state.username}`}</label>
+                        <label /* className={styles.font} */ style={{color: "#ffffff"}} hidden={!this.state.loggedIn}>{`Welcome，${this.state.username}`}</label>
                     </Col>
                     <Col span={2}>
-                        <Button size="small" type="primary" onClick={this.onLogoutButtonClick} hidden={!this.state.loggedIn}>Log out</Button>
+                        <Button size="small" /* type="primary" */ ghost onClick={this.onLogoutButtonClick} hidden={!this.state.loggedIn}>Log out</Button>
                     </Col>
                 </Row>
                 <div /* style={{width: "100%", height: "1px", border: "1px solid #ccc"}} */ className={styles.border} />
@@ -58,6 +64,7 @@ export default class IndexPage extends React.PureComponent {
                         <UserManagement
                             onLoginSuccess={this.onLoginSuccess}
                             userManagementMode={this.state.userManagementMode}
+                            toManagementMode={this.toManagementMode}
                         />
                     </Col>
                 </Row>

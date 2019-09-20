@@ -236,14 +236,15 @@ class LoginForm extends React.Component {
             {getFieldDecorator('remember', {
               valuePropName: 'checked',
               initialValue: true,
-            })(<Checkbox>Remember Password</Checkbox>)}
+            })(<Checkbox><label /* style={{color: "#ccc"}} */ className={styles.font}>Remember Password</label></Checkbox>)}
             <a className={styles.loginFormForgot} href="javascript:;" onClick={this.onResetButtonClick}>
               Forget Password
           </a>
-            <Button type="primary" htmlType="submit" className={styles.loginFormButton} disabled={this.state.disableButton}>
+            <Button type="primary" htmlType="submit" ghost className={styles.loginFormButton} disabled={this.state.disableButton}>
               Login
           </Button>
-            No Account Yet? <a href="javascript:;" onClick={this.props.onRegisterButtonClick}>Apply For One</a>
+          <label className={styles.font}>No Account Yet? </label>
+          <a href="javascript:;" onClick={this.props.onRegisterButtonClick}>Apply For One</a>
           </Form.Item>
         </Form>
         <Modal
@@ -252,7 +253,7 @@ class LoginForm extends React.Component {
           onCancel={this.onConfirmEmailCancel}
           centered
           footer={[
-            <Button type="primary" key="submit"
+            <Button type="primary" key="submit" ghost
               /*  className={styles.loginFormButton}  */
               /* disabled={this.state.disableConfirmButton} */
               onClick={this.onConfirmEmail}

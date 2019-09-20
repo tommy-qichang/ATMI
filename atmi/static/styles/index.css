@@ -3,3 +3,15 @@
     height: 1px;
     border:1px solid #ccc
   }
+
+.canvas {
+  background: #4d4d4d;
+  height:100vh;
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  width: "99%" 
+}
+
+.font {
+  color: #ccc
+}

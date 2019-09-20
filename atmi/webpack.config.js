@@ -82,6 +82,13 @@ module.exports = {
                       }
                   }
               ]
+            },
+            {
+                test: /\.(png|jpg|gif|svg)$/,
+                loader: 'file-loader',
+                options: {
+                    name: '/static/img/[name].[ext]?[hash]'
+                }
             }
             
             /* {

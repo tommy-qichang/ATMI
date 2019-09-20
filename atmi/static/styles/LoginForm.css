@@ -1,12 +1,12 @@
 .background {
     width: 110%;
     height: 100%;
-    background-color: #fff;
+    background-color: #4d4d4d;
     display: flex
   } 
   
   .loginForm {
-      max-width: 300px;
+      width: 300px;
     }
   
     .loginFormForgot {
@@ -15,4 +15,8 @@
   
     .loginFormButton {
       width: 100%;
+    }
+
+    .font {
+      color: #ccc
     }
