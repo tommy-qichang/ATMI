@@ -11,3 +11,26 @@
   color: #4d4d4d
 }
 
+.border {
+  width: 100%;
+  height: 1px;
+  border:0.5px solid #ccc;
+}
+
+.borderSpan {
+  height: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.infinitecontainer {
+  /* border: 1px solid #e8e8e8;  */
+  border-radius: 4px;
+  overflow: auto;
+  /* padding: 0px 1px; */
+  padding-right: 8px;
+  padding-top: 6px;
+  height: 400px;
+}
+

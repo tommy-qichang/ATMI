@@ -137,7 +137,7 @@ class LoginForm extends React.Component {
     }
   }
 
-  proccessReset = values => {
+  proccessReset = username => {
     message.success("Email for resetting password has been sent", 2);
     this.setState({
       showConfirmEmail: false

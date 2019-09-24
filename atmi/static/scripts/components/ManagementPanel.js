@@ -1,6 +1,9 @@
 import React from 'react';
-import { Row, Col, Table, Button, Progress } from 'antd';
+import { Row, Col, Table, Button, Progress, Modal, Input, Select, message, Icon } from 'antd';
+import { SketchPicker } from 'react-color';
 import styles from '../../styles/ManagementPanel.css';
+import InfiniteScroll from 'react-infinite-scroller';
+
 
 export default class ManagementPanel extends React.Component {
     /*     constructor(props) {
@@ -15,9 +18,30 @@ export default class ManagementPanel extends React.Component {
         currentUserTablePage: 1,
         currentInstanceTablePage: 1,
         usernameEntered: "",    //Username of the table row that mouse enters into
-        instanceNameEntered: ""   //Instance name of the table row that mouse enters into
+        instanceNameEntered: "",   //Instance name of the table row that mouse enters into
+        showAddUser: false,
+        showAddInstance: false,
+        showModifyInstance: false,
+        hideColorPicker: true,
+        colorBlockColor: "#FF8000",
+        colorPickerColor: "#FF8000",
+        labelCandidatesBuffer: [],
+        annotatorCandidatesBuffer: [],
+        hideAddLabelControls: true,
+        hideAddAnnotatorControls: true
     };
 
+    newUsername = null;
+    newInstanceName = null;
+    newInstanceDescription = null;
+    modifyInstanceDescription = null;
+    newInstancePath = null;
+    modifyInstancePath = null;
+    newLabelName = null;
+    newLabelValue = null;
+    colorPicker = null;
+    labelCandidatesBuffer = [];
+    annotatorCandidatesBuffer = [];
     //userTableData = [];
     userTableData = [
         {
@@ -92,10 +116,201 @@ export default class ManagementPanel extends React.Component {
         };
     }
 
+    onNewUserButtonClick = e => {
+        this.setState({
+            showAddUser: true
+        });
+    }
+
+    handleAddUserOk = e => {
+        this.checkEmail();
+    }
+
+    handleAddUserCancel = e => {
+        this.setState({
+            showAddUser: false
+        });
+    }
+
+    checkEmail = () => {
+        let reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
+        if (!this.newUsername) {
+            return;
+        }
+        let username = this.newUsername.state.value;
+        if (reg.test(username)) {
+            this.proccessAddUser(username);
+        }
+        else {
+            message.error("Please enter username of email format", 2);
+        }
+    }
+
+    proccessAddUser = username => {
+        message.success("Sucessfully added user and sent email to user", 2);
+        this.setState({
+            showAddUser: false
+        });
+    }
+
     /*     setRowClassName = (record) => {
             console.log("this.state.usernameEntered: ", this.state.usernameEntered);
             return record.username === this.state.usernameEntered ? '.highightTableRow' : '';
         } */
+
+    handleAddInstanceOk = e => {
+        this.labelCandidatesBuffer = [];
+        this.annotatorCandidatesBuffer = [];
+        this.setState({
+            showAddInstance: false,
+            hideColorPicker: true,
+            labelCandidatesBuffer: [],
+            annotatorCandidatesBuffer: [],
+            hideAddLabelControls: true,
+            hideAddAnnotatorControls: true
+        });
+    }
+
+    handleModifyInstanceOk = e => {
+        this.labelCandidatesBuffer = [];
+        this.annotatorCandidatesBuffer = [];
+        this.setState({
+            showModifyInstance: false,
+            hideColorPicker: true,
+            labelCandidatesBuffer: [],
+            annotatorCandidatesBuffer: [],
+            hideAddLabelControls: true,
+            hideAddAnnotatorControls: true
+        });
+    }
+
+    onNewInstanceButtonClick = e => {
+        this.setState({
+            showAddInstance: true
+        });
+    }
+
+    handleAddInstanceCancel = e => {
+        this.labelCandidatesBuffer = [];
+        this.annotatorCandidatesBuffer = [];
+        this.setState({
+            showAddInstance: false,
+            hideColorPicker: true,
+            labelCandidatesBuffer: [],
+            annotatorCandidatesBuffer: [],
+            hideAddLabelControls: true,
+            hideAddAnnotatorControls: true
+        });
+    }
+
+    handleModifyInstanceCancel = e => {
+        this.labelCandidatesBuffer = [];
+        this.annotatorCandidatesBuffer = [];
+        this.setState({
+            showModifyInstance: false,
+            hideColorPicker: true,
+            labelCandidatesBuffer: [],
+            annotatorCandidatesBuffer: [],
+            hideAddLabelControls: true,
+            hideAddAnnotatorControls: true
+        });
+    }
+
+    handleLoadDICOM = e => {
+
+    }
+
+    handleAddLabel = e => {
+        this.labelCandidatesBuffer.push({
+            name: this.newLabelName.state.value,
+            value: this.newLabelValue.state.value,
+            color: this.state.colorBlockColor
+        });
+        this.setState({
+            labelCandidatesBuffer: this.labelCandidatesBuffer,
+            colorBlockColor: "#FF8000"
+        });
+        this.newLabelName.state.value = "";
+        this.newLabelValue.state.value = "";
+    }
+
+    handleAddAnnotator = e => {
+        this.annotatorCandidatesBuffer.push(
+            this.newAnnotatorCandidate.state.value
+        );
+        this.setState({
+            annotatorCandidatesBuffer: this.annotatorCandidatesBuffer,
+        });
+        this.newAnnotatorCandidate.state.value = "";
+    }
+
+    onAddInstanceModalClick = e => {
+        this.setState({
+            hideColorPicker: true
+        });
+    }
+
+    onAddInstanceModalClick = e => {
+        this.setState({
+            hideColorPicker: true
+        });
+    }
+
+    onColorBlockClick = e => {
+        e.stopPropagation();
+        if (!this.state.hideColorPicker) {
+            //console.log("this.colorPicker", this.colorPicker);
+            this.setState({
+                colorBlockColor: this.colorPicker.state.hex
+            });
+        }
+        else {
+            this.setState({
+                colorPickerColor: this.state.colorBlockColor
+            });
+        }
+        this.setState({
+            hideColorPicker: !this.state.hideColorPicker
+        });
+    }
+
+    onColorPickerClick = e => {
+        e.stopPropagation();
+    }
+
+    onLabelPlusIconClick = e => {
+        this.setState({
+            hideAddLabelControls: !this.state.hideAddLabelControls
+        });
+    }
+
+    onAnnotatorPlusIconClick = e => {
+        this.setState({
+            hideAddAnnotatorControls: !this.state.hideAddAnnotatorControls
+        });
+    }
+
+    onLabelCloseIconClick = e => {
+        //console.log("e.target.dataset.index: ", e.currentTarget.dataset.index);
+        this.labelCandidatesBuffer.splice(e.currentTarget.dataset.index, 1);
+        this.setState({
+            labelCandidatesBuffer: this.labelCandidatesBuffer
+        });
+    }
+
+    onAnnotatorCloseIconClick = e => {
+        //console.log("e.target.dataset.index: ", e.currentTarget.dataset.index);
+        this.annotatorCandidatesBuffer.splice(e.currentTarget.dataset.index, 1);
+        this.setState({
+            annotatorCandidatesBuffer: this.annotatorCandidatesBuffer
+        });
+    }
+
+    onModifyInstanceClick = e => {
+        this.setState({
+            showModifyInstance: true
+        });
+    }
 
     userTableColumns = [
         {
@@ -162,7 +377,7 @@ export default class ManagementPanel extends React.Component {
             className: "table",
             render: (text, record) => (
                 <div>
-                    <Progress percent={text} showInfo={false} strokeColor="#87d068"/>
+                    <Progress percent={text} showInfo={false} strokeColor="#87d068" />
                 </div>
             )
         },
@@ -222,7 +437,7 @@ export default class ManagementPanel extends React.Component {
                             <a href="javascript:;"><img src="./assets/static/img/details.png" title='Details' alt='Details' style={{ width: 18, height: 18 }} /* onClick={this.onFavoritesButtonClick} */></img></a>
                         </Col>
                         <Col span={6}>
-                            <a href="javascript:;"><img src="./assets/static/img/modify.png" title='Modify' alt='Modify' style={{ width: 18, height: 18 }} /* onClick={this.onFavoritesButtonClick} */></img></a>
+                            <a href="javascript:;"><img src="./assets/static/img/modify.png" title='Modify' alt='Modify' style={{ width: 18, height: 18 }} onClick={this.onModifyInstanceClick}></img></a>
                         </Col>
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/delete.png" title='Delete this instance' alt='Delete Instance' style={{ width: 18, height: 18 }} /* onClick={this.onFavoritesButtonClick} */></img></a>
@@ -245,7 +460,8 @@ export default class ManagementPanel extends React.Component {
                 <br />
                 <Row type="flex" justify="center" align="middle">
                     <Col span={8}>
-                        <Button icon="plus" type="primary" ghost>
+                        <Button icon="plus" type="primary" ghost
+                            onClick={this.onNewUserButtonClick}>
                             New User
                         </Button>
                     </Col>
@@ -285,7 +501,8 @@ export default class ManagementPanel extends React.Component {
                 <br />
                 <Row type="flex" justify="center" align="middle">
                     <Col span={8}>
-                        <Button icon="plus" type="primary" ghost>
+                        <Button icon="plus" type="primary" ghost
+                            onClick={this.onNewInstanceButtonClick}>
                             New Instance
                         </Button>
                     </Col>
@@ -322,8 +539,679 @@ export default class ManagementPanel extends React.Component {
                         />
                     </Col>
                 </Row>
+                <Modal
+                    title={(<div style={{ height: 12 }}>Add User</div>)}
+                    width="30%"
+                    visible={this.state.showAddUser}
+                    onOk={this.handleAddUserOk}
+                    onCancel={this.handleAddUserCancel}
+                    footer={[
+                        <Button key="submit" type="primary" onClick={this.handleAddUserOk}>
+                            Save
+                        </Button>,
+                        <Button key="back" onClick={this.handleAddUserCancel}>
+                            Cancel
+                        </Button>,
+                    ]}
+                    bodyStyle={{ marginTop: 6, paddingTop: 6 }}
+                >
+                    {/*                     <Row type="flex" justify="start">
+                        <Col span={24}>
+                            批量输入申报名称
+                    </Col>
+                    </Row> */}
+                    {/*                     <div style={{ height: 3 }} /> */}
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                Username
+                    </div>
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row>
+                        <Col>
+                            <Input placeholder="Please enter username (email format)"
+                                ref={target => (this.newUsername = target)} />
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                User Type
+                    </div>
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row>
+                        <Col>
+                            <Select defaultValue="admin" style={{ width: '100%' }}>
+                                <Select.Option value="admin">
+                                    Admin
+                            </Select.Option>
+                                <Select.Option value="annotator">
+                                    Annotator
+                            </Select.Option>
+                            </Select>
+                        </Col>
+                    </Row>
+                </Modal>
 
+                <Modal
+                    title={(<div style={{ height: 12 }}>Create Instance</div>)}
+                    width="35%"
+                    visible={this.state.showAddInstance}
+                    onOk={this.handleAddInstanceOk}
+                    onCancel={this.handleAddInstanceCancel}
+                    destroyOnClose={true}
+                    footer={[
+                        <Button key="submit" type="primary" onClick={this.handleAddInstanceOk}>
+                            Save
+                    </Button>,
+                        <Button key="back" onClick={this.handleAddInstanceCancel}>
+                            Cancel
+                    </Button>,
+                    ]}
+                    bodyStyle={{ marginTop: 6, paddingTop: 6 }}
+                >
+                    <div className={styles.infinitecontainer}>
+                        <InfiniteScroll
+                            initialLoad={false}
+                            pageStart={0}
+                            useWindow={false}
+                        >
+                            <div onClick={this.onAddInstanceModalClick}>
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Instance Name
+                </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row>
+                                    <Col>
+                                        <Input placeholder="Please enter instance name"
+                                            ref={target => (this.newInstanceName = target)} />
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Modality
+                </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row>
+                                    <Col>
+                                        <Select defaultValue="CT" style={{ width: '100%' }}>
+                                            <Select.Option value="CT">
+                                                CT
+                        </Select.Option>
+                                            <Select.Option value="ultrasound">
+                                                Ultra-Sound
+                        </Select.Option>
+                                            <Select.Option value="MRI">
+                                                MRI
+                        </Select.Option>
+                                            <Select.Option value="xray">
+                                                X-ray
+                        </Select.Option>
+                                            <Select.Option value="other">
+                                                Other
+                        </Select.Option>
+                                        </Select>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Description(Optional)
+                </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row>
+                                    <Col>
+                                        <Input.TextArea rows={3} placeholder="Please enter description"
+                                            ref={target => (this.newInstanceDescription = target)} />
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Path
+                </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="space-between">
+                                    <Col span={18}>
+                                        <Input placeholder="Please enter the path"
+                                            ref={target => (this.newInstancePath = target)} />
+                                    </Col>
+                                    <Col span={6}>
+                                        <div style={{ float: "right" }}>
+                                            <Button type="primary" onClick={this.handleLoadDICOM}>
+                                                Load
+                            </Button>
+                                        </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="space-between">
+                                    <Col span={18}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Label
+                </div>
+                                    </Col>
+                                    <Col span={6}>
+                                        <div style={{ float: "right" }}>
+                                            <Icon type="plus"
+                                                style={{ width: 18, height: 18 }}
+                                                onClick={this.onLabelPlusIconClick}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
 
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div className={styles.borderSpan}>
+                                            <div className={styles.border} />
+                                        </div>
+                                    </Col>
+                                </Row>
+
+                                <div hidden={this.state.hideAddLabelControls}>
+                                    <Row type="flex" justify="start" gutter={8}>
+                                        <Col span={10}>
+                                            <div style={{ color: "#ccc" }}>
+                                                Name
+                        </div>
+                                        </Col>
+                                        <Col span={4}>
+                                            <div style={{ color: "#ccc" }}>
+                                                Value
+                        </div>
+                                        </Col>
+                                        <Col span={3}>
+                                            <div style={{ color: "#ccc" }}>
+                                                Color
+                        </div>
+                                        </Col>
+                                        <Col>
+                                        </Col>
+                                    </Row>
+                                    {(this.state.labelCandidatesBuffer.length > 0)
+                                        &&
+                                        this.state.labelCandidatesBuffer.map((label, index) => {
+                                            return (
+                                                <div>
+                                                    <Row type="flex" justify="start" gutter={8}>
+                                                        <Col span={10}>
+                                                            <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                                {label.name}
+                                                            </div>
+                                                        </Col>
+                                                        <Col span={4}>
+                                                            <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                                {label.value}
+                                                            </div>
+                                                        </Col>
+                                                        <Col span={3}>
+                                                            <div style={{ backgroundColor: label.color, width: "3.5vmin", height: "96%" }}
+                                                                onClick={this.onColorBlockClick} />
+                                                        </Col>
+                                                        <Col>
+                                                            <div style={{ border: "0.2px solid #ccc" }}
+                                                                onClick={this.onLabelCloseIconClick}
+                                                                data-index={index}
+                                                            >
+                                                                <Icon type="close"
+                                                                //onClick={this.onLabelCloseIconClick}
+                                                                //data-index={index}
+                                                                />
+                                                            </div>
+                                                        </Col>
+                                                    </Row>
+                                                    <div style={{ height: 2 }} />
+                                                </div>
+                                            );
+                                        })}
+                                    <Row type="flex" justify="start" gutter={8}>
+                                        <Col span={10}>
+                                            <Input placeholder="Label name"
+                                                size="small"
+                                                style={{ fontStyle: "italic" }}
+                                                ref={target => (this.newLabelName = target)} />
+                                        </Col>
+                                        <Col span={4}>
+                                            <Input placeholder="1"
+                                                size="small"
+                                                style={{ fontStyle: "italic" }}
+                                                ref={target => (this.newLabelValue = target)} />
+                                            <div hidden={this.state.hideColorPicker}
+                                                style={{ position: "absolute", zIndex: 1 }}
+                                                onClick={this.onColorPickerClick}
+                                            >
+                                                <SketchPicker
+                                                    ref={target => (this.colorPicker = target)}
+                                                    color={this.state.colorPickerColor}
+                                                />
+                                            </div>
+                                        </Col>
+                                        <Col span={3}>
+                                            <div style={{ backgroundColor: this.state.colorBlockColor, width: "3.5vmin", height: "98%" }}
+                                                onClick={this.onColorBlockClick} />
+                                            {/*  <div hidden={this.state.hideColorPicker}
+                                        style={{ position: "absolute", zIndex: 1 }}
+                                        onClick={this.onColorPickerClick}
+                                    >
+                                        <SketchPicker
+                                            ref={target => (this.colorPicker = target)}
+                                            color={this.state.colorPickerColor}
+                                        />
+                                    </div> */}
+                                        </Col>
+                                        <Col>
+                                            <Button size="small" onClick={this.handleAddLabel}>
+                                                Add
+                        </Button>
+                                        </Col>
+                                    </Row>
+                                </div>
+
+                                <div style={{ height: 6 }} />
+
+                                <Row type="flex" justify="space-between">
+                                    <Col span={18}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Add Annotator
+                              </div>
+                                    </Col>
+                                    <Col span={6}>
+                                        <div style={{ float: "right" }}>
+                                            <Icon type="plus"
+                                                style={{ width: 18, height: 18 }}
+                                                onClick={this.onAnnotatorPlusIconClick}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div className={styles.borderSpan}>
+                                            <div className={styles.border} />
+                                        </div>
+                                    </Col>
+                                </Row>
+
+                                <div hidden={this.state.hideAddAnnotatorControls}>
+                                    <Row type="flex" justify="start">
+                                        <Col>
+                                            <div style={{ color: "#ccc" }}>
+                                                Username
+                        </div>
+                                        </Col>
+                                    </Row>
+                                    {(this.state.annotatorCandidatesBuffer.length > 0)
+                                        &&
+                                        this.state.annotatorCandidatesBuffer.map((annotator, index) => {
+                                            return (
+                                                <div>
+                                                    <Row type="flex" justify="start" gutter={8}>
+                                                        <Col span={17}>
+                                                            <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                                {annotator}
+                                                            </div>
+                                                        </Col>
+                                                        <Col>
+                                                            <div style={{ border: "0.2px solid #ccc" }}
+                                                                onClick={this.onAnnotatorCloseIconClick}
+                                                                data-index={index}
+                                                            >
+                                                                <Icon type="close"
+                                                                />
+                                                            </div>
+                                                        </Col>
+                                                    </Row>
+                                                    <div style={{ height: 2 }} />
+                                                </div>
+                                            );
+                                        })}
+                                    <Row type="flex" justify="start" gutter={8}>
+                                        <Col span={17}>
+                                            <Input placeholder="Username of annotator"
+                                                size="small"
+                                                style={{ fontStyle: "italic" }}
+                                                ref={target => (this.newAnnotatorCandidate = target)} />
+                                        </Col>
+                                        <Col>
+                                            <Button size="small" onClick={this.handleAddAnnotator}>
+                                                Add
+                        </Button>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            </div>
+                        </InfiniteScroll>
+                    </div>
+                </Modal>
+
+                <Modal
+                    title={(<div style={{ height: 12 }}>Modify Instance</div>)}
+                    width="35%"
+                    visible={this.state.showModifyInstance}
+                    onOk={this.handleModifyInstanceOk}
+                    onCancel={this.handleModifyInstanceCancel}
+                    destroyOnClose={true}
+                    footer={[
+                        <Button key="submit" type="primary" onClick={this.handleModifyInstanceOk}>
+                            Save
+                    </Button>,
+                        <Button key="back" onClick={this.handleModifyInstanceCancel}>
+                            Cancel
+                    </Button>,
+                    ]}
+                    bodyStyle={{ marginTop: 6, paddingTop: 6 }}
+                >
+                    <div className={styles.infinitecontainer}>
+                        <InfiniteScroll
+                            initialLoad={false}
+                            pageStart={0}
+                            useWindow={false}
+                        >
+                            <div onClick={this.onModifyInstanceModalClick}>
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Instance Name
+                </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row>
+                                    <Col>
+                                        <Input value="0001001"
+                                            disabled={true}
+                                        />
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Modality
+                </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row>
+                                    <Col>
+                                        <Select defaultValue="CT" style={{ width: '100%' }}>
+                                            <Select.Option value="CT">
+                                                CT
+                        </Select.Option>
+                                            <Select.Option value="ultrasound">
+                                                Ultra-Sound
+                        </Select.Option>
+                                            <Select.Option value="MRI">
+                                                MRI
+                        </Select.Option>
+                                            <Select.Option value="xray">
+                                                X-ray
+                        </Select.Option>
+                                            <Select.Option value="other">
+                                                Other
+                        </Select.Option>
+                                        </Select>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Description(Optional)
+                </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row>
+                                    <Col>
+                                        <Input.TextArea rows={3} placeholder="Please enter description"
+                                            ref={target => (this.modifyInstanceDescription = target)} />
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Path
+                </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="space-between">
+                                    <Col span={18}>
+                                        <Input placeholder="Please enter the path"
+                                            ref={target => (this.modifyInstancePath = target)} />
+                                    </Col>
+                                    <Col span={6}>
+                                        <div style={{ float: "right" }}>
+                                            <Button type="primary" onClick={this.handleLoadDICOM}>
+                                                Load
+                            </Button>
+                                        </div>
+                                    </Col>
+                                </Row>
+                                <div style={{ height: 6 }} />
+                                <Row type="flex" justify="space-between">
+                                    <Col span={18}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Label
+                </div>
+                                    </Col>
+                                    <Col span={6}>
+                                        <div style={{ float: "right" }}>
+                                            <Icon type="plus"
+                                                style={{ width: 18, height: 18 }}
+                                                onClick={this.onLabelPlusIconClick}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div className={styles.borderSpan}>
+                                            <div className={styles.border} />
+                                        </div>
+                                    </Col>
+                                </Row>
+
+                                <div hidden={this.state.hideAddLabelControls}>
+                                    <Row type="flex" justify="start" gutter={8}>
+                                        <Col span={10}>
+                                            <div style={{ color: "#ccc" }}>
+                                                Name
+                        </div>
+                                        </Col>
+                                        <Col span={4}>
+                                            <div style={{ color: "#ccc" }}>
+                                                Value
+                        </div>
+                                        </Col>
+                                        <Col span={3}>
+                                            <div style={{ color: "#ccc" }}>
+                                                Color
+                        </div>
+                                        </Col>
+                                        <Col>
+                                        </Col>
+                                    </Row>
+                                    {(this.state.labelCandidatesBuffer.length > 0)
+                                        &&
+                                        this.state.labelCandidatesBuffer.map((label, index) => {
+                                            return (
+                                                <div>
+                                                    <Row type="flex" justify="start" gutter={8}>
+                                                        <Col span={10}>
+                                                            <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                                {label.name}
+                                                            </div>
+                                                        </Col>
+                                                        <Col span={4}>
+                                                            <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                                {label.value}
+                                                            </div>
+                                                        </Col>
+                                                        <Col span={3}>
+                                                            <div style={{ backgroundColor: label.color, width: "3.5vmin", height: "96%" }}
+                                                                onClick={this.onColorBlockClick} />
+                                                        </Col>
+                                                        <Col>
+                                                            <div style={{ border: "0.2px solid #ccc" }}
+                                                                onClick={this.onLabelCloseIconClick}
+                                                                data-index={index}
+                                                            >
+                                                                <Icon type="close"
+                                                                //onClick={this.onLabelCloseIconClick}
+                                                                //data-index={index}
+                                                                />
+                                                            </div>
+                                                        </Col>
+                                                    </Row>
+                                                    <div style={{ height: 2 }} />
+                                                </div>
+                                            );
+                                        })}
+                                    <Row type="flex" justify="start" gutter={8}>
+                                        <Col span={10}>
+                                            <Input placeholder="Label name"
+                                                size="small"
+                                                style={{ fontStyle: "italic" }}
+                                                ref={target => (this.newLabelName = target)} />
+                                        </Col>
+                                        <Col span={4}>
+                                            <Input placeholder="1"
+                                                size="small"
+                                                style={{ fontStyle: "italic" }}
+                                                ref={target => (this.newLabelValue = target)} />
+                                            <div hidden={this.state.hideColorPicker}
+                                                style={{ position: "absolute", zIndex: 1 }}
+                                                onClick={this.onColorPickerClick}
+                                            >
+                                                <SketchPicker
+                                                    ref={target => (this.colorPicker = target)}
+                                                    color={this.state.colorPickerColor}
+                                                />
+                                            </div>
+                                        </Col>
+                                        <Col span={3}>
+                                            <div style={{ backgroundColor: this.state.colorBlockColor, width: "3.5vmin", height: "98%" }}
+                                                onClick={this.onColorBlockClick} />
+                                            {/*  <div hidden={this.state.hideColorPicker}
+                                        style={{ position: "absolute", zIndex: 1 }}
+                                        onClick={this.onColorPickerClick}
+                                    >
+                                        <SketchPicker
+                                            ref={target => (this.colorPicker = target)}
+                                            color={this.state.colorPickerColor}
+                                        />
+                                    </div> */}
+                                        </Col>
+                                        <Col>
+                                            <Button size="small" onClick={this.handleAddLabel}>
+                                                Add
+                        </Button>
+                                        </Col>
+                                    </Row>
+                                </div>
+
+                                <div style={{ height: 6 }} />
+
+                                <Row type="flex" justify="space-between">
+                                    <Col span={18}>
+                                        <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                            Add Annotator
+                              </div>
+                                    </Col>
+                                    <Col span={6}>
+                                        <div style={{ float: "right" }}>
+                                            <Icon type="plus"
+                                                style={{ width: 18, height: 18 }}
+                                                onClick={this.onAnnotatorPlusIconClick}
+                                            />
+                                        </div>
+                                    </Col>
+                                </Row>
+
+                                <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <div className={styles.borderSpan}>
+                                            <div className={styles.border} />
+                                        </div>
+                                    </Col>
+                                </Row>
+
+                                <div hidden={this.state.hideAddAnnotatorControls}>
+                                    <Row type="flex" justify="start">
+                                        <Col>
+                                            <div style={{ color: "#ccc" }}>
+                                                Username
+                        </div>
+                                        </Col>
+                                    </Row>
+                                    {(this.state.annotatorCandidatesBuffer.length > 0)
+                                        &&
+                                        this.state.annotatorCandidatesBuffer.map((annotator, index) => {
+                                            return (
+                                                <div>
+                                                    <Row type="flex" justify="start" gutter={8}>
+                                                        <Col span={17}>
+                                                            <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                                {annotator}
+                                                            </div>
+                                                        </Col>
+                                                        <Col>
+                                                            <div style={{ border: "0.2px solid #ccc" }}
+                                                                onClick={this.onAnnotatorCloseIconClick}
+                                                                data-index={index}
+                                                            >
+                                                                <Icon type="close"
+                                                                />
+                                                            </div>
+                                                        </Col>
+                                                    </Row>
+                                                    <div style={{ height: 2 }} />
+                                                </div>
+                                            );
+                                        })}
+                                    <Row type="flex" justify="start" gutter={8}>
+                                        <Col span={17}>
+                                            <Input placeholder="Username of annotator"
+                                                size="small"
+                                                style={{ fontStyle: "italic" }}
+                                                ref={target => (this.newAnnotatorCandidate = target)} />
+                                        </Col>
+                                        <Col>
+                                            <Button size="small" onClick={this.handleAddAnnotator}>
+                                                Add
+                        </Button>
+                                        </Col>
+                                    </Row>
+                                </div>
+                            </div>
+                        </InfiniteScroll>
+                    </div>
+                </Modal>
             </div>)
     }
 
