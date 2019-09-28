@@ -1,4 +1,3 @@
-import json
 import sqlite3
 
 from atmi_backend.db_interface.utils import prepare_query, prepare_insert, prepare_delete, prepare_update
@@ -45,7 +44,7 @@ class SeriesService:
         cur = self.sql_connection.cursor()
 
         sql, v = prepare_insert("series", {"study_id": study_id, "series_description": series_description,
-                                           "series_files_list": series_files_list,
+                                           "series_files_list": str(series_files_list),
                                            "series_files_number": series_files_number, "window_width": window_width,
                                            "window_level": window_level, "x_spacing": x_spacing, "y_spacing": y_spacing,
                                            "z_spacing": z_spacing, "patient_id": patient_id, "study_date": study_date,
@@ -91,3 +90,28 @@ class SeriesService:
         cur.execute(sql, v_tuple)
         self.sql_connection.commit()
         return True
+
+    def query_study_series(self, instance_id):
+        """
+        Get All study and series information in one instance
+        :param instance_id:
+        :return:
+        """
+        sql = f'select st.instance_id, st.study_id, se.series_id, st.folder_name, st.annotators, st.auditors, ' \
+            f'st.status, st.total_files_number, se.series_description, se.series_files_number, ins.data_path ' \
+            f' from studies as st ' \
+            f' inner join series as se on st.study_id = se.study_id and st.instance_id == {instance_id}'  \
+            f' inner join instances as ins on st.instance_id = ins.instance_id'
+
+        cur = self.sql_connection.cursor()
+        cur.execute(sql)
+
+        data = cur.fetchall()
+        data = [dict(item) for item in data]
+        result = {}
+        for i in data:
+            if i['study_id'] not in result.keys():
+                result[i['study_id']] = []
+            result[i['study_id']].append(i)
+
+        return list(result.values())

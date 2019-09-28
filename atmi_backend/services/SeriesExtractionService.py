@@ -1,6 +1,7 @@
 import os
 import re
 
+from atmi_backend.constant import QUALIFIED_FILE_EXT
 from atmi_backend.services.DICOMParser import DICOMParser
 
 
@@ -16,6 +17,7 @@ class SeriesExtractionService:
         parser = DICOMParser()
         all_series_list = {}
         for k, l in files_list.items():
+            print(f'Extract Series from path:{k}...')
             all_series = parser.extract_series(k, l)
             all_series_list[k] = all_series
 
@@ -23,9 +25,8 @@ class SeriesExtractionService:
 
     def is_quaified_image(self, file_name):
         # Add different parser for png etc.
-        qualified_file_ext = ["\\.dcm"]
 
-        matches = re.findall(r"|".join(qualified_file_ext), file_name, re.I)
+        matches = re.findall(r"|".join(QUALIFIED_FILE_EXT), file_name, re.I)
 
         return len(matches) > 0
 

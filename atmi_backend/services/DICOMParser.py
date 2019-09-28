@@ -126,6 +126,14 @@ class DicomSeries(object):
         return self._info
 
     @property
+    def length(self):
+        return len(self._filenames)
+
+    @property
+    def filenames(self):
+        return self._filenames
+
+    @property
     def description(self):
         """ A description of the dicom series. Used fields are
         PatientName, shape of the data, SeriesDescription,
