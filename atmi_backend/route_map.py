@@ -27,7 +27,7 @@ def setup_route_map(app, app_path):
 
     @app.route("/", methods=['GET'])
     def index():
-        return render_template("workbench.html")
+        return render_template("index.html")
 
     @app.route("/workbench/instance/<instance_id>/study/<study_id>/series/<series_id>", methods=['GET'])
     def workbench(instance_id, study_id, series_id):
