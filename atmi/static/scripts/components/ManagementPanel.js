@@ -2,7 +2,7 @@ import React from 'react';
 import { Row, Col, Table, Button, Progress, Modal, Input, Select, message, Icon } from 'antd';
 import { SketchPicker } from 'react-color';
 import styles from '../../styles/ManagementPanel.css';
-import InfiniteScroll from 'react-infinite-scroller';
+//import InfiniteScroll from 'react-infinite-scroller';
 
 
 export default class ManagementPanel extends React.Component {
@@ -616,11 +616,11 @@ export default class ManagementPanel extends React.Component {
                     bodyStyle={{ marginTop: 6, paddingTop: 6 }}
                 >
                     <div className={styles.infinitecontainer}>
-                        <InfiniteScroll
+{/*                         <InfiniteScroll
                             initialLoad={false}
                             pageStart={0}
                             useWindow={false}
-                        >
+                        > */}
                             <div onClick={this.onAddInstanceModalClick}>
                                 <Row type="flex" justify="start">
                                     <Col span={24}>
@@ -797,7 +797,7 @@ export default class ManagementPanel extends React.Component {
                                                 style={{ fontStyle: "italic" }}
                                                 ref={target => (this.newLabelValue = target)} />
                                             <div hidden={this.state.hideColorPicker}
-                                                style={{ position: "absolute", zIndex: 1 }}
+                                                style={{ position: "absolute", zIndex: 2 }}
                                                 onClick={this.onColorPickerClick}
                                             >
                                                 <SketchPicker
@@ -901,7 +901,7 @@ export default class ManagementPanel extends React.Component {
                                     </Row>
                                 </div>
                             </div>
-                        </InfiniteScroll>
+                       {/*  </InfiniteScroll> */}
                     </div>
                 </Modal>
 
@@ -923,11 +923,11 @@ export default class ManagementPanel extends React.Component {
                     bodyStyle={{ marginTop: 6, paddingTop: 6 }}
                 >
                     <div className={styles.infinitecontainer}>
-                        <InfiniteScroll
+{/*                         <InfiniteScroll
                             initialLoad={false}
                             pageStart={0}
                             useWindow={false}
-                        >
+                        > */}
                             <div onClick={this.onModifyInstanceModalClick}>
                                 <Row type="flex" justify="start">
                                     <Col span={24}>
@@ -1209,7 +1209,7 @@ export default class ManagementPanel extends React.Component {
                                     </Row>
                                 </div>
                             </div>
-                        </InfiniteScroll>
+                        {/* </InfiniteScroll> */}
                     </div>
                 </Modal>
             </div>)
