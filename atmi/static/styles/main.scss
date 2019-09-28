@@ -1,5 +1,5 @@
 body {
-  background-color: #343234;
+  background-color: #343434;
   color: #969596;
   font-size: 16px;
   font-family: "Helvetica Neue", Helvetica, Arial;
@@ -37,5 +37,18 @@ body {
   right: 0;
   top: 3.4rem;
   width: 20%;
+}
 
+.hide{
+  display: none;
+}
+.arrow-right {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid black;
+  position: absolute;
+  right: 0.2rem;
+  top:0.8rem;
 }

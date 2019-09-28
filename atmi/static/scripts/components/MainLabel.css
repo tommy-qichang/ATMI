@@ -1,10 +1,12 @@
 
-.title{
-    padding:0.5rem 1rem;
-    border-bottom: 1px solid #424242;
+.title {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #333;
+    background: #424242;
 }
 
-.labelitem{
+.labelitem {
     margin: 0.5rem 1rem;
     padding: 0.8rem 1rem 0.8rem 0;
     cursor: pointer;
@@ -15,8 +17,10 @@
     -moz-border-radius: 5px;
     border-radius: 5px;
     position: relative;
+    border-bottom: 1px solid #424242;
 }
-.labelitem i{
+
+.labelitem i {
     display: block;
     float: left;
     margin: -0.6rem 0 0 0.3rem;
@@ -27,26 +31,44 @@
     -moz-border-radius: 10px;
     border-radius: 10px;
 }
-.labelitem:hover i{
+
+.labelitem:hover i {
     background: tomato;
 }
-.active{
-    background: tomato!important;
+
+.studylabelitem {
+    margin: 0.5rem 1rem;
+    padding: 0.8rem 1rem 0.8rem 0;
+    cursor: pointer;
+    text-align: left;
+
 }
-.labeled{
+
+.studylabelitem input, .studylabelitem select {
+    width: 8rem;
+}
+
+.active {
+    background: tomato !important;
+}
+
+.labeled {
     background-color: lightsteelblue;
 }
-.delete{
+
+.delete {
     position: absolute;
     right: 2rem;
     top: 0;
     width: 2rem;
     padding: 0.8rem 0;
 }
-.delete:hover, .hide:hover{
+
+.delete:hover, .hide:hover {
     color: tomato;
 }
-.hide{
+
+.hide {
     position: absolute;
     right: 0;
     top: 0;
@@ -54,8 +76,7 @@
     padding: 0.8rem 0;
 }
 
-
-.icon{
+.icon {
     display: block;
     float: left;
     margin-right: 5px;
@@ -63,5 +84,29 @@
     height: 1rem;
     width: 1rem;
     border: 1px solid #969696;
+}
 
+.table {
+    display: table;
+}
+
+.table input, .table select {
+    -webkit-border-radius: .25rem;
+    -moz-border-radius: .25rem;
+    border-radius: .25rem;
+    border: 1px solid #ced4da;
+    line-height: 1.5;
+    padding: .2rem;
+    width: 100%;
+    margin: .2rem 0
+
+}
+
+.row {
+    display: table-row;
+}
+
+.cell {
+    display: table-cell;
+    padding: .5rem;
 }

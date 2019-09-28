@@ -1,10 +1,10 @@
 import io
-import json
 import os
 from os import path
 
 from flask import render_template, Response, send_from_directory, jsonify, send_file, request
 
+from atmi_backend.constant import DATA_ROOT
 from atmi_backend.db_interface.InitialService import InitialService
 from atmi_backend.db_interface.InstanceService import InstanceService
 from atmi_backend.db_interface.LabelCandidatesService import LabelCandidatesService
@@ -12,6 +12,7 @@ from atmi_backend.db_interface.LabelService import LabelService
 from atmi_backend.db_interface.SeriesService import SeriesService
 from atmi_backend.db_interface.StudiesService import StudiesService
 from atmi_backend.db_interface.UserService import UserService
+from atmi_backend.services.SeriesExtractionService import SeriesExtractionService
 
 
 def setup_route_map(app, app_path):
@@ -33,10 +34,10 @@ def setup_route_map(app, app_path):
 
         study_service = StudiesService(get_conn())
         study_info = study_service.query({"study_id": study_id})
-        if len(study_info) > 0:
+        if len(study_info) > 0 and study_info[0]["instance_id"] == int(instance_id):
             study_info = study_info[0]
         else:
-            return jsonify({}), 404
+            return render_template("404.html")
         label_candidate_service = LabelCandidatesService(get_conn())
         label_candidates = label_candidate_service.query({"instance_id": instance_id})
 
@@ -73,6 +74,33 @@ def setup_route_map(app, app_path):
 
         return jsonify([]), 200
 
+    @app.route('/load_data/<instance_id>/<data_path>', methods=['GET'])
+    def load_data(instance_id, data_path):
+        series_extraction_service = SeriesExtractionService()
+        all_series_list = series_extraction_service.extract_series_from_path(os.path.join(DATA_ROOT, data_path))
+        study_service = StudiesService(get_conn())
+        series_service = SeriesService(get_conn())
+
+        for study_key in all_series_list:
+            series = all_series_list[study_key]
+            study_service.insert(instance_id, study_key, 0)
+            study = study_service.query({"instance_id": instance_id, "folder_name": study_key})
+            study = study[0]
+            total_files_number = 0
+            for one_series in series:
+                total_files_number += one_series.length
+                series_info = one_series.info
+                series_service.insert(study['study_id'], one_series.description, one_series.filenames,
+                                      one_series.length, series_info.get("WindowWidth"),
+                                      series_info.get("WindowCenter"),
+                                      one_series.sampling[1], one_series.sampling[1], one_series.sampling[0], series_info.get("PatientID"),
+                                      series_info.get("StudyDate"), "", "")
+
+            study_service.update({"instance_id": instance_id, "folder_name": study_key},
+                                 {"total_files_number": total_files_number})
+
+        return jsonify({}), 201
+
     @app.route('/users/', methods=['POST'])
     def registry_user():
         # user = request.json['userName']
@@ -95,16 +123,17 @@ def setup_route_map(app, app_path):
 
         return jsonify(json_result), 200
 
-    @app.route('/studies?instance_id=<int:instance_id>', methods=['GET'])
+    @app.route('/studies/instance_id=<int:instance_id>', methods=['GET'])
     def list_all_studies(instance_id):
         """
         List all studies under one instance.
         :param instance_id:
         :return:
         """
-
-        studies_service = StudiesService(get_conn())
-        studies = studies_service.query({"instance_id": instance_id})
+        series_service = SeriesService(get_conn())
+        studies = series_service.query_study_series(instance_id)
+        # studies_service = StudiesService(get_conn())
+        # studies = studies_service.query({"instance_id": instance_id})
         if len(studies) == 0:
             return jsonify({}), 200
         return jsonify(studies), 200
@@ -142,7 +171,7 @@ def setup_route_map(app, app_path):
         label_service = LabelService(get_conn())
         result = label_service.query({"series_id": series_id, "user_id": user_id})
         if len(result) == 0:
-            return jsonify([]), 404
+            return jsonify([]), 200
         return jsonify(result), 200
 
     @app.route('/dcm/<path:data_path>/<path:folder_name>/<file_name>')

@@ -2,7 +2,8 @@ var path = require("path"),
     webpack = require("webpack"),
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
     ManifestRevisionPlugin = require("manifest-revision-webpack-plugin"),
-    MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    MiniCssExtractPlugin = require('mini-css-extract-plugin'),
+    CleanObsoleteChunks = require('webpack-clean-obsolete-chunks');
 
 const isDevelopment = !(process.env.NODE_ENV === 'production');
 
@@ -79,6 +80,7 @@ module.exports = {
             filename: '[name].[hash].css',
             chunkFilename: '[id].[hash].css'
         }),
+        new CleanObsoleteChunks()
         // new webpack.optimize.UglifyJsPlugin(),
         // new webpack.optimize.DedupePlugin(),
         // new webpack.DefinePlugin({

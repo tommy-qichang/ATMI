@@ -6,6 +6,7 @@
     border-color: #000;
     cursor: pointer;
     text-align: center;
+    position: relative;
 }
 
 .navlist:hover {

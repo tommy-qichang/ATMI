@@ -16,3 +16,5 @@ SLICE_THICKNESS = "SliceThickness"
 MODALITY = "Modality"
 CT = "CT"
 INSTANCE_NUMBER = "InstanceNumber"
+DATA_ROOT = "./data"
+QUALIFIED_FILE_EXT = ["\\.dcm","IM_"]

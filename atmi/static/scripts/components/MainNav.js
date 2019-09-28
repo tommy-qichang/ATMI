@@ -1,6 +1,7 @@
 import React from 'react'
 import style from "./MainNav.css"
 import cornerstoneWrapper from "./CornerstoneWrapper"
+import MainStudyList from "./MainStudyList"
 
 class MainNav extends React.Component {
 
@@ -8,7 +9,10 @@ class MainNav extends React.Component {
         super(props);
 
         this.state = {
-            currentTool: props.stack.currentTool
+            instanceId: props.stack.instanceId,
+            currentTool: props.stack.currentTool,
+            showStudyList: -1,
+            stack: props.stack
         };
     }
 
@@ -17,18 +21,19 @@ class MainNav extends React.Component {
         this.setState({currentTool: type});
     };
 
-    exportStates = ()=>{
-        cornerstoneWrapper.exportStates();
-    };
-
     render() {
         return (
             <div className="mainnav row">
                 <div className={style.barstyle}>
                     <div className={style.navlist}><i className={`fas fa-home ${style.i}`}/><br/>Home</div>
-                    <div className={style.navlist}><i className={`fas fa-list ${style.i}`}/><br/>Studies</div>
-                    <div className={style.navlist} onClick={() => this.exportStates()}><i
-                        className={`far fa-list-alt ${style.i}`}/><br/>Series
+                    <div className={style.navlist} onClick={() => {
+                        this.setState({showStudyList: -this.state.showStudyList})
+                    }}>
+                        <i className={`fas fa-list ${style.i}`}/><br/>Studies
+                        <div className={`${this.state.showStudyList>0?"":"hide"}`}>
+                            <MainStudyList ref={input => {
+                                this.studyList = input
+                            }} instanceId={this.state.instanceId} stack={this.state.stack}/></div>
                     </div>
                     <div className={style.navlist}/>
                     <div className={`${style.navlist} ${this.state.currentTool === "Wwwc" ? style.active : ""}`}

@@ -4,6 +4,7 @@ import * as cornerstoneTools from "cornerstone-tools";
 import cornerstoneWrapper from "./CornerstoneWrapper"
 import MainLabel from "./MainLabel"
 
+const scrollToIndex = cornerstoneTools.import('util/scrollToIndex');
 const divStyle = {
     width: "100%",
     margin: "auto",
@@ -93,20 +94,23 @@ class CornerstoneElement extends React.Component {
     onNavSlice = (e) => {
         if (e.keyCode === 40) {
             //arrow down.
-            // debugger;
-
             const stackData = cornerstoneTools.getToolState(this.element, "stack");
             const stack = stackData.data[0];
 
+            console.log(this.state.stack.currentImageIdIndex)
             stack.currentImageIdIndex = ++this.state.stack.currentImageIdIndex;
-            stack.imageIds = this.state.stack.imageIds;
-            cornerstoneTools.addToolState(this.element, "stack", stack);
-
-
-            // const imageId = this.state.stack.imageIds[this.state.stack.currentImageIdIndex];
-            // cornerstoneTools.scrollToIndex(this.element, this.state.stack.currentImageIdIndex++);
-
+            scrollToIndex(this.element, this.state.stack.currentImageIdIndex++);
+        }else if(e.keyCode === 38){
+            // arrow up.
+            const stackData = cornerstoneTools.getToolState(this.element, "stack");
+            const stack = stackData.data[0];
+            console.log(this.state.stack.currentImageIdIndex)
+            stack.currentImageIdIndex = --this.state.stack.currentImageIdIndex;
+            scrollToIndex(this.element, this.state.stack.currentImageIdIndex--);
         }
+
+
+        cornerstone.updateImage(this.element);
     };
 
 
@@ -123,7 +127,6 @@ class CornerstoneElement extends React.Component {
             document.addEventListener('keydown', this.onNavSlice);
 
         });
-
 
 
         // debugger;
