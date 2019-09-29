@@ -106,3 +106,6 @@ venv.bak/
 .mypy_cache/
 
 .idea/
+
+# Frontend VSCode settings
+atmi/.vscode
