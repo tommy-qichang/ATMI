@@ -15,5 +15,6 @@ setup(
         'Flask-Webpack>=0.0.7',
         'h5py>=2,<3',
         'scipy>=1,<2',
+        'pydicom==1.3.0'
     ]
 )

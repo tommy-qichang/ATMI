@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ATMI - Annotation Tool for Medical Image</title>
+    <script src="https://kit.fontawesome.com/a11732cef7.js"></script>
+    {{ stylesheet_tag("main_css") | safe }}
+</head>
+<body>
+<div id="root"></div>
+<script>let data = {{ data|tojson }}</script>
+{{ javascript_tag("main_js") | safe }}
+</body>
+</html>

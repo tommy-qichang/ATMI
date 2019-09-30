@@ -1,0 +1,26 @@
+.navlist {
+    /*margin-right: .5rem;*/
+    padding: 0.5rem 1rem;
+    border-width: 0 2px 0 0;
+    border-style: solid;
+    border-color: #000;
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+}
+
+.navlist:hover {
+    color: tomato;
+}
+
+.active{
+    color: tomato;
+}
+
+.barstyle {
+    width: 100%;
+    border-bottom: 1px solid #424242;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap-reverse;
+}

@@ -2,7 +2,8 @@ var path = require("path"),
     webpack = require("webpack"),
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
     ManifestRevisionPlugin = require("manifest-revision-webpack-plugin"),
-    MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    MiniCssExtractPlugin = require('mini-css-extract-plugin'),
+    CleanObsoleteChunks = require('webpack-clean-obsolete-chunks');
 
 const isDevelopment = !(process.env.NODE_ENV === 'production');
 
@@ -13,6 +14,7 @@ var root = "./static";
 
 module.exports = {
     entry: {
+        main_js: [root + "/scripts/main.js"],
         app_js: [
             root + "/scripts/app.js"
         ],
@@ -24,10 +26,10 @@ module.exports = {
     devtool: 'source-map',
 
     output: {
-        
+
         //publicPath: '/',
 		devtoolModuleFilenameTemplate: '../[resource-path]',
-        
+
         path: path.resolve(__dirname, 'public'),
         publicPath: "/assets/",
         filename: "[name].[hash].js",
@@ -63,14 +65,14 @@ module.exports = {
                         }
                     }
                 ]
-            }, 
-             {//loader for common css files 
+            },
+             {//loader for common css files
                 test: /\.css$/,
                 loader: "style-loader!css-loader?modules",
                 exclude: /node_modules/
             },
 
-            {//loader for antd css files 
+            {//loader for antd css files
               test:/\.css$/,
               exclude:/static/,
               use:[
@@ -90,7 +92,7 @@ module.exports = {
                     name: '/static/img/[name].[ext]?[hash]'
                 }
             }
-            
+
             /* {
                 test: /\.css$/,
                 use: [
@@ -117,7 +119,7 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: "babel-loader",
                 query: {
-                    presets: ['env', 'react']
+                    presets: ['@babel/preset-env', '@babel/preset-react']
                 }
             },  */
            /*  {
@@ -133,19 +135,17 @@ module.exports = {
                         }
                     }
                 ]
-            }, */ /* {
+            }, {
                 test: /\.css$/,
-                //loader: 'style-loader!css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'
-                //loader: 'style-loader!css-loader?modules&importLoaders=1'
-                loader: [
+                use: [
+                    'style-loader',
                     {
-                      loader: 'style-loader'
-                    },
-                    {
-                      loader: 'css-loader'
-                    }
-                  ]
-            } */
+                        loader: 'css-loader',
+                        options: {
+                            modules: true
+                        }
+                    }]
+            }*/
         ]
     },
     plugins: [
@@ -158,6 +158,7 @@ module.exports = {
             filename: '[name].[hash].css',
             chunkFilename: '[id].[hash].css'
         }),
+        new CleanObsoleteChunks()
         // new webpack.optimize.UglifyJsPlugin(),
         // new webpack.optimize.DedupePlugin(),
         // new webpack.DefinePlugin({
@@ -165,5 +166,8 @@ module.exports = {
         //         NODE_ENV: '"production"'
         //     }
         // })
-    ]
+    ],
+    node: {
+        fs: "empty"
+    }
 };
