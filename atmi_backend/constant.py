@@ -17,4 +17,5 @@ MODALITY = "Modality"
 CT = "CT"
 INSTANCE_NUMBER = "InstanceNumber"
 DATA_ROOT = "./data"
+OUTPUT_ROOT = "./output"
 QUALIFIED_FILE_EXT = ["\\.dcm","IM_"]

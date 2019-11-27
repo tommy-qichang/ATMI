@@ -15,7 +15,7 @@ class MainPage extends React.Component {
             return;
         }
         for (let i of data.series_detail["series_files_list"]) {
-            imageIds.push("wadouri:/dcm" + data.study_path.substring(1) + i)
+            imageIds.push("wadouri:/dcm" + data.series_detail['series_path'].substring(1)+"/" + i)
         }
 
         this.state = {

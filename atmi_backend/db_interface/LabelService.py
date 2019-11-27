@@ -80,3 +80,10 @@ class LabelService:
         cur.execute(sql, v_tuple)
         self.sql_connection.commit()
         return True
+
+    def compress_content(self, content):
+        """
+        Compress the sparse 1D array
+        :param content:
+        :return:
+        """
