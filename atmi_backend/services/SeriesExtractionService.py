@@ -21,7 +21,16 @@ class SeriesExtractionService:
             all_series = parser.extract_series(k, l)
             all_series_list[k] = all_series
 
-        return all_series_list
+        all_study_list = {}
+        for i in all_series_list:
+            one_series = all_series_list[i]
+            study_id = str(one_series[0].info['StudyInstanceUID'].value)
+            if study_id not in all_study_list:
+                all_study_list[study_id]={}
+            all_study_list[study_id][i] = one_series
+
+
+        return all_study_list
 
     def is_quaified_image(self, file_name):
         # Add different parser for png etc.

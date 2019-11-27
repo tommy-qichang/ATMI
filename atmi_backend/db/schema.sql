@@ -49,12 +49,14 @@ CREATE TABLE IF NOT EXISTS label_candidates
 );
 
 
-
 CREATE TABLE IF NOT EXISTS studies
 (
     study_id           INTEGER PRIMARY KEY,
     instance_id        INTEGER,
-    folder_name        TEXT    NOT NULL UNIQUE,
+    suid               TEXT UNIQUE,
+    patient_uid         TEXT,
+    study_uid          TEXT,
+    folder_name        TEXT,
     total_files_number INTEGER NOT NULL,
     annotators         TEXT,             --cache all annotators' ids
     auditors           TEXT,             --cache all auditors' ids
@@ -80,6 +82,7 @@ CREATE TABLE IF NOT EXISTS series
     series_id           INTEGER PRIMARY KEY,
     study_id            INTEGER,
     series_description  TEXT,
+    series_path         TEXT,
     series_files_list   TEXT,
     series_files_number INTEGER,
     window_width        TEXT,
@@ -87,7 +90,11 @@ CREATE TABLE IF NOT EXISTS series
     x_spacing           TEXT,
     y_spacing           TEXT,
     z_spacing           TEXT,
+    x_dimension         INTEGER,
+    y_dimension         INTEGER,
+    z_dimension         INTEGER,
     patient_id          TEXT,
+    series_instance_uid TEXT,
     study_date          TEXT,
     intercept           TEXT,
     slop                TEXT, --real_v = slop*V + intercept

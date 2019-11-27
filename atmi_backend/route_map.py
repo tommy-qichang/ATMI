@@ -2,9 +2,13 @@ import io
 import os
 from os import path
 
+import h5py
+import numpy as np
+import pydicom
 from flask import render_template, Response, send_from_directory, jsonify, send_file, request
 
 from atmi_backend.constant import DATA_ROOT
+from atmi_backend.constant import OUTPUT_ROOT
 from atmi_backend.db_interface.InitialService import InitialService
 from atmi_backend.db_interface.InstanceService import InstanceService
 from atmi_backend.db_interface.LabelCandidatesService import LabelCandidatesService
@@ -12,6 +16,8 @@ from atmi_backend.db_interface.LabelService import LabelService
 from atmi_backend.db_interface.SeriesService import SeriesService
 from atmi_backend.db_interface.StudiesService import StudiesService
 from atmi_backend.db_interface.UserService import UserService
+from atmi_backend.services.ExportService import ExportService
+from atmi_backend.services.ImportService import ImportService
 from atmi_backend.services.SeriesExtractionService import SeriesExtractionService
 
 
@@ -76,28 +82,14 @@ def setup_route_map(app, app_path):
 
     @app.route('/load_data/<instance_id>/<data_path>', methods=['GET'])
     def load_data(instance_id, data_path):
-        series_extraction_service = SeriesExtractionService()
-        all_series_list = series_extraction_service.extract_series_from_path(os.path.join(DATA_ROOT, data_path))
-        study_service = StudiesService(get_conn())
-        series_service = SeriesService(get_conn())
-
-        for study_key in all_series_list:
-            series = all_series_list[study_key]
-            study_service.insert(instance_id, study_key, 0)
-            study = study_service.query({"instance_id": instance_id, "folder_name": study_key})
-            study = study[0]
-            total_files_number = 0
-            for one_series in series:
-                total_files_number += one_series.length
-                series_info = one_series.info
-                series_service.insert(study['study_id'], one_series.description, one_series.filenames,
-                                      one_series.length, series_info.get("WindowWidth"),
-                                      series_info.get("WindowCenter"),
-                                      one_series.sampling[1], one_series.sampling[1], one_series.sampling[0], series_info.get("PatientID"),
-                                      series_info.get("StudyDate"), "", "")
-
-            study_service.update({"instance_id": instance_id, "folder_name": study_key},
-                                 {"total_files_number": total_files_number})
+        """
+        Load DICOM data for the instance, given the datapath in data folder.
+        :param instance_id:
+        :param data_path:
+        :return:
+        """
+        import_service = ImportService(get_conn())
+        result = import_service.import_dcm(instance_id, data_path)
 
         return jsonify({}), 201
 
@@ -196,6 +188,17 @@ def setup_route_map(app, app_path):
     @app.route("/assets/<path:filename>")
     def send_asset(filename):
         return send_from_directory(path.join(app_path, "public"), filename)
+
+    @app.route('/export_label/instance/<instance_id>', methods=['GET'])
+    def export_all_label():
+        pass
+
+
+    @app.route('/export_label/studies/<study_id>', methods=['GET'])
+    def export_label(study_id):
+        exportService = ExportService(get_conn())
+        result = exportService.save_onestudy(study_id)
+        return jsonify({'msg': result}), 201
 
     @app.errorhandler(500)
     def internal_error(exception):

@@ -9,7 +9,11 @@
     background-color: rgba(20,20,20,0.5);
     font-size: 14px;
     max-height: 30rem;
-    overflow: auto;
+    padding-right: 14px;
+    /*overflow: auto;*/
+}
+.studies div{
+    position: relative;
 }
 
 .studies li{
@@ -21,7 +25,6 @@
     border-radius: 5px;
     padding: 0.6rem 0.3rem;
     margin: 0.3rem 0;
-    position: relative;
     width:14.3rem;
 }
 .studies>li:hover{
@@ -32,11 +35,14 @@
 }
 .series{
     position: absolute;
-    left: 15rem;
+    left: 16rem;
     top: 0;
     padding: 0.5rem;
-    background-color: #343434;
+    background-color: rgba(20,20,20,0.5);
     color: #333!important;
+    max-height: 35rem;
+    overflow: scroll;
+    border-radius: 5px;
 }
 .series li{
     min-width: 10rem;

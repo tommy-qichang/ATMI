@@ -1,5 +1,5 @@
 from os import environ, path
-
+import atmi.src.log
 from flask import Flask
 from flask_webpack import Webpack
 
