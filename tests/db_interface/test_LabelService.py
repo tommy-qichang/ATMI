@@ -1,9 +1,8 @@
 import os
-from sqlite3 import Error
+
+import numpy as np
 
 from atmi_backend.db_interface.InitialService import InitialService
-from atmi_backend.db_interface.InstanceService import InstanceService
-from atmi_backend.db_interface.LabelCandidatesService import LabelCandidatesService
 from atmi_backend.db_interface.LabelService import LabelService
 from tests.db_interface import setup_sql, teardown_sql
 
@@ -59,11 +58,11 @@ class TestLabelCandidatesService:
         assert label_result[0]["content"] == "content_data3333_232rwer2r232erwer2r"
 
     def test_update(self):
-
         ini_service = InitialService()
         conn = ini_service.get_connection()
         label_service = LabelService(conn)
-        status = label_service.update({"series_id": 1, "user_id": 1, "file_id": "not_exist_DCM.dcm"}, {"content":"asf"})
+        status = label_service.update({"series_id": 1, "user_id": 1, "file_id": "not_exist_DCM.dcm"},
+                                      {"content": "asf"})
         assert status is False
 
         status = label_service.update({"series_id": 1, "user_id": 1, "file_id": "2_DCM.dcm"},
@@ -86,3 +85,23 @@ class TestLabelCandidatesService:
         assert status is True
         label_result = label_service.query({"series_id": 1, "user_id": 1, "file_id": "2_DCM.dcm"})
         assert len(label_result) == 0
+
+    def test_compress_content(self):
+        testdata = np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0])
+        result1 = LabelService.compress_content(testdata)
+        assert result1[1] == [8, 9, 12, 13]
+        testdata = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0])
+        result1 = LabelService.compress_content(testdata)
+        assert result1[1] == [13]
+        testdata = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        result1 = LabelService.compress_content(testdata)
+        assert result1 == {}
+        testdata = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+        result1 = LabelService.compress_content(testdata)
+        assert result1[1] == [0, 19]
+
+        testdata = np.array([0, 0, 0, 2, 2, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 10])
+        result1 = LabelService.compress_content(testdata)
+        assert result1[1] == [8, 9, 12, 13]
+        assert result1[2] == [3, 4]
+        assert result1[10] == [19]

@@ -1,5 +1,7 @@
 import sqlite3
 
+import numpy as np
+
 from atmi_backend.db_interface.utils import prepare_query, prepare_insert, prepare_delete, prepare_update
 
 
@@ -40,7 +42,7 @@ class LabelService:
         has_record = len(self.query({"series_id": series_id, "user_id": user_id, "file_id": file_id})) > 0
         if has_record:
             self.update({"series_id": series_id, "user_id": user_id, "file_id": file_id},
-                                 {"content": content})
+                        {"content": content})
         else:
             sql, v = prepare_insert("labels",
                                     {"series_id": series_id, "user_id": user_id,
@@ -81,9 +83,16 @@ class LabelService:
         self.sql_connection.commit()
         return True
 
-    def compress_content(self, content):
+    @staticmethod
+    def compress_content(content):
         """
         Compress the sparse 1D array
         :param content:
         :return:
         """
+        unique_key = np.unique(content).tolist()[1:]
+        compressed = {}
+        for i in unique_key:
+            compressed[i] = np.where(content == i)[0].tolist()
+
+        return compressed

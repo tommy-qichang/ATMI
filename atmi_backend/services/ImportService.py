@@ -71,6 +71,7 @@ class ImportService:
         :param erase_old:
         :return:
         """
+        LV_code = 2
         if load_type == "h5":
             labeldb = h5py.File(annotation_path, 'r')
             studyService = StudiesService(self.conn)
@@ -89,10 +90,11 @@ class ImportService:
                             x_dim = content_2D.shape[0]
                             y_dim = content_2D.shape[1]
                             content_1D = np.reshape(content_2D, x_dim * y_dim)
-                            content_1D[content_1D > 0] = 2
+                            content_1D[content_1D > 0] = LV_code
                             unique_id = np.unique(content_1D).tolist()
+                            compressed_content_1D = LabelService.compress_content(content_1D)
                             content = {
-                                "labelmap2D": {"pixelData": content_1D.tolist(), "segmentsOnLabelmap": unique_id}}
+                                "labelmap2D": {"pixelData": compressed_content_1D, "segmentsOnLabelmap": unique_id, "dataLength":content_1D.shape[0]}}
                             labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
                                                 str.encode(json.dumps(content)))
 
@@ -104,3 +106,8 @@ if __name__ == "__main__":
     ini_service = InitialService()
     importService = ImportService(ini_service.get_connection())
     importService.import_annotations("h5", "tests/tool/1.2.840.114350.2.232.2.798268.2.81188688.1.h5")
+
+# http://127.0.0.1:5000/load_data/2/NYU_CMR_Raw
+# http://127.0.0.1:5000/export_label/studies/2
+
+
