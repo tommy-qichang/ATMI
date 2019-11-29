@@ -204,11 +204,23 @@ let cornerstoneWrapper = {
             'segmentation'
         );
         let labelmap = getters.labelmap2D(this.element);
+        let rawPixelData = Array.from(labelmap.labelmap2D.pixelData);
+        let compressedPixelData = {};
+        for(let i=0;i<rawPixelData.length;i++){
+            if(rawPixelData[i]>0){
+                if(compressedPixelData[rawPixelData[i]] === undefined){
+                    compressedPixelData[rawPixelData[i]] = [i]
+                }else{
+                    compressedPixelData[rawPixelData[i]].push(i)
+                }
+            }
+        }
 
         let postContent = {
             "labelmap2D": {
-                "pixelData": Array.from(labelmap.labelmap2D.pixelData),
-                "segmentsOnLabelmap": labelmap.labelmap2D.segmentsOnLabelmap
+                "pixelData": compressedPixelData,
+                "segmentsOnLabelmap": labelmap.labelmap2D.segmentsOnLabelmap,
+                "dataLength": rawPixelData.length
             }
         };
 
@@ -249,8 +261,18 @@ let cornerstoneWrapper = {
                 if (ref[imageId] !== undefined) {
                     let labelmap2D = JSON.parse(ref[imageId].content);
                     labelmap2D = labelmap2D.labelmap2D;
-                    labelmap2D['pixelData'] = new Uint16Array(labelmap2D['pixelData']);
+                    let pixelIndex = labelmap2D['pixelData'];
+                    //the labelmap stored in the server are index information, need to conver to mask array.
+                    let real_mask = Array(labelmap2D['dataLength']).fill(0);
+                    for(let j in pixelIndex){
+                        let indexes = pixelIndex[j];
+                        for(let k=0;k<indexes.length;k++){
+                            real_mask[indexes[k]] = parseInt(j);
+                        }
+                    }
+                    // labelmap2D['pixelData'] = new Uint16Array(labelmap2D['pixelData']);
 
+                    labelmap2D['pixelData'] = real_mask
                     labelmap3D.labelmaps2D[i || 0] = labelmap2D;
                     setters.updateSegmentsOnLabelmap2D(labelmap2D);
 
