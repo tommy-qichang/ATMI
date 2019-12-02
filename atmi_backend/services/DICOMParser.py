@@ -6,7 +6,7 @@ from typing import Dict
 import pydicom
 from pydicom import Sequence
 
-from atmi_backend.constant import INSTANCE_NUMBER, SERIES_DESCRIPTION, SERIES_NUMBER
+from atmi_backend.config import INSTANCE_NUMBER, SERIES_DESCRIPTION, SERIES_NUMBER
 
 log = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 import os
 import re
 
-from atmi_backend.constant import QUALIFIED_FILE_EXT
+from atmi_backend.config import QUALIFIED_FILE_EXT
 from atmi_backend.services.DICOMParser import DICOMParser
 
 

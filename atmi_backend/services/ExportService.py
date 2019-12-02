@@ -5,7 +5,7 @@ import numpy as np
 import pydicom
 from flask import Flask
 
-from atmi_backend.constant import OUTPUT_ROOT
+from atmi_backend.config import OUTPUT_ROOT
 from atmi_backend.db_interface.LabelService import LabelService
 from atmi_backend.db_interface.SeriesService import SeriesService
 from atmi_backend.db_interface.StudiesService import StudiesService

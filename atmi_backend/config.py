@@ -1,3 +1,11 @@
+import logging
+
+DEBUG_LEVEL = logging.DEBUG
+LOG_FILENAME = 'log'
+LOG_PATH = 'atmi_backend/log'
+LOG_MAXBYTES = 100 * 1024 * 1024
+LOG_BACKUPS = 5
+
 STUDY_ID = "studyId"
 TASK_ID = "taskId"
 DICOM = "dicom"
@@ -18,4 +26,6 @@ CT = "CT"
 INSTANCE_NUMBER = "InstanceNumber"
 DATA_ROOT = "./data"
 OUTPUT_ROOT = "./output"
-QUALIFIED_FILE_EXT = ["\\.dcm","IM_"]
+QUALIFIED_FILE_EXT = ["\\.dcm", "IM_"]
+
+SECRET_KEY = "dbe924ec-7767-4186-ad8a-b68face4a8fa"

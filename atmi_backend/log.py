@@ -1,7 +1,7 @@
 import os.path as path
 from logging import FileHandler
 
-import atmi.src.config as config
+import atmi_backend.config as config
 
 
 def setup_log(app):

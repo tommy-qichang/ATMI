@@ -4,7 +4,7 @@ import os
 import h5py
 import numpy as np
 
-from atmi_backend.constant import DATA_ROOT
+from atmi_backend.config import DATA_ROOT
 from atmi_backend.db_interface.InitialService import InitialService
 from atmi_backend.db_interface.LabelService import LabelService
 from atmi_backend.db_interface.SeriesService import SeriesService
