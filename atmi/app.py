@@ -1,5 +1,5 @@
 from os import environ, path
-
+from atmi_backend.log import setup_log
 from flask import Flask
 from flask_webpack import Webpack
 
@@ -18,6 +18,7 @@ def create_app():
     flask_app.config["WEBPACK_MANIFEST_PATH"] = path.join(here, "manifest.json")
     webpack.init_app(flask_app)
     setup_route_map(flask_app, here)
+    setup_log(flask_app)
     return flask_app
 
 

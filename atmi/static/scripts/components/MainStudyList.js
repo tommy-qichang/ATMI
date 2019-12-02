@@ -20,7 +20,7 @@ class MainStudyList extends React.Component {
                 this.setState({selectStudy: key})
             }} className={parseInt(this.state.stack['studyId'])===value[0]['study_id']?styles.selected:""}>
                 <div>
-                    {value[0]['folder_name'].replace(value[0]['data_path'], '')}
+                    {value[0]['patient_uid']}-{value[0]['study_uid']}
                     <span className="arrow-right"></span>
                 </div>
                 <ul className={`${styles.series} ${this.state.selectStudy === key ? "" : styles.hide}`}>

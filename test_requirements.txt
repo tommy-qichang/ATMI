@@ -9,3 +9,4 @@
   pytest-datadir>=1,<2
   pytest-flask>=0,<1
   pytest-html>=1
+  simpleitk==1.2.0

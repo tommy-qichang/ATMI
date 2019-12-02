@@ -1,7 +1,7 @@
 import React from 'react';
-import { Row, Col, Button, Modal, Input, message } from 'antd';
+import {Col, Row} from 'antd';
 import LoginForm from './LoginForm';
-import ResetPasswordForm from './ResetPasswordForm';
+import WrappedNormalResetPasswordForm from './ResetPasswordForm';
 //import SettingPanel from './SettingPanel';
 import ManagementPanel from './ManagementPanel';
 
@@ -26,16 +26,16 @@ export default class UserManagement extends React.PureComponent {
     };
 
     componentDidMount() {
-        if(window.location.search!=="") {
+        if (window.location.search !== "") {
             this.setState({
                 ResetPasswordUsername: window.location.search.substring(1),
             });
-            this.toManagementMode("ResetPasswordForm");
+            this.toManagementMode("WrappedNormalResetPasswordForm");
         }
     }
 
     componentDidUpdate() {
-         switch (this.props.userManagementMode) {
+        switch (this.props.userManagementMode) {
             case "LoginForm":
                 this.setState({
                     hideLoginForm: false,
@@ -44,7 +44,7 @@ export default class UserManagement extends React.PureComponent {
                     hideManagementPanel: true
                 });
                 break;
-            case "ResetPasswordForm":
+            case "WrappedNormalResetPasswordForm":
                 this.setState({
                     hideLoginForm: true,
                     hideResetPasswordForm: false,
@@ -70,45 +70,45 @@ export default class UserManagement extends React.PureComponent {
                 break;
             default:
                 return;
-        } 
+        }
     }
 
     onLoginSuccess = username => {
-/*         this.setState({
-            hideLoginForm: true,
-            hideManagementPanel: false
-        });  */
+        /*         this.setState({
+                    hideLoginForm: true,
+                    hideManagementPanel: false
+                });  */
         this.props.onLoginSuccess(username);
         this.toManagementMode("ManagementPanel");
     }
 
     toManagementMode = mode => {
-       this.props.toManagementMode(mode);
+        this.props.toManagementMode(mode);
     }
 
     onResetPasswordSucceed = e => {
-/*         this.setState({
-            hideLoginForm: false,
-            hideResetPasswordForm: true
-        }); */
+        /*         this.setState({
+                    hideLoginForm: false,
+                    hideResetPasswordForm: true
+                }); */
         this.toManagementMode("LoginForm");
     }
 
     render() {
         return (
-            <div style={{ height: "auto", width: "99%" }}>
-                <br />
+            <div style={{height: "auto", width: "99%"}}>
+                <br/>
                 <Row type="flex" justify="center" align="middle" hidden={this.state.hideLoginForm}>
                     <Col>
                         <LoginForm
                             onLoginSuccess={this.onLoginSuccess}
                         />
-                       {/*  <a href="javascript:;" onClick={this.toManagementMode("ResetPasswordForm")}>Reset Password</a> */}
+                        {/*  <a href="javascript:;" onClick={this.toManagementMode("WrappedNormalResetPasswordForm")}>Reset Password</a> */}
                     </Col>
                 </Row>
                 <Row type="flex" justify="center" align="middle" hidden={this.state.hideResetPasswordForm}>
                     <Col>
-                        <ResetPasswordForm
+                        <WrappedNormalResetPasswordForm
                             onResetPasswordSucceed={this.onResetPasswordSucceed}
                             username={this.state.ResetPasswordUsername}
                         />
@@ -121,7 +121,7 @@ export default class UserManagement extends React.PureComponent {
                 </Row> */}
                 <Row type="flex" justify="center" align="middle" hidden={this.state.hideManagementPanel}>
                     <Col span={24}>
-                        <ManagementPanel />
+                        <ManagementPanel/>
                     </Col>
                 </Row>
             </div>
