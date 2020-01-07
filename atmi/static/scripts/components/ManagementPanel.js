@@ -31,10 +31,12 @@ export default class ManagementPanel extends React.Component {
         annotatorCandidatesBuffer: [],
         hideAddLabelControls: true,
         hideAddAnnotatorControls: true,
-        userTableData: []
+        userTableData: [],
+        instanceTableData: [],
+        studiesListTableData: []
     };
 
-    newUsername = null;
+    newUserName = null;
     newInstanceName = null;
     newInstanceDescription = null;
     modifyInstanceDescription = null;
@@ -58,53 +60,54 @@ export default class ManagementPanel extends React.Component {
     // ];
 
 
-    instanceTableData = [
-        {
-            name: "001001",
-            progress: 20,
-            modality: "CT",
-            type: "Brain",
-            description: "Lorum ipsum..."
-        },
-        {
-            name: "001002",
-            progress: 80,
-            modality: "Ultra-Sound",
-            type: "Breasts",
-            description: "Lorum ipsum..."
-        }
-    ];
+    // instanceTableData = [
+    //     {
+    //         name: "001001",
+    //         progress: 20,
+    //         modality: "CT",
+    //         type: "Brain",
+    //         description: "Lorum ipsum..."
+    //     },
+    //     {
+    //         name: "001002",
+    //         progress: 80,
+    //         modality: "Ultra-Sound",
+    //         type: "Breasts",
+    //         description: "Lorum ipsum..."
+    //     }
+    // ];
 
 
-    studiesListTableData = [
-        {
-            name: "Study 1",
-            path: "D:\\dev\\projects\\Git repositories\\ATMI\\",
-            annotators: "calkufu@hotmail.com",
-            auditors: "fuhua06@gmail.com",
-            filesNo: 5,
-            status: "Ready"
-        },
-        {
-            name: "Study 2",
-            path: "D:\\dev\\projects\\AnnotationSystem\\",
-            annotators: "calkufu@hotmail.com",
-            auditors: "fuhua06@gmail.com",
-            filesNo: 10,
-            status: "Finish"
-        },
-        {
-            name: "Study 3",
-            path: "D:\\dev\\projects\\CornerstoneToolTest\\",
-            annotators: "29375917@qq.com",
-            auditors: "fuhua06@gmail.com",
-            filesNo: 10,
-            status: "Auditing"
-        }
-    ];
+    // studiesListTableData = [
+    //     {
+    //         name: "Study 1",
+    //         path: "D:\\dev\\projects\\Git repositories\\ATMI\\",
+    //         annotators: "calkufu@hotmail.com",
+    //         auditors: "fuhua06@gmail.com",
+    //         filesNo: 5,
+    //         status: "Ready"
+    //     },
+    //     {
+    //         name: "Study 2",
+    //         path: "D:\\dev\\projects\\AnnotationSystem\\",
+    //         annotators: "calkufu@hotmail.com",
+    //         auditors: "fuhua06@gmail.com",
+    //         filesNo: 10,
+    //         status: "Finish"
+    //     },
+    //     {
+    //         name: "Study 3",
+    //         path: "D:\\dev\\projects\\CornerstoneToolTest\\",
+    //         annotators: "29375917@qq.com",
+    //         auditors: "fuhua06@gmail.com",
+    //         filesNo: 10,
+    //         status: "Auditing"
+    //     }
+    // ];
 
     componentDidMount() {
         this.listAllUsers()
+        this.listAllInstance()
     }
 
     listAllUsers = () => {
@@ -112,16 +115,40 @@ export default class ManagementPanel extends React.Component {
             let userTableData = []
             const user = res.data;
             for (let i = 0; i < user.length; i++) {
-                userTableData.push({username: user[i].email, nickname: user[i].name, usertype: user[i].user_type==0?"Admin":"Annotator"})
+                userTableData.push({
+                    username: user[i].email,
+                    nickname: user[i].name,
+                    usertype: user[i].user_type == 0 ? "Admin" : "Annotator"
+                })
             }
             this.setState({"userTableData": userTableData})
         }).catch(error => {
             message.error('List user error');
             console.log(error)
         })
+    };
 
-
-    }
+    listAllInstance = () => {
+        axios.get("/instances").then(res => {
+            let instanceTableData = [];
+            const instances = res.data;
+            for (let i = 0; i < instances.length; i++) {
+                let progress = Math.round((instances[i]['annotated_num'] / instances[i]['study_num']) * 100);
+                instanceTableData.push({
+                    'instanceid': instances[i]['instance_id'],
+                    'name': instances[i]['name'],
+                    'modality': instances[i]['modality'],
+                    'description': instances[i]['description'],
+                    'progress': progress,
+                    'data_path': instances[i]['data_path']
+                })
+            }
+            this.setState({"instanceTableData": instanceTableData})
+        }).catch(error => {
+            message.error('Instance list error');
+            console.log(error)
+        })
+    };
 
 
     onUserTablePageChange = page => {
@@ -187,22 +214,34 @@ export default class ManagementPanel extends React.Component {
 
     checkEmail = () => {
         let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
-        if (!this.newUsername) {
+        if (!this.newUserName) {
             return;
         }
-        let username = this.newUsername.value;
-        if (reg.test(username)) {
-            this.proccessAddUser(username);
+        let userName = this.newUserName.input.value;
+        let dispName = this.newUserDispName.input.value;
+        let userType = this.newUserType.rcSelect.state.value[0];
+        userType = (userType === "admin")?0:1;
+        debugger;
+        if (reg.test(userName)) {
+            this.proccessAddUser(userName, dispName, userType);
         } else {
             message.error("Please enter username of email format", 2);
         }
     }
 
-    proccessAddUser = username => {
-        message.success("Sucessfully added user and sent email to user", 2);
-        this.setState({
-            showAddUser: false
+    proccessAddUser = (username, dispname, type) => {
+        debugger;
+        axios.post("/user", {'email': username, 'name': dispname, 'user_type':type}).then(res => {
+            let url = res.data.url
+            message.success("URL: "+url, 10);
+            this.setState({
+                showAddUser: false
+            });
+        }).catch(error => {
+            message.error('User add error');
+            console.log(error)
         });
+
     }
 
     /*     setRowClassName = (record) => {
@@ -364,9 +403,45 @@ export default class ManagementPanel extends React.Component {
     }
 
     onInstanceDetailClick = e => {
-        this.setState({
-            showInstanceDetail: true
-        });
+        let instance_id = e.target.dataset.instanceid;
+        let instance_name = e.target.dataset.instancename;
+
+        // name: "Study 1",
+        // path: "D:\\dev\\projects\\Git repositories\\ATMI\\",
+        // annotators: "calkufu@hotmail.com",
+        // auditors: "fuhua06@gmail.com",
+        // filesNo: 5,
+        // status: "Ready"
+
+        axios.get("/instances/" + instance_id + "/studies").then(res => {
+            let studyTableData = [];
+            const studies = res.data;
+            for (let i = 0; i < studies.length; i++) {
+                status = studies[i].status;
+                if (status === "1") status = "Ready to annotate.";
+                else if (status === "2") status = "Auditing";
+                else if (status === "3") status = "Finished";
+                studyTableData.push({
+                    name: studies[i].study_uid,
+                    instance_id: instance_id,
+                    study_id: studies[i].study_id,
+                    annotators: studies[i].annotators,
+                    auditors: studies[i].auditors,
+                    status: status,
+                    path: eval(studies[i].folder_name)[0] + "...",
+                    file_number: studies[i].total_files_number
+                })
+            }
+            this.setState({
+                showInstanceDetail: true,
+                "studiesListTableData": studyTableData,
+                current_instance_id: instance_name
+            })
+        }).catch(error => {
+            message.error('Studies load error');
+            console.log(error)
+        })
+
     }
 
     handleInstanceDetailOk = e => {
@@ -434,8 +509,9 @@ export default class ManagementPanel extends React.Component {
             render: (text, record) => (
                 <div
                     className={(record.name === this.state.instanceNameEntered) ? styles.highightTableRow : styles.font}>
-                    <a href="javascript:;" title="Show studies list" style={{color: "#0099FF"}}
-                       onClick={this.onInstanceDetailClick} data-instancename={text}>
+                    <a href="javascript:void(0);" title="Show studies list" style={{color: "#0099FF"}}
+                       onClick={this.onInstanceDetailClick} data-instancename={text}
+                       data-instanceid={record.instanceid}>
                         {text}
                     </a>
                 </div>
@@ -469,8 +545,8 @@ export default class ManagementPanel extends React.Component {
             )
         },
         {
-            title: 'Type',
-            dataIndex: 'type',
+            title: 'Data Path',
+            dataIndex: 'data_path',
             key: 'type',
             width: "18%",
             align: "center",
@@ -511,12 +587,13 @@ export default class ManagementPanel extends React.Component {
                                                         alt='Download' style={{
                                 width: 18,
                                 height: 18
-                            }} /* onClick={this.onFavoritesButtonClick} */></img></a>
+                            }} /* onClick={this.onFavoritesButtonClick} *//></a>
                         </Col>
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/details.png" title='Show studies list'
                                                         alt='Show studies list' style={{width: 18, height: 18}}
-                                                        onClick={this.onInstanceDetailClick}></img></a>
+                                                        onClick={this.onInstanceDetailClick} data-instancename={text}
+                                                        data-instanceid={record.instanceid}/></a>
                         </Col>
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/modify.png" title='Modify' alt='Modify'
@@ -538,11 +615,19 @@ export default class ManagementPanel extends React.Component {
 
     studiesListTableColumns = [
         {
-            title: 'Study Name',
+            title: 'Study ID',
             dataIndex: 'name',
             key: 'name',
             width: "16%",
-            align: "center"
+            align: "center",
+            render: (text, record) => (
+                <div>
+                    <a href={"workbench/instance/" + record.instance_id + "/study/" + record.study_id} target="_blank"
+                       title="Show studies list" style={{color: "#0099FF"}}>
+                        {text}
+                    </a>
+                </div>
+            )
         },
         {
             title: 'Study Path',
@@ -567,8 +652,8 @@ export default class ManagementPanel extends React.Component {
         },
         {
             title: 'Total Files Number',
-            dataIndex: 'filesNo',
-            key: 'filesNo',
+            dataIndex: 'file_number',
+            key: 'file_number',
             width: "10%",
             align: "center"
         },
@@ -645,7 +730,7 @@ export default class ManagementPanel extends React.Component {
                 <Row type="flex" justify="start">
                     <Col span={24}>
                         <Table columns={this.instanceTableColumns}
-                               dataSource={this.instanceTableData}
+                               dataSource={this.state.instanceTableData}
                             /* bordered  */
                                size="middle"
                                loading={this.state.instanceTableLoading}
@@ -691,18 +776,34 @@ export default class ManagementPanel extends React.Component {
                     <Row type="flex" justify="start">
                         <Col span={24}>
                             <div style={{fontSize: 'x-small', fontWeight: 'bold'}}>
-                                Username
+                                Email
                             </div>
                         </Col>
                     </Row>
                     <div style={{height: 6}}/>
                     <Row>
                         <Col>
-                            <Input placeholder="Please enter username (email format)"
-                                   ref={target => (this.newUsername = target)}/>
+                            <Input placeholder="Please enter new user email"
+                                   ref={target => (this.newUserName = target)}/>
                         </Col>
                     </Row>
                     <div style={{height: 6}}/>
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{fontSize: 'x-small', fontWeight: 'bold'}}>
+                                Name
+                            </div>
+                        </Col>
+                    </Row>
+                    <div style={{height: 6}}/>
+                    <Row>
+                        <Col>
+                            <Input placeholder="Please enter username"
+                                   ref={target => (this.newUserDispName = target)}/>
+                        </Col>
+                    </Row>
+                    <div style={{height: 6}}/>
+
                     <Row type="flex" justify="start">
                         <Col span={24}>
                             <div style={{fontSize: 'x-small', fontWeight: 'bold'}}>
@@ -713,11 +814,12 @@ export default class ManagementPanel extends React.Component {
                     <div style={{height: 6}}/>
                     <Row>
                         <Col>
-                            <Select defaultValue="admin" style={{width: '100%'}}>
-                                <Select.Option value="admin">
+                            <Select defaultValue="admin" style={{width: '100%'}}
+                                    ref={target => (this.newUserType = target)}>
+                                <Select.Option value="0">
                                     Admin
                                 </Select.Option>
-                                <Select.Option value="annotator">
+                                <Select.Option value="1">
                                     Annotator
                                 </Select.Option>
                             </Select>
@@ -1074,7 +1176,7 @@ export default class ManagementPanel extends React.Component {
                             <div style={{height: 6}}/>
                             <Row>
                                 <Col>
-                                    <Input value="0001001"
+                                    <Input value={this.state.instanceNameEntered}
                                            disabled={true}
                                     />
                                 </Col>
@@ -1375,14 +1477,14 @@ export default class ManagementPanel extends React.Component {
                     <Row type="flex" justify="center" align="middle">
                         <Col span={24}>
                             <div style={{textAlign: "center"}}>
-                                <h2>Studies List of Instance 0001001</h2>
+                                <h2>Studies in {this.state.current_instance_id}</h2>
                             </div>
                         </Col>
                     </Row>
                     <Row type="flex" justify="start">
                         <Col span={24}>
                             <Table columns={this.studiesListTableColumns}
-                                   dataSource={this.studiesListTableData}
+                                   dataSource={this.state.studiesListTableData}
                                 /* bordered  */
                                    size="middle"
                                    loading={this.state.instanceTableLoading}
@@ -1393,11 +1495,6 @@ export default class ManagementPanel extends React.Component {
                                        current: this.state.currentInstanceTablePage,
                                        onChange: this.onInstanceTablePageChange,
                                        showSizeChanger: true,
-                                       /*                                 itemRender:(page, type, originalElement) => {return(
-                                                                           <div style={{color: "#ccc"}}>
-                                                                               {originalElement}
-                                                                           </div>
-                                                                       ) }, */
                                        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
                                    }}
                             />

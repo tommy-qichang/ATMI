@@ -148,6 +148,10 @@ class DicomSeries(object):
 
         fields = []
 
+        # Try adding more fields
+        if "SeriesDescription" in info:
+            fields.append(info.SeriesDescription)
+
         # Give patient name
         if "PatientName" in info:
             fields.append(str(info.PatientName))
@@ -157,14 +161,11 @@ class DicomSeries(object):
             tmp = [str(d) for d in self.shape]
             fields.append("x".join(tmp))
 
-        # Try adding more fields
-        if "SeriesDescription" in info:
-            fields.append("'" + info.SeriesDescription + "'")
         if "ImageComments" in info:
-            fields.append("'" + info.ImageComments + "'")
+            fields.append(info.ImageComments)
 
         # Combine
-        return " ".join(fields)
+        return "_".join(fields)
 
     def __repr__(self):
         adr = hex(id(self)).upper()

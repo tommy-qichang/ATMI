@@ -24,10 +24,13 @@ class SeriesExtractionService:
         all_study_list = {}
         for i in all_series_list:
             one_series = all_series_list[i]
-            study_id = str(one_series[0].info['StudyInstanceUID'].value)
-            if study_id not in all_study_list:
-                all_study_list[study_id]={}
-            all_study_list[study_id][i] = one_series
+            if len(one_series)>0:
+                study_id = str(one_series[0].info['StudyInstanceUID'].value)
+                if study_id not in all_study_list:
+                    all_study_list[study_id]={}
+                all_study_list[study_id][i] = one_series
+            else:
+                print(f"Error in series index:{i}")
 
 
         return all_study_list

@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS studies
 (
     study_id           INTEGER PRIMARY KEY,
     instance_id        INTEGER,
-    suid               TEXT UNIQUE,
+    suid               TEXT,
     patient_uid         TEXT,
     study_uid          TEXT,
     folder_name        TEXT,

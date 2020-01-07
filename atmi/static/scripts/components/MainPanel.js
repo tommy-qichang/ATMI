@@ -63,8 +63,6 @@ class CornerstoneElement extends React.Component {
     }
 
     onImageRendered = () => {
-        console.log("image rendered");
-
         // cornerstoneWrapper.loadSegments(this.state.stack.seriesId);
         cornerstoneWrapper.updateViewport();
         let labels = cornerstoneWrapper.getActiveLabelsId();
@@ -74,7 +72,6 @@ class CornerstoneElement extends React.Component {
     };
 
     onNewImage = () => {
-        console.log("new image rendered");
         const enabledElement = cornerstone.getEnabledElement(this.element);
         this.setState({
             imageId: enabledElement.image.imageId
@@ -92,25 +89,35 @@ class CornerstoneElement extends React.Component {
     };
 
     onNavSlice = (e) => {
+        const stackData = cornerstoneTools.getToolState(this.element, "stack");
+        const stack = stackData.data[0];
+        const stackLength = stack.imageIds.length;
         if (e.keyCode === 40) {
             //arrow down.
-            const stackData = cornerstoneTools.getToolState(this.element, "stack");
-            const stack = stackData.data[0];
-
-            console.log(this.state.stack.currentImageIdIndex)
-            stack.currentImageIdIndex = ++this.state.stack.currentImageIdIndex;
+            stack.currentImageIdIndex = ++this.state.stack.currentImageIdIndex % stackLength;
             scrollToIndex(this.element, this.state.stack.currentImageIdIndex++);
-        }else if(e.keyCode === 38){
+        } else if (e.keyCode === 38) {
             // arrow up.
-            const stackData = cornerstoneTools.getToolState(this.element, "stack");
-            const stack = stackData.data[0];
-            console.log(this.state.stack.currentImageIdIndex)
             stack.currentImageIdIndex = --this.state.stack.currentImageIdIndex;
             scrollToIndex(this.element, this.state.stack.currentImageIdIndex--);
+        } else if (e.keyCode === 80) {
+            if (this.playHook === undefined) {
+                this.play();
+            } else {
+                clearInterval(this.playHook);
+                this.playHook = undefined;
+            }
         }
-
-
         cornerstone.updateImage(this.element);
+    };
+
+
+
+    play = () => {
+        let _this = this;
+        this.playHook = setInterval(() => {
+            _this.onNavSlice({'keyCode': 40})
+        }, 100)
     };
 
 
@@ -125,7 +132,7 @@ class CornerstoneElement extends React.Component {
 
             element.addEventListener("cornerstonetoolsmouseup", this.onUpdateLabelId);
             document.addEventListener('keydown', this.onNavSlice);
-
+            window.navSlice = this.onNavSlice
         });
 
 
