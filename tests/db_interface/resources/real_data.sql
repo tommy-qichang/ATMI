@@ -29,9 +29,9 @@ VALUES (1, 0, 0);
 
 
 INSERT INTO label_candidates(instance_id, label_type, input_type, text)
-VALUES (1, 0, NULL, "Right Ventricle Cavity"),
-       (1, 0, NULL, "Left Ventricle Myocardium"),
-       (1, 0, NULL, "Left Ventricle Cavity"),
+VALUES (1, 0, NULL, "RVC"),
+       (1, 0, NULL, "LVM"),
+       (1, 0, NULL, "LVC"),
 --        (1, 1, "selectbox", '{"key":"Dyssynchrony","value":["negative","positive"]}'),
        (1, 1, "input", '{"key":"Note","value":""}');
 
