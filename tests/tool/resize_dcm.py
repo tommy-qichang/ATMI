@@ -14,7 +14,11 @@ def resize_dcm(source_path, target_path, factor=2):
         target_sub_path = path[(len(source_path)+1):]
         if not os.path.isdir(os.path.join(target_path, target_sub_path)):
             os.makedirs(os.path.join(target_path, target_sub_path))
-        ds = pydicom.dcmread(file)
+        try:
+            ds = pydicom.dcmread(file)
+        except Exception as e:
+            print(f"Read dicom file error: {file}, with error:{e}")
+            continue
         dcm = ds.pixel_array
         print(f"resize dcm: {filename}, in path: {path}")
         sup_dcm = ndimage.interpolation.zoom(dcm, factor)
@@ -24,7 +28,7 @@ def resize_dcm(source_path, target_path, factor=2):
         ds.save_as(os.path.join(target_path, target_sub_path, filename))
 
 
-resize_dcm("/Users/qichang/CBIM/data/NYU_CMR_Raw", "/Users/qichang/CBIM/data/NYU_CMR_Raw_HD", 4)
+resize_dcm("/Users/qichang/CBIM/data/NYU_CMR_Raw", "/Users/qichang/CBIM/data/NYU_CMR_Raw_HD", 2)
 
 # for i in range(1, 26):
 #     id = ("0 " + str(i))[-2:]
