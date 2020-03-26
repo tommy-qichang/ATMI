@@ -91,6 +91,7 @@ class ImportService:
                 if len(series) > 0:
                     slice_file_name = eval(series[0]['series_files_list'])
                     content_3D = labeldb[f"study:{study_uid}-series:{series_uid}/label"][()]
+                    print(f"Import label for: study:{study_uid}-series:{series_uid}/")
                     for i in range(len(slice_file_name)):
                         content_2D = content_3D[:, :, i]
                         x_dim = content_2D.shape[0]
@@ -111,7 +112,7 @@ class ImportService:
 if __name__ == "__main__":
     ini_service = InitialService()
     importService = ImportService(ini_service.get_connection())
-    importService.import_annotations("h5", "/Users/qichang/PycharmProjects/pytorch-template/data/ACDC/processed/Export-1-Cardial_MRI_DB-0-predict-mask.h5")
+    importService.import_annotations("h5", "/Users/qichang/PycharmProjects/pytorch-template/data/ACDC/processed/Export-1-Cardial_MRI_DB-0-predict-final-x4.h5")
 
 # http://127.0.0.1:5000/load_data/2/NYU_CMR_Raw
 # http://127.0.0.1:5000/export_label/studies/2

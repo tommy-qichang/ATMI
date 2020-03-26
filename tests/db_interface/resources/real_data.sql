@@ -33,7 +33,12 @@ VALUES (1, 0, NULL, "RVC"),
        (1, 0, NULL, "LVM"),
        (1, 0, NULL, "LVC"),
 --        (1, 1, "selectbox", '{"key":"Dyssynchrony","value":["negative","positive"]}'),
-       (1, 1, "input", '{"key":"Note","value":""}');
+       (1, 1, "input", '{"key":"Note","value":""}'),
+       (2, 0, NULL, "RVC"),
+       (2, 0, NULL, "LVM"),
+       (2, 0, NULL, "LVC"),
+--        (2, 1, "selectbox", '{"key":"Dyssynchrony","value":["negative","positive"]}'),
+       (2, 1, "input", '{"key":"Note","value":""}');
 
 -- INSERT INTO studies(instance_id, suid, folder_name, total_files_number, annotators, auditors, status)
 -- VALUES (1,'1313', "./data/CCTA/CRE_120-1014-CCTA-10-139967", 50, NULL, NULL, 1),

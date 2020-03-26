@@ -221,7 +221,6 @@ export default class ManagementPanel extends React.Component {
         let dispName = this.newUserDispName.input.value;
         let userType = this.newUserType.rcSelect.state.value[0];
         userType = (userType === "admin")?0:1;
-        debugger;
         if (reg.test(userName)) {
             this.proccessAddUser(userName, dispName, userType);
         } else {
@@ -230,7 +229,6 @@ export default class ManagementPanel extends React.Component {
     }
 
     proccessAddUser = (username, dispname, type) => {
-        debugger;
         axios.post("/user", {'email': username, 'name': dispname, 'user_type':type}).then(res => {
             let url = res.data.url
             message.success("URL: "+url, 10);
