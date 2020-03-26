@@ -46,8 +46,8 @@ let cornerstoneWrapper = {
                 setters.activeLabelmapIndex(this.element, 0);
 
                 callback();
-
                 this.loadSegments(this.state.stack.seriesId);
+
 
             });
 
@@ -74,6 +74,8 @@ let cornerstoneWrapper = {
         const StackScrollTool = cornerstoneTools.StackScrollTool;
         const StackScrollMouseWheelTool = cornerstoneTools.StackScrollMouseWheelTool;
 
+        const BrushTool = cornerstoneTools.BrushTool;
+
 
         // const FreehandMouseTool = cornerstoneTools.FreehandMouseTool;
         // const EllipticalRoiTool = cornerstoneTools.EllipticalRoiTool;
@@ -90,21 +92,26 @@ let cornerstoneWrapper = {
         cornerstoneTools.addTool(CircleScissorsTool);
         cornerstoneTools.addTool(RectangleScissorsTool);
         cornerstoneTools.addTool(CorrectionScissorsTool);
-        cornerstoneTools.addTool(StackScrollTool);
-        cornerstoneTools.addTool(StackScrollMouseWheelTool);
+        cornerstoneTools.addTool(StackScrollTool,{configuration:{loop:true}});
+        cornerstoneTools.addTool(StackScrollMouseWheelTool,{configuration:{loop:true}});
+
+        cornerstoneTools.addTool(BrushTool,{configuration:{alwaysEraseOnClick:true}});
+
 
 
         // Set tool modes
         // cornerstoneTools.setToolActive("Pan", {mouseButtonMask: 4}); // Middle
-        // cornerstoneTools.setToolActive("Zoom", {mouseButtonMask: 2}); // Right
+        cornerstoneTools.setToolActive("Zoom", {mouseButtonMask: 4}); // Right
         // cornerstoneTools.setToolActive("Wwwc", {mouseButtonMask: 1}); // Left & Touch
         cornerstoneTools.setToolActive("PanMultiTouch", {});
         cornerstoneTools.setToolActive("ZoomMouseWheel", {});
         cornerstoneTools.setToolActive("ZoomTouchPinch", {});
 
-
         cornerstoneTools.setToolActive('StackScroll', {mouseButtonMask: 1});
         cornerstoneTools.setToolActive('StackScrollMouseWheel', {mouseButtonMask: 1});
+
+        // cornerstoneTools.setToolActive('Brush')
+
     },
     bindEvent: function () {
         let _this = this;
@@ -123,11 +130,15 @@ let cornerstoneWrapper = {
     updateViewport: function () {
         this.viewport = cornerstone.getViewport(this.element);
     },
-    enableTool: function (type) {
+    enableTool: function (type, mousemask) {
         /***
          * type=["Wwwc", "FreehandScissors", "CircleScissors", "RectangleScissors", "CorrectionScissors"]
          */
-        cornerstoneTools.setToolActive(type, {mouseButtonMask: 1});
+        if(mousemask === undefined){
+            mousemask = 1
+        }
+        console.log("enable:"+type+" mousemask:"+mousemask);
+        cornerstoneTools.setToolActive(type, {mouseButtonMask: mousemask});
 
     },
     getAllSegmentsColor: function (length) {

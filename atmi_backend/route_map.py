@@ -1,9 +1,11 @@
+import datetime
 import io
 import os
 from os import path
 
-from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session
+from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect
 
+from atmi_backend.config import REGISTER_MAX_HOURS
 from atmi_backend.db_interface.InitialService import InitialService
 from atmi_backend.db_interface.InstanceService import InstanceService
 from atmi_backend.db_interface.LabelCandidatesService import LabelCandidatesService
@@ -13,6 +15,7 @@ from atmi_backend.db_interface.StudiesService import StudiesService
 from atmi_backend.db_interface.UserService import UserService
 from atmi_backend.services.ExportService import ExportService
 from atmi_backend.services.ImportService import ImportService
+from atmi_backend.utils import to_bool_or_none
 
 
 def setup_route_map(app, app_path):
@@ -27,11 +30,40 @@ def setup_route_map(app, app_path):
 
     @app.route("/", methods=['GET'])
     def index():
-        return render_template("index.html")
+        username = ''
+        if 'email' in session:
+            username = session['email']
+        if len(request.args) > 0:
+            try:
+                user = request.args.get('user', default='')
+                ts = request.args.get('ts', default=0)
+                user_service = UserService(get_conn())
+                if len(user_service.query({'email': user, 'init_code': ts})) > 0:
+                    now = datetime.datetime.now().timestamp()
+                    ts = float(ts)
+                    hours = (now - ts) / (60 * 60)
+                    if hours > REGISTER_MAX_HOURS:
+                        return redirect("/", code=302)
+                elif len(user_service.query({})) == 0:
+                    # The first time register.
+                    return render_template("index.html", data={'username': username})
+                else:
+                    return redirect("/", code=302)
+            except:
+                return redirect("/", code=302)
+
+        return render_template("index.html", data={'username': username})
+
+    @app.route("/workbench/instance/<instance_id>/study/<study_id>", methods=['GET'])
+    def workbench_redict(instance_id, study_id):
+        series_service = SeriesService(get_conn())
+        series = series_service.query({"study_id": study_id})
+        if len(series) > 0:
+            series_id = series[0]['series_id']
+        return redirect(f"/workbench/instance/{instance_id}/study/{study_id}/series/{series_id}", code=302)
 
     @app.route("/workbench/instance/<instance_id>/study/<study_id>/series/<series_id>", methods=['GET'])
     def workbench(instance_id, study_id, series_id):
-
         study_service = StudiesService(get_conn())
         study_info = study_service.query({"study_id": study_id})
         if len(study_info) > 0 and study_info[0]["instance_id"] == int(instance_id):
@@ -42,6 +74,7 @@ def setup_route_map(app, app_path):
         label_candidates = label_candidate_service.query({"instance_id": instance_id})
 
         series_service = SeriesService(get_conn())
+
         series = series_service.query({"study_id": study_id, "series_id": series_id})
         if len(series) > 0 and len(series[0]) > 3:
             series = series[0]
@@ -74,42 +107,48 @@ def setup_route_map(app, app_path):
 
         return jsonify([]), 200
 
-    @app.route('/load_data/<instance_id>/<data_path>', methods=['GET'])
-    def load_data(instance_id, data_path):
-        """
-        Load DICOM data for the instance, given the datapath in data folder.
-        :param instance_id:
-        :param data_path:
-        :return:
-        """
-        import_service = ImportService(get_conn())
-        result = import_service.import_dcm(instance_id, data_path)
-
-        return jsonify({}), 201
-
-    @app.route('/user/', methods=['POST', 'PUT', 'GET'])
+    @app.route('/user', methods=['POST', 'PUT', 'GET'], strict_slashes=False)
     def registry_user():
         user_service = UserService(get_conn())
         if request.method == 'PUT':
             email = request.json['email']
             pwd = request.json['password']
             # Update password based on the email
-            status = user_service.update(email, {"pwd": pwd})
-
+            status = user_service.update(email, {"pwd": pwd, "init_code": ""})
+            if not status and len(user_service.query({})) == 0:
+                ts = datetime.datetime.now().timestamp()
+                user_service.insert(email, email, pwd, str(ts), 0)
             return Response("{status: true }", status=201, mimetype='application/json')
         elif request.method == 'GET':
             users = user_service.query({})
             return jsonify(users), 200
+        elif request.method == 'POST':
+            email = request.json['email']
+            user_type = request.json['user_type']
+            name = request.json['name']
+            ts = datetime.datetime.now().timestamp()
+            if len(user_service.query({'email': email})) > 0:
+                user_service.update(email, {'name': name, 'pwd': '', 'init_code': str(ts), 'user_type': user_type})
+            else:
+                user_service.insert(email, name, "", str(ts), user_type)
+            app.logger.info(f"Create user: user={email}&ts={ts}")
+            return jsonify({'url': f'?user={email}&ts={ts}'})
 
     @app.route('/user/<user_name>/<password>', methods=['GET'])
     def login_user(user_name, password):
         user_service = UserService(get_conn())
         user = user_service.query({'email': user_name, 'pwd': password})
-        # if len(user) > 0:
-        #     session["email"] = user_name
+        if len(user) > 0 and ("email" not in session or session['email'] == ''):
+            session["email"] = user_name
+
         return jsonify(user), 200
 
-    @app.route('/instances/<int:instance_id>', methods=['GET'])
+    @app.route('/logout', methods=['GET'])
+    def logout_user():
+        session['email'] = ""
+        return '{}', 200
+
+    @app.route('/instance/<int:instance_id>', methods=['GET'])
     def instance_detail(instance_id):
 
         instance_service = InstanceService(get_conn())
@@ -124,10 +163,27 @@ def setup_route_map(app, app_path):
 
         return jsonify(json_result), 200
 
+    @app.route('/instances', methods=['GET'])
+    def instance_list():
+        instance_service = InstanceService(get_conn())
+        instances = instance_service.query({})
+        return jsonify(instances), 200
+
+    @app.route('/instances/<instance_id>/studies', methods=['GET'])
+    def list_studies_info(instance_id):
+        """
+        List all studies basic information.
+        :param instance_id:
+        :return:
+        """
+        study_service = StudiesService(get_conn())
+        studies = study_service.query({'instance_id': instance_id})
+        return jsonify(studies), 200
+
     @app.route('/studies/instance_id=<int:instance_id>', methods=['GET'])
     def list_all_studies(instance_id):
         """
-        List all studies under one instance.
+        List all studies with their series info under one instance.
         :param instance_id:
         :return:
         """
@@ -175,6 +231,38 @@ def setup_route_map(app, app_path):
             return jsonify([]), 200
         return jsonify(result), 200
 
+    @app.route('/import/instance/<instance_id>', methods=['GET'])
+    def load_data(instance_id):
+        """
+        Load DICOM data for the instance, given the datapath in data folder.
+        :param instance_id:
+        :param data_path:
+        :return:
+        """
+        data_path = request.args.get('data_path', default=None)
+        if data_path is None:
+            return jsonify({}), 404
+        import_service = ImportService(get_conn())
+        result = import_service.import_dcm(instance_id, data_path)
+
+        return jsonify({'result': result}), 201
+
+    @app.route('/export/instance/<instance_id>', methods=['GET'])
+    def export_all_label(instance_id):
+        split_entry_num = request.args.get('split_entry_num', default=100)
+        store_type = request.args.get('store_type', default='train')
+        save_label = to_bool_or_none(request.args.get('save_label', default='True'))
+        save_data = to_bool_or_none(request.args.get('save_data', default='True'))
+        export_service = ExportService(get_conn())
+        msg = export_service.save_studies(instance_id, split_entry_num, store_type, save_label, save_data)
+        return jsonify({'msg': msg}), 200
+
+    @app.route('/export_label/studies/<study_id>', methods=['GET'])
+    def export_label(study_id):
+        exportService = ExportService(get_conn())
+        result = exportService.save_onestudy(study_id)
+        return jsonify({'msg': result}), 201
+
     @app.route('/dcm/<path:data_path>/<path:folder_name>/<file_name>')
     def get_dcm_img(data_path, folder_name, file_name):
         """
@@ -197,16 +285,6 @@ def setup_route_map(app, app_path):
     @app.route("/assets/<path:filename>")
     def send_asset(filename):
         return send_from_directory(path.join(app_path, "public"), filename)
-
-    @app.route('/export_label/instance/<instance_id>', methods=['GET'])
-    def export_all_label():
-        pass
-
-    @app.route('/export_label/studies/<study_id>', methods=['GET'])
-    def export_label(study_id):
-        exportService = ExportService(get_conn())
-        result = exportService.save_onestudy(study_id)
-        return jsonify({'msg': result}), 201
 
     @app.errorhandler(500)
     def internal_error(exception):

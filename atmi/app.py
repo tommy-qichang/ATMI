@@ -19,6 +19,7 @@ def create_app():
     webpack.init_app(flask_app)
     setup_route_map(flask_app, here)
     setup_log(flask_app)
+    flask_app.url_map.strict_slashes = False
     return flask_app
 
 
@@ -29,5 +30,5 @@ export FLASK_APP=app.py
 flask run
 '''
 if __name__ == "__main__":
-    app.run(extra_files=[app.config["WEBPACK_MANIFEST_PATH"]], debug=True)
-    # app.run(host='0.0.0.0', port=80, extra_files=[app.config["WEBPACK_MANIFEST_PATH"]])
+    # app.run(extra_files=[app.config["WEBPACK_MANIFEST_PATH"]], debug=True)
+    app.run(host='0.0.0.0', port=80, extra_files=[app.config["WEBPACK_MANIFEST_PATH"]])

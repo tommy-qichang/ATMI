@@ -28,4 +28,6 @@ DATA_ROOT = "./data"
 OUTPUT_ROOT = "./output"
 QUALIFIED_FILE_EXT = ["\\.dcm", "IM_"]
 
+REGISTER_MAX_HOURS = 10000000
+
 SECRET_KEY = "dbe924ec-7767-4186-ad8a-b68face4a8fa"

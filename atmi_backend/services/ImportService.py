@@ -36,6 +36,9 @@ class ImportService:
                 one_series = series[series_path][0]
                 patient_uid = one_series.info.PatientID
                 study_uid = one_series.info.StudyID
+                if patient_uid == "" or study_uid == "":
+                    patient_uid = ""
+                    study_uid = suid
                 # disp_name = "pid:" + one_series.info.PatientID + "_sid:" + one_series.info.StudyID
                 total_files_number += one_series.length
                 series_info = one_series.info
@@ -71,32 +74,35 @@ class ImportService:
         :param erase_old:
         :return:
         """
-        LV_code = 2
+        RVM_code = 1
+        LVM_code = 2
+        LVC_code = 3
         if load_type == "h5":
             labeldb = h5py.File(annotation_path, 'r')
             studyService = StudiesService(self.conn)
             seriesService = SeriesService(self.conn)
             labelService = LabelService(self.conn)
-            for study_id in labeldb.keys():
-                study_uid = study_id[6:]
-                for series_id in labeldb[study_id].keys():
-                    series_uid = series_id[7:]
-                    series = seriesService.query({"series_instance_uid": series_uid})
-                    if len(series) > 0:
-                        slice_file_name = eval(series[0]['series_files_list'])
-                        content_3D = labeldb[f"{study_id}/{series_id}/label"]
-                        for i in range(len(slice_file_name)):
-                            content_2D = content_3D[:, :, i]
-                            x_dim = content_2D.shape[0]
-                            y_dim = content_2D.shape[1]
-                            content_1D = np.reshape(content_2D, x_dim * y_dim)
-                            content_1D[content_1D > 0] = LV_code
-                            unique_id = np.unique(content_1D).tolist()
-                            compressed_content_1D = LabelService.compress_content(content_1D)
-                            content = {
-                                "labelmap2D": {"pixelData": compressed_content_1D, "segmentsOnLabelmap": unique_id, "dataLength":content_1D.shape[0]}}
-                            labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
-                                                str.encode(json.dumps(content)))
+            for study_and_series_id in labeldb.keys():
+                split_str = study_and_series_id.split("-")
+                study_uid = split_str[0][6:]
+                series_uid = split_str[1][7:]
+
+                series = seriesService.query({"series_instance_uid": series_uid})
+                if len(series) > 0:
+                    slice_file_name = eval(series[0]['series_files_list'])
+                    content_3D = labeldb[f"study:{study_uid}-series:{series_uid}/label"][()]
+                    for i in range(len(slice_file_name)):
+                        content_2D = content_3D[:, :, i]
+                        x_dim = content_2D.shape[0]
+                        y_dim = content_2D.shape[1]
+                        content_1D = np.reshape(content_2D, x_dim * y_dim)
+
+                        unique_id = np.unique(content_1D).tolist()
+                        compressed_content_1D = LabelService.compress_content(content_1D)
+                        content = {
+                            "labelmap2D": {"pixelData": compressed_content_1D, "segmentsOnLabelmap": unique_id, "dataLength":content_1D.shape[0]}}
+                        labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
+                                            str.encode(json.dumps(content)))
 
         elif load_type == 'mhd':
             raise NotImplementedError()
@@ -105,7 +111,7 @@ class ImportService:
 if __name__ == "__main__":
     ini_service = InitialService()
     importService = ImportService(ini_service.get_connection())
-    importService.import_annotations("h5", "tests/tool/1.2.840.114350.2.232.2.798268.2.81188688.1.h5")
+    importService.import_annotations("h5", "/Users/qichang/PycharmProjects/pytorch-template/data/ACDC/processed/Export-1-Cardial_MRI_DB-0-predict-mask.h5")
 
 # http://127.0.0.1:5000/load_data/2/NYU_CMR_Raw
 # http://127.0.0.1:5000/export_label/studies/2

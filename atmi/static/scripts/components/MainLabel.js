@@ -13,7 +13,8 @@ class MainLabel extends React.Component {
             currentLabel: props.stack.currentLabel,
             hasLabels: [],
             hiddenLabels: Array(props.stack.labels.length).fill(1).join(""),
-            selectValue:{}
+            selectValue: {},
+            hideAll:false
         };
 
         this.itemColors = cornerstoneWrapper.getAllSegmentsColor(this.state.labels.length);
@@ -34,6 +35,13 @@ class MainLabel extends React.Component {
 
     listLabelsItems() {
         const labels = this.state.labels;
+
+        this.labelCount = 0;
+        for (let i = 0; i < labels.length; i++) {
+            if (labels[i]['label_type'] === 0) {
+                this.labelCount++;
+            }
+        }
         this.items = labels.map((value, key) => {
             if (value["label_type"] === 0) {
                 return <div key={key}
@@ -46,12 +54,12 @@ class MainLabel extends React.Component {
                         <span className={style.icon} style={{backgroundColor: this.itemColors[key]}}>&nbsp;</span>
                         <span> {value["text"]}</span>
                     </div>
-                    <div className={style.delete} onClick={() => this.deleteSegment(key)}>
-                        <span className="fas fa-trash-alt" title="delete segment"/>
-                    </div>
                     <div className={style.hide} onClick={() => this.toggleSegment(key)}>
                         <span className={`fas  ${this.state.hiddenLabels[key] === "0" ? "fa-eye" : "fa-eye-slash"}`}
                               title={this.state.hiddenLabels[key] === "0" ? "show segment" : "hide segment"}/>
+                    </div>
+                    <div className={style.delete} onClick={() => this.deleteSegment(key)}>
+                        <span className="fas fa-trash-alt" title="delete segment"/>
                     </div>
                 </div>
             }
@@ -68,20 +76,20 @@ class MainLabel extends React.Component {
                 // this.setState({[content['candidate_id']]:''});
 
                 if (value['input_type'] === "selectbox") {
-                    return (<div key={key}  className={style.row}>
-                        <span  className={style.cell}>{content['key']}: &nbsp;</span>
-                        <select  className={style.cell} value={this.state[content['candidate_id']]} onChange={this.onSelectStudyLabel}>
+                    return (<div key={key} className={style.row}>
+                        <span className={style.cell}>{content['key']}: &nbsp;</span>
+                        <select className={style.cell} value={this.state[content['candidate_id']]}
+                                onChange={this.onSelectStudyLabel}>
                             <option value=""/>
-                            {content['value'].map(v=>{
+                            {content['value'].map(v => {
                                 return <option key={v} value={v}>{v}</option>;
                             })}
                         </select>
-                        </div>)
-                }
-                else if (value['input_type'] === "input") {
+                    </div>)
+                } else if (value['input_type'] === "input") {
                     return (<div key={key} className={style.row}>
-                        <span  className={style.cell}>{content['key']}: &nbsp;</span>
-                        <input  className={style.cell} type="text" value={content["value"]}/>
+                        <span className={style.cell}>{content['key']}: &nbsp;</span>
+                        <input className={style.cell} type="text" value={content["value"]}/>
                     </div>)
                 }
             }
@@ -89,7 +97,8 @@ class MainLabel extends React.Component {
         return this.items;
 
     }
-    onSelectStudyLabel = ()=>{
+
+    onSelectStudyLabel = () => {
 
     };
 
@@ -99,6 +108,35 @@ class MainLabel extends React.Component {
 
     };
 
+    activateTool = (e) => {
+        if (e.keyCode === 83) {
+            this.onSelectLabel((this.state.currentLabel+1)%this.labelCount)
+        }else if(e.keyCode === 72){
+            //Hide all labels
+            if(this.state.hideAll){
+                //display all
+                let hiddenLabels = this.state.hiddenLabels.split('')
+                for(let i =0;i<hiddenLabels.length;i++){
+                    if(hiddenLabels[i] ==="0"){
+                        cornerstoneWrapper.toggleSegmentByIndex(i+1);
+                    }
+                }
+                this.setState({'hideAll':false,
+                "hiddenLabels":this.state.hiddenLabels.replace(/0/g,"1")})
+            }else{
+                //hide all
+                let hiddenLabels = this.state.hiddenLabels.split('')
+                for(let i =0;i<hiddenLabels.length;i++){
+                    if(hiddenLabels[i] ==="1"){
+                        cornerstoneWrapper.toggleSegmentByIndex(i+1);
+                    }
+                }
+                this.setState({'hideAll':true,
+                "hiddenLabels":this.state.hiddenLabels.replace(/1/g,"0")})
+            }
+        }
+    };
+
     render() {
         return (
             <div className="mainlabel">
@@ -106,7 +144,7 @@ class MainLabel extends React.Component {
                 <div className={`${style.studylabelitem} ${style.table}`}>
                     {this.listStudyLabelItems()}
                 </div>
-                <div className={style.title}>Labels</div>
+                <div className={style.title}>Labels(s-switch;h-hide)</div>
                 <div>
                     {this.listLabelsItems()}
                 </div>
@@ -114,6 +152,10 @@ class MainLabel extends React.Component {
         )
     }
 
+    componentDidMount() {
+        document.addEventListener('keydown', this.activateTool);
+
+    }
 }
 
 export default MainLabel;

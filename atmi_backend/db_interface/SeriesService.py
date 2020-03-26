@@ -61,14 +61,18 @@ class SeriesService:
             return False
         cur = self.sql_connection.cursor()
 
-        if pydicom.dataelem.isMultiValue(window_level):
-            window_level = float(window_level[0])
+        if window_level is not None and window_width is not None:
+            if pydicom.dataelem.isMultiValue(window_level):
+                window_level = float(window_level[0])
+            else:
+                window_level = float(window_level)
+            if pydicom.dataelem.isMultiValue(window_width):
+                window_width = float(window_width[0])
+            else:
+                window_width = float(window_width)
         else:
-            window_level = float(window_level)
-        if pydicom.dataelem.isMultiValue(window_width):
-            window_width = float(window_width[0])
-        else:
-            window_width = float(window_width)
+            window_width = 1000
+            window_level = 0
 
         sql, v = prepare_insert("series", {"study_id": study_id, "series_description": series_description,
                                            "series_path": series_path, "series_files_list": str(series_files_list),
@@ -134,8 +138,8 @@ class SeriesService:
               f'st.status, st.total_files_number, se.series_description, se.series_files_number, se.series_instance_uid, ins.data_path ' \
               f' from studies as st ' \
               f' inner join series as se on st.study_id = se.study_id and st.instance_id == {instance_id}' \
-              f' inner join instances as ins on st.instance_id = ins.instance_id' \
-              f' order by se.series_files_number desc'
+              f' inner join instances as ins on st.instance_id = ins.instance_id'
+        # \f' order by se.series_files_number desc'
 
         cur = self.sql_connection.cursor()
         cur.execute(sql)
@@ -148,4 +152,8 @@ class SeriesService:
                 result[i['study_id']] = []
             result[i['study_id']].append(i)
 
-        return list(result.values())
+        list_result = []
+        for key in sorted(result.keys()):
+            list_result.append(result[key])
+
+        return list_result

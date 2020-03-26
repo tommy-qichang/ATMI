@@ -27,11 +27,15 @@ export default class UserManagement extends React.PureComponent {
 
     componentDidMount() {
         if (window.location.search !== "") {
+            let queries = window.location.search.substring(1).split("&");
             this.setState({
-                ResetPasswordUsername: window.location.search.substring(1),
+                ResetPasswordUsername: queries[0].split("=")[1],
             });
             this.toManagementMode("WrappedNormalResetPasswordForm");
+        }else if (ATMI_STATUS.username !== '') {
+            this.onLoginSuccess(ATMI_STATUS.username);
         }
+
     }
 
     componentDidUpdate() {

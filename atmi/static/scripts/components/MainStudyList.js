@@ -20,14 +20,15 @@ class MainStudyList extends React.Component {
                 this.setState({selectStudy: key})
             }} className={parseInt(this.state.stack['studyId'])===value[0]['study_id']?styles.selected:""}>
                 <div>
-                    {value[0]['patient_uid']}-{value[0]['study_uid']}
+                    {/*{value[0]['patient_uid']}-*/}
+                    {value[0]['study_uid']}
                     <span className="arrow-right"></span>
                 </div>
                 <ul className={`${styles.series} ${this.state.selectStudy === key ? "" : styles.hide}`}>
                     {value.map((v, k) => {
                         return <li key={k} className={parseInt(this.state.stack['seriesId'])===v['series_id']?styles.selected:""}>
                             <a href={`/workbench/instance/${v['instance_id']}/study/${v['study_id']}/series/${v['series_id']}`}>
-                            {v['series_description']}({v['series_files_number']} files)
+                            {v['series_description'].replace("_"," \n")}<br/>({v['series_files_number']} files)
                             </a>
                         </li>
                     })}

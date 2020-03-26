@@ -8,8 +8,12 @@
     text-align: center;
     position: relative;
 }
+.home{
+    color:#969596;
+    font-size: 16px;
+}
 
-.navlist:hover {
+.navlist:hover,.navlist a:hover {
     color: tomato;
 }
 

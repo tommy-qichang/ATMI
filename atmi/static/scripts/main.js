@@ -29,7 +29,6 @@ class MainPage extends React.Component {
             currentTool: "Wwwc",
             currentLabel: -1
         };
-        console.log(this.state);
     }
 
     render() {

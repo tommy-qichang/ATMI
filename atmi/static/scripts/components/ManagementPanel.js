@@ -49,16 +49,40 @@ export default class ManagementPanel extends React.Component {
             let userTableData = []
             const user = res.data;
             for (let i = 0; i < user.length; i++) {
-                userTableData.push({username: user[i].email, nickname: user[i].name, usertype: user[i].user_type==0?"Admin":"Annotator"})
+                userTableData.push({
+                    username: user[i].email,
+                    nickname: user[i].name,
+                    usertype: user[i].user_type == 0 ? "Admin" : "Annotator"
+                })
             }
             this.setState({"userTableData": userTableData})
         }).catch(error => {
             message.error('List user error');
             console.log(error)
         })
+    };
 
-
-    }
+    listAllInstance = () => {
+        axios.get("/instances").then(res => {
+            let instanceTableData = [];
+            const instances = res.data;
+            for (let i = 0; i < instances.length; i++) {
+                let progress = Math.round((instances[i]['annotated_num'] / instances[i]['study_num']) * 100);
+                instanceTableData.push({
+                    'instanceid': instances[i]['instance_id'],
+                    'name': instances[i]['name'],
+                    'modality': instances[i]['modality'],
+                    'description': instances[i]['description'],
+                    'progress': progress,
+                    'data_path': instances[i]['data_path']
+                })
+            }
+            this.setState({"instanceTableData": instanceTableData})
+        }).catch(error => {
+            message.error('Instance list error');
+            console.log(error)
+        })
+    };
 
     onInstanceDetailClick = e => {
         this.setState({
