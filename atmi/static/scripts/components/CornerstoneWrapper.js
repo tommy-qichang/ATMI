@@ -80,7 +80,9 @@ let cornerstoneWrapper = {
         // const FreehandMouseTool = cornerstoneTools.FreehandMouseTool;
         // const EllipticalRoiTool = cornerstoneTools.EllipticalRoiTool;
         // const RectangleRoiTool = cornerstoneTools.RectangleRoiTool;
-
+        const configuration = cornerstoneTools.store.modules.segmentation.configuration;
+        configuration.outlineWidth = 1;
+        configuration.fillAlpha = 0.05;
         // Add them
         cornerstoneTools.addTool(PanTool);
         cornerstoneTools.addTool(ZoomTool);
@@ -88,6 +90,10 @@ let cornerstoneWrapper = {
         cornerstoneTools.addTool(PanMultiTouchTool);
         cornerstoneTools.addTool(ZoomTouchPinchTool);
         cornerstoneTools.addTool(ZoomMouseWheelTool);
+
+        cornerstoneTools.addTool(cornerstoneTools.ZoomTool, { configuration: { invert: false, preventZoomOutsideImage: false, minScale: .1, maxScale: 20.0, } });
+
+
         cornerstoneTools.addTool(FreehandScissorsTool);
         cornerstoneTools.addTool(CircleScissorsTool);
         cornerstoneTools.addTool(RectangleScissorsTool);
@@ -101,14 +107,17 @@ let cornerstoneWrapper = {
 
         // Set tool modes
         // cornerstoneTools.setToolActive("Pan", {mouseButtonMask: 4}); // Middle
-        cornerstoneTools.setToolActive("Zoom", {mouseButtonMask: 4}); // Right
-        // cornerstoneTools.setToolActive("Wwwc", {mouseButtonMask: 1}); // Left & Touch
-        cornerstoneTools.setToolActive("PanMultiTouch", {});
+        cornerstoneTools.setToolActive("Wwwc", {mouseButtonMask: 1}); // Left & Touch
+
         cornerstoneTools.setToolActive("ZoomMouseWheel", {});
         cornerstoneTools.setToolActive("ZoomTouchPinch", {});
 
-        cornerstoneTools.setToolActive('StackScroll', {mouseButtonMask: 1});
-        cornerstoneTools.setToolActive('StackScrollMouseWheel', {mouseButtonMask: 1});
+        // cornerstoneTools.setToolActive('StackScroll', {mouseButtonMask: 1});
+        // cornerstoneTools.setToolActive('StackScrollMouseWheel', {mouseButtonMask: 1});
+
+        // cornerstoneTools.setToolActive("Pan",  { mouseButtonMask: 4 });
+        // cornerstoneTools.setToolActive("Zoom", {mouseButtonMask: 4}); // Right
+        // cornerstoneTools.setToolActive('Pan', { mouseButtonMask: 1 });
 
         // cornerstoneTools.setToolActive('Brush')
 
@@ -185,6 +194,18 @@ let cornerstoneWrapper = {
 
         setters.toggleSegmentVisibility(this.element, index);
         cornerstone.updateImage(this.element);
+    },
+    undoSegment: function(){
+        const {configuration, getters, setters} = cornerstoneTools.getModule(
+            'segmentation'
+        );
+        setters.undo(this.element);
+    },
+    redoSegment: function(){
+        const {configuration, getters, setters} = cornerstoneTools.getModule(
+            'segmentation'
+        );
+        setters.redo(this.element);
     },
     deleteSegmentByIndex: function (index) {
 

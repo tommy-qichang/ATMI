@@ -28,7 +28,9 @@ def resize_dcm(source_path, target_path, factor=2):
         ds.save_as(os.path.join(target_path, target_sub_path, filename))
 
 
-resize_dcm("/Users/qichang/CBIM/data/NYU_CMR_Raw", "/Users/qichang/CBIM/data/NYU_CMR_Raw_HD", 2)
+# resize_dcm("/Users/qichang/CBIM/data/NYU_CMR_Raw", "/Users/qichang/CBIM/data/NYU_CMR_Raw_HD", 4)
+resize_dcm("/Users/qichang/PycharmProjects/ATMI/data/NYU_CMR_Raw", "/Users/qichang/PycharmProjects/ATMI/data/NYU_CMR_Raw_HD", 4)
+
 
 # for i in range(1, 26):
 #     id = ("0 " + str(i))[-2:]

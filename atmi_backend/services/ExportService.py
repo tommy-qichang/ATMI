@@ -83,9 +83,16 @@ class ExportService:
                 file_id = label['file_id']
                 content = eval(label['content'])
                 pixel_data = content['labelmap2D']['pixelData']
-                pixel_data_xy = np.reshape(pixel_data, [x_dim, y_dim])
-                z_index = series_files_list.index(file_id)
-                series_label[:, :, z_index] = pixel_data_xy
+
+                for label in pixel_data:
+                    pixel_data_xy = np.zeros((x_dim,y_dim))
+                    label_int = int(float(label))
+                    content_1D = np.reshape(pixel_data_xy, x_dim * y_dim)
+                    content_1D[pixel_data[label]] = label_int
+                    pixel_data_xy = np.reshape(content_1D, (x_dim, y_dim))
+
+                    z_index = series_files_list.index(file_id)
+                    series_label[:, :, z_index] += pixel_data_xy
 
             label_db = study_h5.create_dataset(f"{store_type}/study:{study['suid']}-series:{series_uuid}/label",
                                                data=series_label)

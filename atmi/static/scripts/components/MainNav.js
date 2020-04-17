@@ -32,6 +32,12 @@ class MainNav extends React.Component {
 
         cornerstone.updateImage(this.element);
     };
+    redo = () => {
+        cornerstoneWrapper.redoSegment()
+    };
+    undo = ()=>{
+        cornerstoneWrapper.undoSegment()
+    };
 
     activateTool = (e) => {
         if (e.keyCode === 49) {
@@ -63,6 +69,17 @@ class MainNav extends React.Component {
                 this.selectTool('CorrectionScissors');
                 this.setState({cur_tool: "CorrectionScissors"});
             }
+        }else if (e.keyCode === 56) {
+            this.selectTool('Zoom');
+            this.setState({cur_tool: "Zoom"});
+            this.selectTool('Pan');
+            this.setState({cur_tool: "Pan"});
+        }else if (e.keyCode == 85){
+            //undo
+            this.undo()
+        }else if (e.keyCode == 82){
+            //redo
+            this.redo()
         }
 
     };
@@ -88,6 +105,13 @@ class MainNav extends React.Component {
                          onClick={() => this.selectTool('Wwwc')}><i
                         className={`fas fa-adjust ${style.i}`}/><br/>ww/wc(2)
                     </div>
+
+                    <div className={`${style.navlist} ${this.state.currentTool === "Pan" ? style.active : ""}`}
+                         onClick={() => {this.selectTool('Zoom');this.selectTool('Pan');}}><i
+                        className={`fas fa-adjust ${style.i}`}/><br/>Zoom(8)
+                    </div>
+
+                    <div className={style.navlist}/>
                     <div
                         className={`${style.navlist}  ${this.state.currentTool === "FreehandScissors" ? style.active : ""}`}
                         onClick={() => this.selectTool('FreehandScissors')}><i
@@ -129,6 +153,17 @@ class MainNav extends React.Component {
                         className={`${style.navlist} ${this.state.currentTool === "Play" ? style.active : ""}`}
                         onClick={(e) => navSlice({'keyCode': 80})}><i
                         className={`fas fa-play-circle ${style.i}`}/><br/>play(p)
+                    </div>
+
+                    <div
+                        className={`${style.navlist} `}
+                        onClick={(e) => this.undo()}><i
+                        className={`fas fa-play-circle ${style.i}`}/><br/>undo(u)
+                    </div>
+                    <div
+                        className={`${style.navlist} `}
+                        onClick={(e) => this.redo()}><i
+                        className={`fas fa-play-circle ${style.i}`}/><br/>redo(r)
                     </div>
                 </div>
             </div>)

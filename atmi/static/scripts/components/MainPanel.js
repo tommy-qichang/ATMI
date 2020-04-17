@@ -92,11 +92,11 @@ class CornerstoneElement extends React.Component {
         const stackData = cornerstoneTools.getToolState(this.element, "stack");
         const stack = stackData.data[0];
         const stackLength = stack.imageIds.length;
-        if (e.keyCode === 40) {
+        if (e.keyCode === 39) {
             //arrow down.
             stack.currentImageIdIndex = ++this.state.stack.currentImageIdIndex % stackLength;
             scrollToIndex(this.element, this.state.stack.currentImageIdIndex++);
-        } else if (e.keyCode === 38) {
+        } else if (e.keyCode === 37) {
             // arrow up.
             stack.currentImageIdIndex = --this.state.stack.currentImageIdIndex;
             scrollToIndex(this.element, this.state.stack.currentImageIdIndex--);
@@ -107,6 +107,15 @@ class CornerstoneElement extends React.Component {
                 clearInterval(this.playHook);
                 this.playHook = undefined;
             }
+        }else if (e.keyCode === 40) {
+            //arrow down. Switch to the next SAX series.
+
+            window.location.href = window.location.href.replace(/\d+$/, function(n){return parseInt(n)+1})
+
+        } else if (e.keyCode === 38) {
+            // arrow up, switch to the prev SAX section.
+            window.location.href = window.location.href.replace(/\d+$/, function(n){return parseInt(n)-1});
+
         }
         cornerstone.updateImage(this.element);
     };
@@ -116,7 +125,7 @@ class CornerstoneElement extends React.Component {
     play = () => {
         let _this = this;
         this.playHook = setInterval(() => {
-            _this.onNavSlice({'keyCode': 40})
+            _this.onNavSlice({'keyCode': 39})
         }, 100)
     };
 
