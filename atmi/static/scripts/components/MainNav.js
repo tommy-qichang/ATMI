@@ -15,28 +15,42 @@ class MainNav extends React.Component {
             instanceId: props.stack.instanceId,
             currentTool: props.stack.currentTool,
             showStudyList: -1,
-            stack: props.stack
+            stack: props.stack,
+            currentImageIdIndex : props.stack.currentImageIdIndex,
+            prevImageIdIndex : props.stack.prevImageIdIndex
         };
     }
-
+    componentWillReceiveProps(nextProps) {
+        this.setState({
+            currentImageIdIndex: nextProps.stack.currentImageIdIndex,
+            prevImageIdIndex : nextProps.stack.prevImageIdIndex
+        });
+    }
     selectTool = (type, args) => {
         cornerstoneWrapper.enableTool(type, args);
         this.setState({currentTool: type});
     };
-    play = ()=>{
-        const stack = this.state.stack;
-        const stackLength = stack.imageIds.length;
-
-        stack.currentImageIdIndex = ++this.state.stack.currentImageIdIndex%stackLength;
-        scrollToIndex(this.element, this.state.stack.currentImageIdIndex++);
-
-        cornerstone.updateImage(this.element);
-    };
+    // play = () =>{
+    //     const stack = this.state.stack;
+    //     const stackLength = stack.imageIds.length;
+    //
+    //     this.state.stack.prevImageIdIndex = this.state.stack.currentImageIdIndex;
+    //
+    //     stack.currentImageIdIndex = ++this.state.stack.currentImageIdIndex%stackLength;
+    //     scrollToIndex(this.element, this.state.stack.currentImageIdIndex++);
+    //
+    //     cornerstone.updateImage(this.element);
+    // };
     redo = () => {
         cornerstoneWrapper.redoSegment()
     };
     undo = ()=>{
         cornerstoneWrapper.undoSegment()
+    };
+    propagate = () => {
+        cornerstoneWrapper.replaceSegments(this.state.prevImageIdIndex, this.state.currentImageIdIndex)
+
+
     };
 
     activateTool = (e) => {
@@ -108,10 +122,8 @@ class MainNav extends React.Component {
 
                     <div className={`${style.navlist} ${this.state.currentTool === "Pan" ? style.active : ""}`}
                          onClick={() => {this.selectTool('Zoom');this.selectTool('Pan');}}><i
-                        className={`fas fa-adjust ${style.i}`}/><br/>Zoom(8)
+                        className={`fas fa-search ${style.i}`}/><br/>Zoom(8)
                     </div>
-
-                    <div className={style.navlist}/>
                     <div
                         className={`${style.navlist}  ${this.state.currentTool === "FreehandScissors" ? style.active : ""}`}
                         onClick={() => this.selectTool('FreehandScissors')}><i
@@ -122,21 +134,21 @@ class MainNav extends React.Component {
                     {/*    onClick={() => this.selectTool('FreehandScissors')}><i*/}
                     {/*    className={`fas fa-bezier-curve ${style.i}`}/><br/>spline*/}
                     {/*</div>*/}
-                    <div
-                        className={`${style.navlist} ${this.state.currentTool === "RectangleScissors" ? style.active : ""}`}
-                        onClick={() => this.selectTool('RectangleScissors')}><i
-                        className={`far fa-square  ${style.i}`}/><br/>rectangle(4)
-                    </div>
+                    {/*<div*/}
+                    {/*    className={`${style.navlist} ${this.state.currentTool === "RectangleScissors" ? style.active : ""}`}*/}
+                    {/*    onClick={() => this.selectTool('RectangleScissors')}><i*/}
+                    {/*    className={`far fa-square  ${style.i}`}/><br/>rectangle(4)*/}
+                    {/*</div>*/}
                     {/*<div*/}
                     {/*    className={`${style.navlist} ${this.state.currentTool === "FreehandScissors" ? style.active : ""}`}*/}
                     {/*    onClick={() => this.selectTool('FreehandScissors')}><i*/}
                     {/*    className={`fas fa-draw-polygon ${style.i}`}/><br/>polygon*/}
                     {/*</div>*/}
-                    <div
-                        className={`${style.navlist} ${this.state.currentTool === "CircleScissors" ? style.active : ""}`}
-                        onClick={() => this.selectTool('CircleScissors')}>
-                        <i className={`far fa-circle ${style.i}`}/><br/>circle(5)
-                    </div>
+                    {/*<div*/}
+                    {/*    className={`${style.navlist} ${this.state.currentTool === "CircleScissors" ? style.active : ""}`}*/}
+                    {/*    onClick={() => this.selectTool('CircleScissors')}>*/}
+                    {/*    <i className={`far fa-circle ${style.i}`}/><br/>circle(5)*/}
+                    {/*</div>*/}
                     <div
                         className={`${style.navlist} ${this.state.currentTool === "CorrectionScissors" ? style.active : ""}`}
                         onClick={() => this.selectTool('CorrectionScissors')}><i
@@ -158,13 +170,21 @@ class MainNav extends React.Component {
                     <div
                         className={`${style.navlist} `}
                         onClick={(e) => this.undo()}><i
-                        className={`fas fa-play-circle ${style.i}`}/><br/>undo(u)
+                        className={`fas fa-undo ${style.i}`}/><br/>undo(u)
                     </div>
                     <div
                         className={`${style.navlist} `}
                         onClick={(e) => this.redo()}><i
-                        className={`fas fa-play-circle ${style.i}`}/><br/>redo(r)
+                        className={`fas fa-redo ${style.i}`}/><br/>redo(r)
                     </div>
+
+
+                    <div
+                        className={`${style.navlist} `}
+                        onClick={(e) => this.propagate()}><i
+                        className={`fas fa-copy ${style.i}`}/><br/>propagate(c)
+                    </div>
+
                 </div>
             </div>)
     }

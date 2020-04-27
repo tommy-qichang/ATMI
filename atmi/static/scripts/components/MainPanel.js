@@ -79,13 +79,12 @@ class CornerstoneElement extends React.Component {
     };
 
     onUpdateLabelId = () => {
-        console.log("label id rendered");
         let labels = cornerstoneWrapper.getActiveLabelsId();
         let copyLabels = labels.slice();
         copyLabels.shift();
         this.setState({activeLabels: copyLabels});
-
-        cornerstoneWrapper.saveSegments(this.state.stack.seriesId, this.state.stack.imageIds[this.state.stack.currentImageIdIndex])
+        cornerstoneWrapper.saveSegments(this.state.stack.seriesId,
+            this.state.stack.imageIds[this.state.stack.currentImageIdIndex])
     };
 
     onNavSlice = (e) => {
@@ -93,13 +92,23 @@ class CornerstoneElement extends React.Component {
         const stack = stackData.data[0];
         const stackLength = stack.imageIds.length;
         if (e.keyCode === 39) {
-            //arrow down.
-            stack.currentImageIdIndex = ++this.state.stack.currentImageIdIndex % stackLength;
-            scrollToIndex(this.element, this.state.stack.currentImageIdIndex++);
+            //arrow right.
+            let prevIdx = parseInt(stack.currentImageIdIndex);
+            let curIdx = parseInt((prevIdx+1)%stackLength);
+            scrollToIndex(this.element, curIdx);
+            this.props.onUpdateIndex(prevIdx, curIdx);
+
+            // stack.currentImageIdIndex = ++this.state.stack.currentImageIdIndex % stackLength;
+            // scrollToIndex(this.element, this.state.stack.currentImageIdIndex++);
         } else if (e.keyCode === 37) {
-            // arrow up.
-            stack.currentImageIdIndex = --this.state.stack.currentImageIdIndex;
-            scrollToIndex(this.element, this.state.stack.currentImageIdIndex--);
+            // arrow left.
+            let prevIdx = parseInt(stack.currentImageIdIndex);
+            let curIdx = parseInt((prevIdx-1)<0?(stackLength-1):(prevIdx-1));
+            scrollToIndex(this.element, curIdx);
+            this.props.onUpdateIndex(prevIdx, curIdx);
+
+            // stack.currentImageIdIndex = --this.state.stack.currentImageIdIndex;
+            // scrollToIndex(this.element, this.state.stack.currentImageIdIndex--);
         } else if (e.keyCode === 80) {
             if (this.playHook === undefined) {
                 this.play();
@@ -108,12 +117,12 @@ class CornerstoneElement extends React.Component {
                 this.playHook = undefined;
             }
         }else if (e.keyCode === 40) {
-            //arrow down. Switch to the next SAX series.
+            //arrow down. Switch to the next series.
 
             window.location.href = window.location.href.replace(/\d+$/, function(n){return parseInt(n)+1})
 
         } else if (e.keyCode === 38) {
-            // arrow up, switch to the prev SAX section.
+            // arrow up, switch to the prev section.
             window.location.href = window.location.href.replace(/\d+$/, function(n){return parseInt(n)-1});
 
         }
@@ -133,13 +142,11 @@ class CornerstoneElement extends React.Component {
     componentDidMount() {
         const element = this.element;
         cornerstoneWrapper.init(element, this.state, () => {
-            element.addEventListener(
-                "cornerstoneimagerendered",
-                this.onImageRendered
-            );
+            element.addEventListener("cornerstoneimagerendered",this.onImageRendered);
             element.addEventListener("cornerstonenewimage", this.onNewImage);
 
             element.addEventListener("cornerstonetoolsmouseup", this.onUpdateLabelId);
+            element.addEventListener("cornerstonetoolstouchend", this.onUpdateLabelId);
             document.addEventListener('keydown', this.onNavSlice);
             window.navSlice = this.onNavSlice
         });
@@ -187,7 +194,7 @@ class CornerstoneElement extends React.Component {
 
 const MainPanel = (props) => {
     return (
-        <CornerstoneElement stack={{...props.stack}}/>
+        <CornerstoneElement stack={{...props.stack}} onUpdateIndex={props.onUpdateIndex}/>
     )
 };
 localStorage.setItem("debug", "cornerstoneTools");

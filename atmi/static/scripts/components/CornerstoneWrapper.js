@@ -13,6 +13,7 @@ let cornerstoneWrapper = {
     isInitialized: false,
     element: null,
     viewport: cornerstone.getDefaultViewport(null, undefined),
+    autosaveCallback: null,
     init: function (element, state, callback) {
         if (!this.isInitialized) {
             // this.viewport = ;
@@ -231,6 +232,9 @@ let cornerstoneWrapper = {
         cornerstone.updateImage(this.element);
 
     },
+    setAutosaveCallback: function(callback){
+        this.autosaveCallback = callback;
+    },
     saveSegments: function (seriesId, fileId) {
         const {getters} = cornerstoneTools.getModule(
             'segmentation'
@@ -257,6 +261,7 @@ let cornerstoneWrapper = {
         };
 
         fileId = fileId.replace(/^.+\/+/ig, '');
+        var _this = this;
         fetch(`/series/${seriesId}/files/${fileId}/labels`, {
             method: "POST",
             headers: {
@@ -264,8 +269,27 @@ let cornerstoneWrapper = {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(postContent)
+        }).then(function(){
+            _this.autosaveCallback(true)
+        }).catch(function(){
+            _this.autosaveCallback(false)
         });
 
+    },
+    replaceSegments: function(prevIdx, curIdx){
+        const {configuration, getters, setters, state} = cornerstoneTools.getModule(
+            'segmentation'
+        );
+        let labelmap3D = getters.labelmap3D(this.element);
+        if(labelmap3D.labelmaps2D[prevIdx] != undefined){
+            labelmap3D.labelmaps2D[curIdx].dataLength = labelmap3D.labelmaps2D[prevIdx].dataLength;
+            labelmap3D.labelmaps2D[curIdx].pixelData = [...labelmap3D.labelmaps2D[prevIdx].pixelData];
+            labelmap3D.labelmaps2D[curIdx].segmentsOnLabelmap = [...labelmap3D.labelmaps2D[prevIdx].segmentsOnLabelmap];
+
+            // labelmap3D.labelmaps2D[curIdx] = JSON.parse(JSON.stringify(labelmap3D.labelmaps2D[prevIdx]));
+            setters.updateSegmentsOnLabelmap2D(labelmap3D.labelmaps2D[curIdx]);
+            cornerstone.updateImage(this.element);
+        }
     },
     loadSegments: function (seriesId) {
         const {configuration, getters, setters, state} = cornerstoneTools.getModule(
@@ -304,7 +328,7 @@ let cornerstoneWrapper = {
                     }
                     // labelmap2D['pixelData'] = new Uint16Array(labelmap2D['pixelData']);
 
-                    labelmap2D['pixelData'] = real_mask
+                    labelmap2D['pixelData'] = real_mask;
                     labelmap3D.labelmaps2D[i || 0] = labelmap2D;
                     setters.updateSegmentsOnLabelmap2D(labelmap2D);
 

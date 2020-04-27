@@ -46,7 +46,7 @@ class LabelCandidatesService:
                                 {"instance_id": instance_id, "label_type": label_type, "input_type": input_type,
                                  "text": text})
         cur.execute(sql, v)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def delete(self, del_condition):
@@ -62,7 +62,7 @@ class LabelCandidatesService:
 
         cur = self.sql_connection.cursor()
         cur.execute(sql)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def update(self, update_condition, modify_obj):
@@ -78,5 +78,5 @@ class LabelCandidatesService:
                                       ["candidate_id", "instance_id", "label_type", "input_type", "text"])
         cur = self.sql_connection.cursor()
         cur.execute(sql, v_tuple)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True

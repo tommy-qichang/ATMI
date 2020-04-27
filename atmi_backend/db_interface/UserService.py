@@ -69,7 +69,7 @@ class UserService:
         sql, v = prepare_insert("users", {"name": name, "email": email, "pwd": crypted_pwd, "init_code": init_code,
                                           "user_type": user_type})
         cur.execute(sql, v)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def delete(self, email):
@@ -84,7 +84,7 @@ class UserService:
         sql = prepare_delete("users", {'email': email})
 
         cur.execute(sql)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
 
         return True
 
@@ -108,7 +108,7 @@ class UserService:
         app.logger.debug(f"sql:{sql}, value list:{v_list}")
         cur = self.sql_connection.cursor()
         cur.execute(sql, v_list)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         # # debug:
         # self.query({'email': email})
         return True

@@ -18,7 +18,7 @@ class TestLabelCandidatesService:
         conn = ini_service.get_connection()
         cur = conn.cursor()
         cur.executescript(qry)
-        conn.commit()
+        # conn.commit()
 
     def teardown_class(self):
         print("Delete Testing TEMP Files....")
