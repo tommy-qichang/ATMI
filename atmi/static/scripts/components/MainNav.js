@@ -49,8 +49,6 @@ class MainNav extends React.Component {
     };
     propagate = () => {
         cornerstoneWrapper.replaceSegments(this.state.prevImageIdIndex, this.state.currentImageIdIndex)
-
-
     };
 
     activateTool = (e) => {
@@ -88,12 +86,16 @@ class MainNav extends React.Component {
             this.setState({cur_tool: "Zoom"});
             this.selectTool('Pan');
             this.setState({cur_tool: "Pan"});
-        }else if (e.keyCode == 85){
+        }else if (e.keyCode === 85){
             //undo
             this.undo()
-        }else if (e.keyCode == 82){
+        }else if (e.keyCode === 82){
             //redo
             this.redo()
+        }else if (e.keyCode === 67){
+            cornerstoneWrapper.replaceSegments(this.state.prevImageIdIndex, this.state.currentImageIdIndex)
+        }else{
+            console.log("KeyCode Uncatched:"+e.keyCode)
         }
 
     };
