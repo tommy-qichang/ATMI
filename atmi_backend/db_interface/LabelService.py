@@ -48,7 +48,7 @@ class LabelService:
                                     {"series_id": series_id, "user_id": user_id,
                                      "file_id": file_id, "content": content})
             cur.execute(sql, v)
-            print(f"Insert labels without commit!")
+            # print(f"Insert labels without commit!")
             # self.sql_connection.commit()
         return True
 
