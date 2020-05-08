@@ -48,7 +48,9 @@ class MainNav extends React.Component {
         cornerstoneWrapper.undoSegment()
     };
     propagate = () => {
-        cornerstoneWrapper.replaceSegments(this.state.prevImageIdIndex, this.state.currentImageIdIndex)
+        cornerstoneWrapper.replaceSegments(this.state.prevImageIdIndex, this.state.currentImageIdIndex);
+        cornerstoneWrapper.saveSegments(this.props.stack.seriesId,
+            this.props.stack.imageIds[this.props.stack.currentImageIdIndex])
     };
 
     activateTool = (e) => {
@@ -93,7 +95,8 @@ class MainNav extends React.Component {
             //redo
             this.redo()
         }else if (e.keyCode === 67){
-            cornerstoneWrapper.replaceSegments(this.state.prevImageIdIndex, this.state.currentImageIdIndex)
+            this.propagate()
+            // cornerstoneWrapper.replaceSegments(this.state.prevImageIdIndex, this.state.currentImageIdIndex)
         }else{
             console.log("KeyCode Uncatched:"+e.keyCode)
         }
