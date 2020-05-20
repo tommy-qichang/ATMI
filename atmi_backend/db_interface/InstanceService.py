@@ -45,7 +45,7 @@ class InstanceService:
                                 {"name": name, "modality": modality, "description": description, "data_path": data_path,
                                  "has_audit": has_audit, "study_num": study_num, "annotated_num": annotated_num})
         cur.execute(sql, v)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def delete(self, del_condition):
@@ -63,7 +63,7 @@ class InstanceService:
         cur = self.sql_connection.cursor()
 
         cur.execute(sql)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def update(self, update_condition, modify_obj):
@@ -81,7 +81,7 @@ class InstanceService:
         cur = self.sql_connection.cursor()
 
         cur.execute(sql, v_tuple)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def list_users_in_instance(self, instance_id):
@@ -95,7 +95,7 @@ class InstanceService:
         cur = self.sql_connection.cursor()
         cur.execute(sql)
         result = cur.fetchall()
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return result
 
     def insert_user_in_instance(self, instance_id, user_id, is_auditor):
@@ -112,7 +112,7 @@ class InstanceService:
 
         cur = self.sql_connection.cursor()
         cur.execute(sql, k_list)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def delete_users_in_instance(self, instance_id, user_id):
@@ -127,5 +127,5 @@ class InstanceService:
 
         cur = self.sql_connection.cursor()
         cur.execute(sql)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True

@@ -14,16 +14,23 @@ class MainLabel extends React.Component {
             hasLabels: [],
             hiddenLabels: Array(props.stack.labels.length).fill(1).join(""),
             selectValue: {},
-            hideAll:false
+            hideAll:false,
+            autosave:true
         };
 
         this.itemColors = cornerstoneWrapper.getAllSegmentsColor(this.state.labels.length);
 
+        var _this = this;
+        cornerstoneWrapper.setAutosaveCallback(function(status){
+            _this.setState({autosave:status})
+        })
     }
 
     deleteSegment = (idx) => {
         cornerstoneWrapper.deleteSegmentByIndex(idx + 1, this.props.stack.currentImageIdIndex);
-        cornerstoneWrapper.saveSegments(this.props.stack.seriesId, this.props.stack.imageIds[this.props.stack.currentImageIdIndex])
+        let _this = this;
+        cornerstoneWrapper.saveSegments(this.props.stack.seriesId,
+            this.props.stack.imageIds[this.props.stack.currentImageIdIndex])
     };
     toggleSegment = (idx) => {
         cornerstoneWrapper.toggleSegmentByIndex(idx + 1);
@@ -138,9 +145,14 @@ class MainLabel extends React.Component {
     };
 
     render() {
+        let saveStyle = this.state.autosave?style.autosave_ok:style.autosave_err;
         return (
             <div className="mainlabel">
-                <div className={style.title}>Study Labels</div>
+                <div className={style.title}>
+                    <div className={style.autosave +" "+ saveStyle}>auto save</div>
+                    <div style={{clear:'both'}}></div>
+                </div>
+                <div className={style.title} style={{clear:'both'}}>Study Labels</div>
                 <div className={`${style.studylabelitem} ${style.table}`}>
                     {this.listStudyLabelItems()}
                 </div>
@@ -150,7 +162,7 @@ class MainLabel extends React.Component {
                 </div>
             </div>
         )
-    }
+    };
 
     componentDidMount() {
         document.addEventListener('keydown', this.activateTool);

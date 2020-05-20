@@ -84,7 +84,7 @@ class SeriesService:
                                            "patient_id": patient_id, 'series_instance_uid': series_instance_uid,
                                            "study_date": study_date, "intercept": intercept, "slop": slop})
         cur.execute(sql, v)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def delete(self, del_condition):
@@ -104,7 +104,7 @@ class SeriesService:
         cur = self.sql_connection.cursor()
 
         cur.execute(sql)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def update(self, update_condition, modify_obj):
@@ -125,7 +125,7 @@ class SeriesService:
         cur = self.sql_connection.cursor()
 
         cur.execute(sql, v_tuple)
-        self.sql_connection.commit()
+        # self.sql_connection.commit()
         return True
 
     def query_study_series(self, instance_id):

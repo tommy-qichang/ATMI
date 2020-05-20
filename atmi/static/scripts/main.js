@@ -26,6 +26,7 @@ class MainPage extends React.Component {
             labels: data.label_candidates,
             imageIds: imageIds,
             currentImageIdIndex: 0,
+            prevImageIdIndex: 0,
             currentTool: "Wwwc",
             currentLabel: -1
         };
@@ -35,9 +36,14 @@ class MainPage extends React.Component {
         return (
             <div>
                 <MainNav stack={{...this.state}} onUpdateTool={this.handleUpdate}/>
-                <MainPanel stack={{...this.state}}/>
+                <MainPanel stack={{...this.state}} onUpdateIndex={this.updateIndex}/>
             </div>
         )
+    }
+
+    updateIndex = (prevIdx, curIdx) =>{
+        this.setState({currentImageIdIndex:curIdx,prevImageIdIndex:prevIdx});
+        console.log("state updated. cur:"+curIdx+", prev:"+prevIdx)
     }
 
 }
