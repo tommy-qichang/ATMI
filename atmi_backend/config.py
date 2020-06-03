@@ -26,7 +26,7 @@ CT = "CT"
 INSTANCE_NUMBER = "InstanceNumber"
 DATA_ROOT = "./data"
 OUTPUT_ROOT = "./output"
-QUALIFIED_FILE_EXT = ["\\.dcm", "IM_"]
+QUALIFIED_FILE_EXT = ["\\.dcm", "IM_", "IM"]
 
 REGISTER_MAX_HOURS = 10000000
 
