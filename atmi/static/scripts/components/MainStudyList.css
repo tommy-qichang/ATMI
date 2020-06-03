@@ -8,9 +8,9 @@
     text-align: left;
     background-color: rgba(20,20,20,0.5);
     font-size: 14px;
-    max-height: 30rem;
+    max-height: 35rem;
     padding-right: 14px;
-    /*overflow: auto;*/
+    overflow: auto;
 }
 .studies div{
     position: relative;
