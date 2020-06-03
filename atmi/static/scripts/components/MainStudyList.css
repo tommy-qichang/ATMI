@@ -34,9 +34,9 @@
     overflow-wrap: break-word;
 }
 .series{
-    position: absolute;
-    left: 16rem;
-    top: 0;
+    position: fixed;
+    left: 21rem;
+    top: 3rem;
     padding: 0.5rem;
     background-color: rgba(20,20,20,0.5);
     color: #333!important;
