@@ -45,7 +45,7 @@ class StudiesService:
                                  "suid": suid, "folder_name": folder_name,
                                  "total_files_number": total_files_number, "status": 1})
         cur.execute(sql, v)
-        # self.sql_connection.commit()
+        self.sql_connection.commit()
         return True
 
     def delete(self, del_condition):
@@ -63,7 +63,7 @@ class StudiesService:
         cur = self.sql_connection.cursor()
 
         cur.execute(sql)
-        # self.sql_connection.commit()
+        self.sql_connection.commit()
         return True
 
     def update(self, update_condition, modify_obj):
@@ -81,7 +81,7 @@ class StudiesService:
         cur = self.sql_connection.cursor()
 
         cur.execute(sql, v_tuple)
-        # self.sql_connection.commit()
+        self.sql_connection.commit()
         return True
 
     def add_users_in_study(self, study_id, annotator_id_list, auditor_id_list):

@@ -26,7 +26,7 @@ class DICOMParser:
         for file_name in file_list:
             file_path = os.path.join(parent_path, file_name)
             try:
-                dcm = pydicom.read_file(file_path, stop_before_pixels=True, force=True)
+                dcm = pydicom.dcmread(file_path, stop_before_pixels=True, force=True)
 
             except Exception as e:
                 log.warning("Warning:", e)
@@ -225,6 +225,11 @@ class DicomSeries(object):
         dimensions = ds1.Rows, ds1.Columns
 
         # row, column
+        if 'PixelSpacing' not in ds1:
+            # ds1 = list(ds1)
+            ds1.add_new(0x00280030, "PixelData", (0.5,0.5))
+            log.warning("Warning:PixelSpacing is missing, replace with (.5, .5)")
+
         sampling = float(ds1.PixelSpacing[0]), float(ds1.PixelSpacing[1])
 
         for index in range(len(L)):
@@ -243,6 +248,11 @@ class DicomSeries(object):
 
             # Test measures
             dimensions2 = ds2.Rows, ds2.Columns
+
+            if 'PixelSpacing' not in ds2:
+                # ds1 = list(ds1)
+                ds2.add_new(0x00280030, "PixelData", (0.5, 0.5))
+
             sampling2 = float(ds2.PixelSpacing[0]), float(ds2.PixelSpacing[1])
             if dimensions != dimensions2:
                 # We cannot produce a volume if the dimensions match

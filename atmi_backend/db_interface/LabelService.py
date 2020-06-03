@@ -49,7 +49,7 @@ class LabelService:
                                      "file_id": file_id, "content": content})
             cur.execute(sql, v)
             # print(f"Insert labels without commit!")
-            # self.sql_connection.commit()
+            self.sql_connection.commit()
         return True
 
     def delete(self, del_condition):
@@ -65,7 +65,7 @@ class LabelService:
 
         cur = self.sql_connection.cursor()
         cur.execute(sql)
-        # self.sql_connection.commit()
+        self.sql_connection.commit()
         return True
 
     def update(self, update_condition, modify_obj):
@@ -83,7 +83,7 @@ class LabelService:
         cur.execute(sql, v_tuple)
 
         # print(f"Insert labels without commit!")
-        # self.sql_connection.commit()
+        self.sql_connection.commit()
         return True
 
     @staticmethod

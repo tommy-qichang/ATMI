@@ -26,7 +26,7 @@ export default class UserManagement extends React.PureComponent {
     };
 
     componentDidMount() {
-        if (window.location.search !== "") {
+        if (window.location.search !== "" || ATMI_STATUS.ini_admin) {
             let queries = window.location.search.substring(1).split("&");
             this.setState({
                 ResetPasswordUsername: queries[0].split("=")[1],
@@ -35,7 +35,6 @@ export default class UserManagement extends React.PureComponent {
         }else if (ATMI_STATUS.username !== '') {
             this.onLoginSuccess(ATMI_STATUS.username);
         }
-
     }
 
     componentDidUpdate() {

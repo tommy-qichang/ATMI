@@ -6,7 +6,8 @@ import axios from "axios";
 class ResetPasswordForm extends React.Component {
 
     state = {
-        disableButton: true
+        disableButton: true,
+        userName:""
     };
 
     onPasswordChange = e => {
@@ -31,8 +32,12 @@ class ResetPasswordForm extends React.Component {
     }
 
     validate(values) {
+        let email = this.props.username;
+        if(ATMI_STATUS.ini_admin){
+            email = this.state.userName;
+        }
         axios.put("/user/", {
-            email: this.props.username,
+            email: email,
             password: values.password
         }).then(res => {
             const status = eval(res.data);
@@ -49,15 +54,28 @@ class ResetPasswordForm extends React.Component {
         })
 
     }
+    onUsernameUpdate = e=>{
+        let user = e.target.value;
+        this.setState({userName:user})
+        // this.setProps({username:user});
+        // this.props.username = user;
+
+    }
 
     render() {
         const {getFieldDecorator} = this.props.form;
+        let userInfo = <strong>{this.props.username}</strong>;
+        if(ATMI_STATUS.ini_admin){
+            userInfo = <input type="input" autoComplete="off" value={this.state.userName} onChange={this.onUsernameUpdate} />
+        }
         return (
             <div className={styles.background}>
                 <Form onSubmit={this.handleSubmit} className={styles.loginForm} style={{margin: 1}}
                       autoComplete="off" /* style={{backgroundColor: "#fff"}} */>
                     <Form.Item>
-                        <label className={styles.font}>Username: <strong>{this.props.username}</strong></label>
+                        <label className={styles.font}>Username:
+                            {userInfo}
+                        </label>
                     </Form.Item>
                     <Form.Item>
                         {getFieldDecorator('password', {

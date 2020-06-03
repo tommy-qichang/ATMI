@@ -31,13 +31,13 @@ def setup_route_map(app, app_path):
     @app.route("/", methods=['GET'])
     def index():
         username = ''
+        user_service = UserService(get_conn())
         if 'email' in session:
             username = session['email']
         if len(request.args) > 0:
             try:
                 user = request.args.get('user', default='')
                 ts = request.args.get('ts', default=0)
-                user_service = UserService(get_conn())
                 if len(user_service.query({'email': user, 'init_code': ts})) > 0:
                     now = datetime.datetime.now().timestamp()
                     ts = float(ts)
@@ -46,13 +46,24 @@ def setup_route_map(app, app_path):
                         return redirect("/", code=302)
                 elif len(user_service.query({})) == 0:
                     # The first time register.
-                    return render_template("index.html", data={'username': username})
+                    # /?user=tommy.qichang@gmail.com
+                    return render_template("index.html", data={'username': username, 'ini_admin': "false"})
                 else:
                     return redirect("/", code=302)
             except:
                 return redirect("/", code=302)
+        elif len(user_service.query({})) == 0:
+            return redirect("/ini_admin", code=302)
 
-        return render_template("index.html", data={'username': username})
+        return render_template("index.html", data={'username': username, 'ini_admin': "false"})
+
+    @app.route("/ini_admin", methods=['GET'])
+    def index_newadmin():
+        user_service = UserService(get_conn())
+        if len(user_service.query({})) == 0:
+            return render_template("index.html", data={'ini_admin': "true"})
+        else:
+            return redirect("/", code=302)
 
     @app.route("/workbench/instance/<instance_id>/study/<study_id>", methods=['GET'])
     def workbench_redict(instance_id, study_id):
