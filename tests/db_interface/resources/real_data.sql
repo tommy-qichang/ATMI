@@ -1,17 +1,17 @@
-DELETE
-FROM users;
-DELETE
-FROM instances;
-DELETE
-FROM instances_users;
-DELETE
-FROM label_candidates;
-DELETE
-FROM studies;
-DELETE
-FROM series;
-DELETE
-FROM labels;
+-- DELETE
+-- FROM users;
+-- DELETE
+-- FROM instances;
+-- DELETE
+-- FROM instances_users;
+-- DELETE
+-- FROM label_candidates;
+-- DELETE
+-- FROM studies;
+-- DELETE
+-- FROM series;
+-- DELETE
+-- FROM labels;
 
 -- INSERT INTO users(name, email, pwd, init_code, user_type)
 -- VALUES ("qi chang", "tommy.qichang@gmail.com",
@@ -20,25 +20,31 @@ FROM labels;
 
 
 INSERT INTO instances(name, modality, description, data_path, has_audit, study_num, annotated_num)
-VALUES ("Cardial_MRI_DB", "MRI", "Cardial MRI images in NYU", "./data/NYU_CMR_Raw", 0, 6, 0),
-       ("Cardial_MRI_DB_HD", "MRI", "High Dimension Cardial MRI images in NYU(upsampled)", "./data/NYU_CMR_Raw_HD", 0,
-        6, 0);
-
+VALUES ("Derivate_Cardial_MRI_DB", "MRI", "Cardial MRI images in Cornell", "./data/Cornell_LBBB", 0, 197, 0);
+-- -- VALUES ("Cardial_MRI_DB", "MRI", "Cardial MRI images in NYU", "./data/NYU_CMR_Raw", 0, 6, 0),
+-- --        ("Cardial_MRI_DB_HD", "MRI", "High Dimension Cardial MRI images in NYU(upsampled)", "./data/NYU_CMR_Raw_HD", 0,
+-- --         6, 0);
+--
 INSERT INTO instances_users(user_id, instance_id, is_auditor)
 VALUES (1, 0, 0);
-
-
+--
 INSERT INTO label_candidates(instance_id, label_type, input_type, text)
 VALUES (1, 0, NULL, "RVC"),
        (1, 0, NULL, "LVM"),
        (1, 0, NULL, "LVC"),
---        (1, 1, "selectbox", '{"key":"Dyssynchrony","value":["negative","positive"]}'),
-       (1, 1, "input", '{"key":"Note","value":""}'),
-       (2, 0, NULL, "RVC"),
-       (2, 0, NULL, "LVM"),
-       (2, 0, NULL, "LVC"),
---        (2, 1, "selectbox", '{"key":"Dyssynchrony","value":["negative","positive"]}'),
-       (2, 1, "input", '{"key":"Note","value":""}');
+       (1, 1, "input", '{"key":"Note","value":""}');
+
+-- INSERT INTO label_candidates(instance_id, label_type, input_type, text)
+-- VALUES (1, 0, NULL, "RVC"),
+--        (1, 0, NULL, "LVM"),
+--        (1, 0, NULL, "LVC"),
+-- --        (1, 1, "selectbox", '{"key":"Dyssynchrony","value":["negative","positive"]}'),
+--        (1, 1, "input", '{"key":"Note","value":""}'),
+--        (2, 0, NULL, "RVC"),
+--        (2, 0, NULL, "LVM"),
+--        (2, 0, NULL, "LVC"),
+-- --        (2, 1, "selectbox", '{"key":"Dyssynchrony","value":["negative","positive"]}'),
+--        (2, 1, "input", '{"key":"Note","value":""}');
 
 -- INSERT INTO studies(instance_id, suid, folder_name, total_files_number, annotators, auditors, status)
 -- VALUES (1,'1313', "./data/CCTA/CRE_120-1014-CCTA-10-139967", 50, NULL, NULL, 1),

@@ -4,6 +4,7 @@ import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dicomParser from "dicom-parser";
 import Hammer from "hammerjs";
+import {forEach} from "react-bootstrap/cjs/ElementChildren";
 
 /***
  * Cornerstone and Cornerstone tool wrapper with utils.
@@ -13,6 +14,7 @@ let cornerstoneWrapper = {
     isInitialized: false,
     element: null,
     viewport: cornerstone.getDefaultViewport(null, undefined),
+    updatelist:{},
     autosaveCallback: null,
     init: function (element, state, callback) {
         if (!this.isInitialized) {
@@ -128,7 +130,15 @@ let cornerstoneWrapper = {
         window.addEventListener("resize", function () {
             cornerstone.resize(_this.element);
         });
-
+        setInterval(function(){
+            for(const updateId in _this.updatelist){
+                console.log("updateId:",updateId, _this.updatelist[updateId]);
+                if(_this.updatelist[updateId]){
+                    let ids = updateId.split("*-$");
+                    _this._saveSegments(ids[0], ids[1]);
+                }
+            }
+        },1000)
     },
     getActiveLabelsId: function () {
         const {configuration, getters, setters, state} = cornerstoneTools.getModule(
@@ -236,6 +246,11 @@ let cornerstoneWrapper = {
         this.autosaveCallback = callback;
     },
     saveSegments: function (seriesId, fileId) {
+        this.updatelist[seriesId+"*-$"+fileId] = true;
+        console.log("save id:",seriesId+"*-$"+fileId, this.updatelist[seriesId+"*-$"+fileId])
+    },
+
+    _saveSegments: function (seriesId, fileId) {
         const {getters} = cornerstoneTools.getModule(
             'segmentation'
         );
@@ -260,9 +275,9 @@ let cornerstoneWrapper = {
             }
         };
 
-        fileId = fileId.replace(/^.+\/+/ig, '');
+        let fileId_new = fileId.replace(/^.+\/+/ig, '');
         var _this = this;
-        fetch(`/series/${seriesId}/files/${fileId}/labels`, {
+        fetch(`/series/${seriesId}/files/${fileId_new}/labels`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',
@@ -275,6 +290,8 @@ let cornerstoneWrapper = {
             _this.autosaveCallback(false)
         });
 
+        delete this.updatelist[seriesId+"*-$"+fileId];
+        console.log("delete id:",seriesId+"*-$"+fileId);
     },
     replaceSegments: function(prevIdx, curIdx){
         const {configuration, getters, setters, state} = cornerstoneTools.getModule(
