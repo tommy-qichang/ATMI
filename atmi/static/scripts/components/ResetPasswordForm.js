@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Form, Icon, Input, message} from 'antd';
+import { Button, Form, Icon, Input, message, Row, Col } from 'antd';
 import styles from '../../styles/LoginForm.css';
 import axios from "axios";
 
@@ -7,7 +7,7 @@ class ResetPasswordForm extends React.Component {
 
     state = {
         disableButton: true,
-        userName:""
+        userName: ""
     };
 
     onPasswordChange = e => {
@@ -33,7 +33,7 @@ class ResetPasswordForm extends React.Component {
 
     validate(values) {
         let email = this.props.username;
-        if(ATMI_STATUS.ini_admin){
+        if (ATMI_STATUS.ini_admin) {
             email = this.state.userName;
         }
         axios.put("/user/", {
@@ -54,37 +54,74 @@ class ResetPasswordForm extends React.Component {
         })
 
     }
-    onUsernameUpdate = e=>{
+    onUsernameUpdate = e => {
         let user = e.target.value;
-        this.setState({userName:user})
+        this.setState({ userName: user })
         // this.setProps({username:user});
         // this.props.username = user;
 
     }
 
     render() {
-        const {getFieldDecorator} = this.props.form;
+        const { getFieldDecorator } = this.props.form;
         let userInfo = <strong>{this.props.username}</strong>;
-        if(ATMI_STATUS.ini_admin){
+        if (ATMI_STATUS.ini_admin) {
             userInfo = <input type="input" autoComplete="off" value={this.state.userName} onChange={this.onUsernameUpdate} />
         }
         return (
             <div className={styles.background}>
-                <Form onSubmit={this.handleSubmit} className={styles.loginForm} style={{margin: 1}}
-                      autoComplete="off" /* style={{backgroundColor: "#fff"}} */>
+                {/*                 <Row type="flex" justify="space-around" align="middle">
+                    <Col> */}
+                {/*  <h2 className={styles.font}>Initiate Admin Account for ATMI</h2> */}
+                {/*                     </Col>
+                </Row> */}
+                {/*                 <Row type="flex" justify="center" align="middle">
+                    <Col span={24}> */}
+                <Form onSubmit={this.handleSubmit} className={styles.loginForm} style={{ margin: 1 }}
+                    autoComplete="off" /* style={{backgroundColor: "#fff"}} */>
                     <Form.Item>
-                        <label className={styles.font}>Username:
-                            {userInfo}
-                        </label>
+                        {/* <h3 className={styles.font}>Initiate Admin Account for ATMI</h3> */}
+                        <Row type="flex" justify="space-around" align="bottom">
+                            <Col>
+                                <label className={styles.font} style={{fontSize: 18}}>
+                                    <strong>
+                                        Initiate Admin Account for ATMI
+                                    </strong>
+                                </label>
+                            </Col>
+                        </Row>
+                        {/*  <label className={styles.font}>Initiate Admin Account for ATMI</label> */}
                     </Form.Item>
                     <Form.Item>
-                        {getFieldDecorator('password', {
-                            rules: [{required: true, message: 'Please input your password'},
-                                {min: 6, max: 16, message: 'Please enter your password (6-16 characters)'}
+                        {/*                         <label className={styles.font}>Username:
+                            {userInfo}
+                        </label> */}
+                        {getFieldDecorator('username', {
+                            rules: [{ required: true, message: 'Please enter your username' },
+                            {
+                                pattern: new RegExp(/^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i),
+                                message: 'Please enter username of email format'
+                            }
                             ],
                         })(
                             <Input
-                                prefix={<Icon type="lock" style={{color: 'rgba(0,0,0,.25)'}}/>}
+                                prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                placeholder="Please enter your username"
+                                //maxLength={11}
+                                onChange={this.onUsernameChange}
+                                autoComplete="off"
+                                defaultValue={userInfo}
+                            />,
+                        )}
+                    </Form.Item>
+                    <Form.Item>
+                        {getFieldDecorator('password', {
+                            rules: [{ required: true, message: 'Please input your password' },
+                            { min: 6, max: 16, message: 'Please enter your password (6-16 characters)' }
+                            ],
+                        })(
+                            <Input
+                                prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />}
                                 type="password"
                                 placeholder="Reset password (6-16 characters)"
                                 maxLength={16}
@@ -95,16 +132,18 @@ class ResetPasswordForm extends React.Component {
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit" ghost className={styles.loginFormButton}
-                                disabled={this.state.disableButton}>
+                            disabled={this.state.disableButton}>
                             Reset password
                         </Button>
                         {/*   已有账号？ <a href="javascript:;" onClick={this.props.onLoginButtonClick}>去登陆</a> */}
                     </Form.Item>
                 </Form>
+                {/*                    </Col>
+                </Row> */}
             </div>
         );
     }
 }
 
-const WrappedNormalResetPasswordForm = Form.create({name: 'normal_resetPassword'})(ResetPasswordForm);
+const WrappedNormalResetPasswordForm = Form.create({ name: 'normal_resetPassword' })(ResetPasswordForm);
 export default WrappedNormalResetPasswordForm;
