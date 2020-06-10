@@ -2,7 +2,8 @@ import sqlite3
 
 import numpy as np
 
-from atmi_backend.db_interface.utils import prepare_query, prepare_insert, prepare_delete, prepare_update
+from atmi_backend.db_interface.utils import prepare_query, prepare_insert, prepare_delete, prepare_update, \
+    prepare_exists
 
 
 class LabelService:
@@ -10,6 +11,20 @@ class LabelService:
     def __init__(self, connection):
         self.sql_connection = connection
         self.sql_connection.row_factory = sqlite3.Row
+
+    def exist(self, query_obj):
+        sql = prepare_exists("labels", query_obj,
+                            ["label_id", "series_id", "user_id", "file_id", "content"])
+        cur = self.sql_connection.cursor()
+        cur.execute(sql)
+        result = cur.fetchall()
+
+        result = dict(result[0])
+
+        if len(result)>0 and dict(result[0]).values()[0] ==1:
+            return True
+
+        return False
 
     def query(self, query_obj):
         """
@@ -40,6 +55,9 @@ class LabelService:
 
         cur = self.sql_connection.cursor()
         has_record = len(self.query({"series_id": series_id, "user_id": user_id, "file_id": file_id})) > 0
+
+        # has_record = self.exist({"series_id": series_id, "user_id": user_id, "file_id": file_id})
+
         if has_record:
             self.update({"series_id": series_id, "user_id": user_id, "file_id": file_id},
                         {"content": content})
