@@ -256,6 +256,7 @@ let cornerstoneWrapper = {
 
     _saveSegments: function (seriesId, fileId) {
         this.updateLabelLock = true;
+        this.autosaveCallback(false);
         const {getters} = cornerstoneTools.getModule(
             'segmentation'
         );
