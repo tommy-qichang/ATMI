@@ -159,7 +159,7 @@ class MainLabel extends React.Component {
                         {this.state.autosave?(
                             <span>saved({this.state.savetime})</span>
                         ):(
-                            <span>saving({this.state.savetime})</span>
+                            <span>saving...</span>
                         )}
                     </div>
                     <div style={{clear:'both'}}></div>
