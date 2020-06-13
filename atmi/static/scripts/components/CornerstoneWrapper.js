@@ -14,7 +14,8 @@ let cornerstoneWrapper = {
     isInitialized: false,
     element: null,
     viewport: cornerstone.getDefaultViewport(null, undefined),
-    updatelist:{},
+    updatelist:[],
+    updateLabelLock : false,
     autosaveCallback: null,
     init: function (element, state, callback) {
         if (!this.isInitialized) {
@@ -131,14 +132,13 @@ let cornerstoneWrapper = {
             cornerstone.resize(_this.element);
         });
         setInterval(function(){
-            for(const updateId in _this.updatelist){
+            if(!_this.updateLabelLock && _this.updatelist.length>0){
+                let updateId = _this.updatelist.shift();
                 console.log("updateId:",updateId, _this.updatelist[updateId]);
-                if(_this.updatelist[updateId]){
-                    let ids = updateId.split("*-$");
-                    _this._saveSegments(ids[0], ids[1]);
-                }
+                let ids = updateId.split("*-$");
+                _this._saveSegments(ids[0], ids[1]);
             }
-        },1000)
+        },500)
     },
     getActiveLabelsId: function () {
         const {configuration, getters, setters, state} = cornerstoneTools.getModule(
@@ -246,7 +246,11 @@ let cornerstoneWrapper = {
         this.autosaveCallback = callback;
     },
     saveSegments: function (seriesId, fileId) {
-        this.updatelist[seriesId+"*-$"+fileId] = true;
+        let updateId = seriesId+"*-$"+fileId;
+        if(this.updatelist.length===0 || this.updatelist[this.updatelist.length-1] !== updateId){
+            this.updatelist.push(updateId)
+        }
+
         console.log("save id:",seriesId+"*-$"+fileId, this.updatelist[seriesId+"*-$"+fileId])
     },
 
@@ -290,7 +294,7 @@ let cornerstoneWrapper = {
             _this.autosaveCallback(false)
         });
 
-        delete this.updatelist[seriesId+"*-$"+fileId];
+        // delete this.updatelist[seriesId+"*-$"+fileId];
         console.log("delete id:",seriesId+"*-$"+fileId);
     },
     replaceSegments: function(prevIdx, curIdx){

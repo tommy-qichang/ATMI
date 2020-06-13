@@ -15,14 +15,16 @@ class MainLabel extends React.Component {
             hiddenLabels: Array(props.stack.labels.length).fill(1).join(""),
             selectValue: {},
             hideAll:false,
-            autosave:true
+            autosave:true,
+            savetime : ''
         };
 
         this.itemColors = cornerstoneWrapper.getAllSegmentsColor(this.state.labels.length);
 
         var _this = this;
         cornerstoneWrapper.setAutosaveCallback(function(status){
-            _this.setState({autosave:status})
+            let t = new Date();
+            _this.setState({autosave:status, savetime:`${t.getHours()}:${t.getMinutes()}:${t.getSeconds()}`})
         })
     }
 
@@ -114,6 +116,10 @@ class MainLabel extends React.Component {
         this.setState({currentLabel: k});
 
     };
+    onSaveLabel = () =>{
+        cornerstoneWrapper.saveSegments(this.props.stack.seriesId,
+            this.props.stack.imageIds[this.props.stack.currentImageIdIndex])
+    };
 
     activateTool = (e) => {
         if (e.keyCode === 83) {
@@ -149,7 +155,7 @@ class MainLabel extends React.Component {
         return (
             <div className="mainlabel">
                 <div className={style.title}>
-                    <div className={style.autosave +" "+ saveStyle}>auto save</div>
+                    <div onClick={this.onSaveLabel} className={style.autosave +" "+ saveStyle}>auto save({this.state.savetime})</div>
                     <div style={{clear:'both'}}></div>
                 </div>
                 <div className={style.title} style={{clear:'both'}}>Study Labels</div>

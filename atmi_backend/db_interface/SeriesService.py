@@ -134,7 +134,7 @@ class SeriesService:
         :param instance_id:
         :return:
         """
-        sql = f'select st.instance_id, st.study_id, st.patient_uid, st.study_uid, se.series_id, st.folder_name, st.annotators, st.auditors, se.series_path, ' \
+        sql = f'select st.instance_id, st.study_id, st.patient_uid, st.study_uid, se.series_id, st.annotators, st.auditors, se.series_path, ' \
               f'st.status, st.total_files_number, se.series_description, se.series_files_number, se.series_instance_uid, ins.data_path ' \
               f' from studies as st ' \
               f' inner join series as se on st.study_id = se.study_id and st.instance_id == {instance_id}' \
