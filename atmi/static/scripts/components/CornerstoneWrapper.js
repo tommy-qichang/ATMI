@@ -255,6 +255,7 @@ let cornerstoneWrapper = {
     },
 
     _saveSegments: function (seriesId, fileId) {
+        this.updateLabelLock = true;
         const {getters} = cornerstoneTools.getModule(
             'segmentation'
         );
@@ -289,8 +290,10 @@ let cornerstoneWrapper = {
             },
             body: JSON.stringify(postContent)
         }).then(function(){
+            _this.updateLabelLock = false;
             _this.autosaveCallback(true)
         }).catch(function(){
+            _this.updateLabelLock = false;
             _this.autosaveCallback(false)
         });
 
