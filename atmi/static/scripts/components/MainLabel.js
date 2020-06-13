@@ -155,7 +155,13 @@ class MainLabel extends React.Component {
         return (
             <div className="mainlabel">
                 <div className={style.title}>
-                    <div onClick={this.onSaveLabel} className={style.autosave +" "+ saveStyle}>auto save({this.state.savetime})</div>
+                    <div onClick={this.onSaveLabel} className={style.autosave +" "+ saveStyle}>
+                        {this.state.autosave?(
+                            <span>saved({this.state.savetime})</span>
+                        ):(
+                            <span>saving({this.state.savetime})</span>
+                        )}
+                    </div>
                     <div style={{clear:'both'}}></div>
                 </div>
                 <div className={style.title} style={{clear:'both'}}>Study Labels</div>
