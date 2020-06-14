@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Col, Icon, Input, message, Modal, Progress, Row, Select, Table } from 'antd';
+import { Button, Col, Icon, Input, message, Modal, Progress, Row, Select, Table, Popconfirm } from 'antd';
 //import {SketchPicker} from 'react-color';
 import StudyList from './StudyList';
 import styles from '../../styles/ManagementPanel.css';
@@ -26,9 +26,10 @@ export default class MainManagementPanel extends React.Component {
         colorPickerColor: "#FF8000",
         labelCandidatesBuffer: [],
         annotatorCandidatesBuffer: [],
-        hideAddLabelControls: true,
-        hideAddAnnotatorControls: true,
+        hideAddLabelControls: false,
+        hideAddAnnotatorControls: false,
         userTableData: [],
+        instanceTableData: [],
         hideMainPanel: false,
         hideStudyList: true
     };
@@ -61,6 +62,63 @@ export default class MainManagementPanel extends React.Component {
             description: "Lorum ipsum..."
         }
     ];
+
+    //For forntend dev
+    userTableData = [
+        {
+            username: "fuhua06@gmail.com",
+            usertype: "Admin"
+        },
+        {
+            username: "598561408@qq.com",
+            usertype: "Annotator"
+        }
+    ];
+
+    listAllUsers = () => {
+        axios.get("/user/").then(res => {
+            let userTableData = []
+            const user = res.data;
+            for (let i = 0; i < user.length; i++) {
+                userTableData.push({
+                    username: user[i].email,
+                    nickname: user[i].name,
+                    usertype: user[i].user_type == 0 ? "Admin" : "Annotator"
+                })
+            }
+            this.setState({"userTableData": userTableData})
+        }).catch(error => {
+            message.error('List user error');
+            console.log(error)
+        })
+    };
+
+    componentDidMount() {
+        this.listAllUsers();
+        this.listAllInstance();
+    }
+
+    listAllInstance = () => {
+        axios.get("/instances").then(res => {
+            let instanceTableData = [];
+            const instances = res.data;
+            for (let i = 0; i < instances.length; i++) {
+                let progress = Math.round((instances[i]['annotated_num'] / instances[i]['study_num']) * 100);
+                instanceTableData.push({
+                    'instanceid': instances[i]['instance_id'],
+                    'name': instances[i]['name'],
+                    'modality': instances[i]['modality'],
+                    'description': instances[i]['description'],
+                    'progress': progress,
+                    'data_path': instances[i]['data_path']
+                })
+            }
+            this.setState({"instanceTableData": instanceTableData})
+        }).catch(error => {
+            message.error('Instance list error');
+            console.log(error)
+        })
+    };
 
     onNewUserButtonClick = e => {
         this.setState({
@@ -120,6 +178,9 @@ export default class MainManagementPanel extends React.Component {
 
     handleAddUserOk = e => {
         this.checkEmail();
+        //Add user into the backend
+
+        this.listAllUsers();
     };
 
     handleAddUserCancel = e => {
@@ -130,10 +191,10 @@ export default class MainManagementPanel extends React.Component {
 
     checkEmail = () => {
         let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
-        if (!this.newUsername) {
+        if (!this.newUsername || !this.newUsername.input) {
             return;
         }
-        let username = this.newUsername.value;
+        let username = this.newUsername.input.value;
         if (reg.test(username)) {
             this.proccessAddUser(username);
         } else {
@@ -149,6 +210,10 @@ export default class MainManagementPanel extends React.Component {
     };
 
     handleAddInstanceOk = e => {
+        //Add instance into the backend
+        //New added labels are cached in this.labelCandidatesBuffer
+        //New added annotatos are cached in this.annotatorCandidatesBuffer
+
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
         this.setState({
@@ -156,8 +221,8 @@ export default class MainManagementPanel extends React.Component {
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
-            hideAddLabelControls: true,
-            hideAddAnnotatorControls: true
+            hideAddLabelControls: false,
+            hideAddAnnotatorControls: false
         });
     };
 
@@ -169,8 +234,8 @@ export default class MainManagementPanel extends React.Component {
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
-            hideAddLabelControls: true,
-            hideAddAnnotatorControls: true
+            hideAddLabelControls: false,
+            hideAddAnnotatorControls: false
         });
     };
 
@@ -200,16 +265,16 @@ export default class MainManagementPanel extends React.Component {
 
     handleAddLabel = e => {
         this.labelCandidatesBuffer.push({
-            name: this.newLabelName.state.value,
-            value: this.newLabelValue.state.value,
-            color: this.state.colorBlockColor
+            name: this.newLabelName.input.value,
+            value: this.newLabelValue.input.value,
+            //color: this.state.colorBlockColor
         });
         this.setState({
             labelCandidatesBuffer: this.labelCandidatesBuffer,
-            colorBlockColor: "#FF8000"
+            //colorBlockColor: "#FF8000"
         });
-        this.newLabelName.state.value = "";
-        this.newLabelValue.state.value = "";
+        this.newLabelName.input.value = "";
+        this.newLabelValue.input.value = "";
     };
 
     onAnnotatorPlusIconClick = e => {
@@ -229,15 +294,19 @@ export default class MainManagementPanel extends React.Component {
 
     handleAddAnnotator = e => {
         this.annotatorCandidatesBuffer.push(
-            this.newAnnotatorCandidate.state.value
+            this.newAnnotatorCandidate.input.value
         );
         this.setState({
             annotatorCandidatesBuffer: this.annotatorCandidatesBuffer,
         });
-        this.newAnnotatorCandidate.state.value = "";
+        this.newAnnotatorCandidate.input.value = "";
     };
 
     handleModifyInstanceOk = e => {
+        //Modify instance in the backend
+        //Modified labels are cached in this.labelCandidatesBuffer
+        //Modified annotatos are cached in this.annotatorCandidatesBuffer
+
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
         this.setState({
@@ -245,8 +314,8 @@ export default class MainManagementPanel extends React.Component {
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
-            hideAddLabelControls: true,
-            hideAddAnnotatorControls: true
+            hideAddLabelControls: false,
+            hideAddAnnotatorControls: false
         });
     };
 
@@ -258,8 +327,8 @@ export default class MainManagementPanel extends React.Component {
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
-            hideAddLabelControls: true,
-            hideAddAnnotatorControls: true
+            hideAddLabelControls: false,
+            hideAddAnnotatorControls: false
         });
     };
 
@@ -268,10 +337,28 @@ export default class MainManagementPanel extends React.Component {
     };
 
     onModifyInstanceClick = e => {
+        //Load instance data from the backend
+        //The parameter "record" means the table record of the instance
+
         this.setState({
             showModifyInstance: true
         });
     };
+
+    onDeleteUserConfirm = (record) => {
+        //Delete record from the backend
+
+        this.listAllUsers();
+        message.success('User has been deleted', 2);
+    }
+
+    
+    onDeleteInstanceConfirm = (record) => {
+        //Delete record from the backend
+
+        this.listAllInstance();
+        message.success('Instance has been deleted', 2); 
+    }
 
     userTableColumns = [
         {
@@ -311,11 +398,13 @@ export default class MainManagementPanel extends React.Component {
             className: "table",
             render: (text, record) => (
                 <div>
+                    <Popconfirm title="Delete User?" onConfirm={() => this.onDeleteUserConfirm(record)} /* data-hscode={record.HSCode} */ okText="Yes" cancelText="No">
                     <a href="javascript:;"><img src="./assets/static/img/delete.png" title='Delete this user'
                         alt='Delete User' style={{
                             width: 18,
                             height: 18
                         }}></img></a>
+                     </Popconfirm>
                 </div>
             )
         }
@@ -419,14 +508,16 @@ export default class MainManagementPanel extends React.Component {
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/modify.png" title='Modify' alt='Modify'
                                 style={{ width: 18, height: 18 }}
-                                onClick={this.onModifyInstanceClick}></img></a>
+                                onClick={() => this.onModifyInstanceClick(record)}></img></a>
                         </Col>
                         <Col span={6}>
+                        <Popconfirm title="Delete Instance?" onConfirm={() => this.onDeleteInstanceConfirm(record)} /* data-hscode={record.HSCode} */ okText="Yes" cancelText="No">
                             <a href="javascript:;"><img src="./assets/static/img/delete.png"
                                 title='Delete this instance' alt='Delete Instance' style={{
                                     width: 18,
                                     height: 18
                                 }}></img></a>
+                        </Popconfirm>
                         </Col>
                     </Row>
                 </div>
@@ -456,7 +547,8 @@ export default class MainManagementPanel extends React.Component {
                 <Row type="flex" justify="start">
                     <Col span={24}>
                         <Table columns={this.userTableColumns}
-                            dataSource={this.state.userTableData}
+                            //dataSource={this.state.userTableData}
+                            dataSource={this.userTableData}
                             /* bordered  */
                             size="middle"
                             loading={this.state.userTableLoading}
@@ -652,7 +744,7 @@ export default class MainManagementPanel extends React.Component {
                                 </Col>
                             </Row>
                             <div style={{ height: 6 }} />
-                            <Row type="flex" justify="start">
+                            {/* <Row type="flex" justify="start">
                                 <Col span={24}>
                                     <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
                                         Path
@@ -673,7 +765,7 @@ export default class MainManagementPanel extends React.Component {
                                     </div>
                                 </Col>
                             </Row>
-                            <div style={{ height: 6 }} />
+                            <div style={{ height: 6 }} /> */}
                             <Row type="flex" justify="space-between">
                                 <Col span={18}>
                                     <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
@@ -722,12 +814,12 @@ export default class MainManagementPanel extends React.Component {
                                             <div>
                                                 <Row type="flex" justify="start" gutter={8}>
                                                     <Col span={10}>
-                                                        <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                        <div style={{ fontStyle: "italic" }}>
                                                             {label.name}
                                                         </div>
                                                     </Col>
                                                     <Col span={4}>
-                                                        <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                        <div style={{ fontStyle: "italic" }}>
                                                             {label.value}
                                                         </div>
                                                     </Col>
@@ -813,7 +905,7 @@ export default class MainManagementPanel extends React.Component {
                                             <div>
                                                 <Row type="flex" justify="start" gutter={8}>
                                                     <Col span={17}>
-                                                        <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                        <div style={{ fontStyle: "italic" }}>
                                                             {annotator}
                                                         </div>
                                                     </Col>
@@ -1002,12 +1094,12 @@ export default class MainManagementPanel extends React.Component {
                                             <div>
                                                 <Row type="flex" justify="start" gutter={8}>
                                                     <Col span={10}>
-                                                        <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                        <div style={{ fontStyle: "italic" }}>
                                                             {label.name}
                                                         </div>
                                                     </Col>
                                                     <Col span={4}>
-                                                        <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                        <div style={{ fontStyle: "italic" }}>
                                                             {label.value}
                                                         </div>
                                                     </Col>
@@ -1093,7 +1185,7 @@ export default class MainManagementPanel extends React.Component {
                                             <div>
                                                 <Row type="flex" justify="start" gutter={8}>
                                                     <Col span={17}>
-                                                        <div style={{ color: "#ccc", fontStyle: "italic" }}>
+                                                        <div style={{ fontStyle: "italic" }}>
                                                             {annotator}
                                                         </div>
                                                     </Col>
