@@ -227,10 +227,12 @@ def setup_route_map(app, app_path):
         user_id = 1
         data = request.data
         label_service = LabelService(get_conn())
-        label_service.insert(series_id, user_id, file_name, data)
+        status = label_service.insert(series_id, user_id, file_name, data)
 
-        return jsonify({}), 201
-
+        if status:
+            return jsonify({}), 201
+        else:
+            return jsonify({status:"Transaction Rollback."}), 404
     @app.route('/series/<int:series_id>/labels', methods=['GET'])
     def get_labels(series_id):
         # Temporary mock the user Id.

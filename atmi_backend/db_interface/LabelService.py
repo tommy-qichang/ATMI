@@ -59,7 +59,7 @@ class LabelService:
         # has_record = self.exist({"series_id": series_id, "user_id": user_id, "file_id": file_id})
 
         if has_record:
-            self.update({"series_id": series_id, "user_id": user_id, "file_id": file_id},
+            status = self.update({"series_id": series_id, "user_id": user_id, "file_id": file_id},
                         {"content": content})
         else:
             sql, v = prepare_insert("labels",
@@ -68,7 +68,8 @@ class LabelService:
             cur.execute(sql, v)
             # print(f"Insert labels without commit!")
             self.sql_connection.commit()
-        return True
+            status = True
+        return status
 
     def delete(self, del_condition):
         """
@@ -98,10 +99,16 @@ class LabelService:
         sql, v_tuple = prepare_update("labels", update_condition, modify_obj,
                                       ["label_id", "candidate_id", "series_id", "user_id", "file_id", "content"])
         cur = self.sql_connection.cursor()
-        cur.execute(sql, v_tuple)
 
         # print(f"Insert labels without commit!")
-        self.sql_connection.commit()
+        try:
+            cur.execute(sql, v_tuple)
+            self.sql_connection.commit()
+
+        except:
+            self.sql_connection.rollback()
+            return False
+
         return True
 
     @staticmethod
