@@ -20,7 +20,7 @@ class ExportService:
     def __init__(self, connection):
         self.conn = connection
 
-    def save_studies(self, instance_id, split_entry_num=100, store_type="train", save_label=True, save_data=True):
+    def save_studies(self, instance_id, split_entry_num=100, store_type="train", save_label=True, save_data=True, compression=None):
         """
         Save all annotations and and dicom data for each study in the instance
         :param instance_id:
@@ -28,6 +28,7 @@ class ExportService:
         :param store_type: train or test
         :param save_label: True or False
         :param save_data: True or False
+        :param compression: Whether the hdf5 file compressed or not. "gzip|lzf"
         :return:
         """
         msg_box = []
@@ -53,17 +54,17 @@ class ExportService:
                 study_h5 = h5py.File(os.path.join(h5_path, h5_file_name), 'w')
 
             if save_label:
-                self.save_onestudy_label(study_id, study, study_h5, msg_box, store_type)
+                self.save_onestudy_label(study_id, study, study_h5, msg_box, store_type, compression)
 
             if save_data:
-                self.save_onestudy_dcm(study_id, study, study_h5, msg_box, store_type)
+                self.save_onestudy_dcm(study_id, study, study_h5, msg_box, store_type, compression)
 
             study_num += 1
 
         study_h5.close()
         return msg_box
 
-    def save_onestudy_label(self, study_id, study, study_h5, msg_box, store_type="train"):
+    def save_onestudy_label(self, study_id, study, study_h5, msg_box, store_type="train", compression=None):
         series_service = SeriesService(self.conn)
         label_service = LabelService(self.conn)
         series = series_service.query({"study_id": study_id})
@@ -95,7 +96,7 @@ class ExportService:
                     series_label[:, :, z_index] += pixel_data_xy
 
             label_db = study_h5.create_dataset(f"{store_type}/study:{study['suid']}-series:{series_uuid}/label",
-                                               data=series_label)
+                                               data=series_label, compression=compression)
             label_db.attrs['x_spacing'] = i['x_spacing']
             label_db.attrs['y_spacing'] = i['y_spacing']
             label_db.attrs['z_spacing'] = i['z_spacing']
@@ -112,7 +113,7 @@ class ExportService:
 
         return msg_box
 
-    def save_onestudy_dcm(self, study_id, study, study_h5, msg_box, store_type="train"):
+    def save_onestudy_dcm(self, study_id, study, study_h5, msg_box, store_type="train", compression=None):
         series_service = SeriesService(self.conn)
         series = series_service.query({"study_id": study_id})
         for i in series:
@@ -136,7 +137,7 @@ class ExportService:
             #     app.logger.warn(
             #         f"The original DICOM shape({series_dcm.shape}) mismatch with the label's shape({series_label.shape})")
             dcm = study_h5.create_dataset(f"{store_type}/study:{study['suid']}-series:{series_uuid}/data",
-                                          data=series_dcm)
+                                          data=series_dcm, compression=compression)
             dcm.attrs['x_spacing'] = i['x_spacing']
             dcm.attrs['y_spacing'] = i['y_spacing']
             dcm.attrs['z_spacing'] = i['z_spacing']
