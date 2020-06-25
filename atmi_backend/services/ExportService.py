@@ -20,11 +20,12 @@ class ExportService:
     def __init__(self, connection):
         self.conn = connection
 
-    def save_studies(self, instance_id, split_entry_num=100, store_type="train", save_label=True, save_data=True, compression=None):
+    def save_studies(self, instance_id, split_entry_num=100, start_idx=0,store_type="train", save_label=True, save_data=True, compression=None):
         """
         Save all annotations and and dicom data for each study in the instance
         :param instance_id:
         :param split_entry_num: create new h5 file if stored entries more than the max split number
+        :param start_idx: start file number.
         :param store_type: train or test
         :param save_label: True or False
         :param save_data: True or False
@@ -37,29 +38,30 @@ class ExportService:
         instance_name = instance[0]['name']
         study_service = StudiesService(self.conn)
         studies = study_service.query({"instance_id": instance_id})
-        study_num = 0
+        study_num = split_entry_num*start_idx
+
         study_h5 = None
         time_stamp = str(int(time.time()))
-        for study in studies:
+        for idx, study in enumerate(studies):
+            if idx == study_num:
+                study_id = study['study_id']
+                app.logger.info(f"Save study-instance_id:{instance_id}({instance_name}),study_id:{study_id}")
+                h5_path = os.path.join(OUTPUT_ROOT, str(instance_id))
+                if study_num % split_entry_num == 0:
+                    if not os.path.exists(h5_path):
+                        os.makedirs(h5_path)
+                    if study_h5 is not None:
+                        study_h5.close()
+                    h5_file_name = f"Export-{instance_id}-{instance_name}-{time_stamp}-{study_num // split_entry_num}.h5"
+                    study_h5 = h5py.File(os.path.join(h5_path, h5_file_name), 'w')
 
-            study_id = study['study_id']
-            app.logger.info(f"Save study-instance_id:{instance_id}({instance_name}),study_id:{study_id}")
-            h5_path = os.path.join(OUTPUT_ROOT, str(instance_id))
-            if study_num % split_entry_num == 0:
-                if not os.path.exists(h5_path):
-                    os.makedirs(h5_path)
-                if study_h5 is not None:
-                    study_h5.close()
-                h5_file_name = f"Export-{instance_id}-{instance_name}-{time_stamp}-{study_num // split_entry_num}.h5"
-                study_h5 = h5py.File(os.path.join(h5_path, h5_file_name), 'w')
+                if save_label:
+                    self.save_onestudy_label(study_id, study, study_h5, msg_box, store_type, compression)
 
-            if save_label:
-                self.save_onestudy_label(study_id, study, study_h5, msg_box, store_type, compression)
+                if save_data:
+                    self.save_onestudy_dcm(study_id, study, study_h5, msg_box, store_type, compression)
 
-            if save_data:
-                self.save_onestudy_dcm(study_id, study, study_h5, msg_box, store_type, compression)
-
-            study_num += 1
+                study_num += 1
 
         study_h5.close()
         return msg_box
