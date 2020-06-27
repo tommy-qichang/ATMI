@@ -262,12 +262,29 @@ def setup_route_map(app, app_path):
 
     @app.route('/export/instance/<instance_id>', methods=['GET'])
     def export_all_label(instance_id):
-        split_entry_num = request.args.get('split_entry_num', default=100)
+        """
+        Export all requested data as hdf5 file(s)
+        request arguments includes:
+        split_entry_num: entry numbers for each hdf5 file. Will create separate files end with ids. Default is 100 entries per file.
+        store_type: default root path in the hdf5 is "train"
+        save_data/save_label: indicate if save dcm data or labels in the hdf5 file.
+        compression: indicate whether the hdf5 compressed using "gzip or lzf".
+        start_idx: Specify the start index of h5 file, useful for continuous export files.
+        :param instance_id:
+        :return:
+        """
+        split_entry_num = request.args.get('split_entry_num', default=100, type=int)
         store_type = request.args.get('store_type', default='train')
         save_label = to_bool_or_none(request.args.get('save_label', default='True'))
         save_data = to_bool_or_none(request.args.get('save_data', default='True'))
+        compression = request.args.get('compression', default='gzip')
+        if compression != "gzip":
+            compression = None
+
+        start_idx = request.args.get('start_idx', default=0, type=int)
+
         export_service = ExportService(get_conn())
-        msg = export_service.save_studies(instance_id, split_entry_num, store_type, save_label, save_data)
+        msg = export_service.save_studies(instance_id, split_entry_num, start_idx, store_type, save_label, save_data, compression)
         return jsonify({'msg': msg}), 200
 
     @app.route('/export_label/studies/<study_id>', methods=['GET'])

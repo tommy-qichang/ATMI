@@ -8,6 +8,14 @@
     text-align: center;
     position: relative;
 }
+
+/* Medium devices (tablets, 768px and up)*/
+@media (min-width: 768px) {
+    .navlist{
+        padding: 0.5rem 0.5rem;
+    }
+}
+
 .home{
     color:#969596;
     font-size: 16px;

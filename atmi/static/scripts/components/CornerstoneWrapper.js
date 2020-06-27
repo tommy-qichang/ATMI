@@ -136,7 +136,7 @@ let cornerstoneWrapper = {
                 let updateId = _this.updatelist.shift();
                 console.log("updateId:",updateId, _this.updatelist[updateId]);
                 let ids = updateId.split("*-$");
-                _this._saveSegments(ids[0], ids[1]);
+                _this._saveSegments(ids[0], ids[1], ids[2]);
             }
         },500)
     },
@@ -246,22 +246,31 @@ let cornerstoneWrapper = {
         this.autosaveCallback = callback;
     },
     saveSegments: function (seriesId, fileId) {
-        let updateId = seriesId+"*-$"+fileId;
+        const {getters} = cornerstoneTools.getModule(
+            'segmentation'
+        );
+        let labelmap = getters.labelmap2D(this.element);
+        let imageIdx = labelmap.currentImageIdIndex;
+
+        let updateId = seriesId+"*-$"+fileId+"*-$"+imageIdx;
         if(this.updatelist.length===0 || this.updatelist[this.updatelist.length-1] !== updateId){
             this.updatelist.push(updateId)
         }
 
-        console.log("save id:",seriesId+"*-$"+fileId, this.updatelist[seriesId+"*-$"+fileId])
+        console.log("save id:",seriesId+"*-$"+fileId+"*-$"+imageIdx, this.updatelist[seriesId+"*-$"+fileId+"*-$"+imageIdx])
     },
 
-    _saveSegments: function (seriesId, fileId) {
+    _saveSegments: function (seriesId, fileId, imageIdx) {
         this.updateLabelLock = true;
         this.autosaveCallback(false);
         const {getters} = cornerstoneTools.getModule(
             'segmentation'
         );
         let labelmap = getters.labelmap2D(this.element);
-        let rawPixelData = Array.from(labelmap.labelmap2D.pixelData);
+        // debugger;
+        let pixelData = labelmap.labelmap3D.labelmaps2D[imageIdx].pixelData;
+
+        let rawPixelData = Array.from(pixelData);
         let compressedPixelData = {};
         for(let i=0;i<rawPixelData.length;i++){
             if(rawPixelData[i]>0){
@@ -299,7 +308,7 @@ let cornerstoneWrapper = {
         });
 
         // delete this.updatelist[seriesId+"*-$"+fileId];
-        console.log("delete id:",seriesId+"*-$"+fileId);
+        console.log("delete id:",seriesId+"*-$"+fileId+"*-$"+imageIdx);
     },
     replaceSegments: function(prevIdx, curIdx){
         const {configuration, getters, setters, state} = cornerstoneTools.getModule(
