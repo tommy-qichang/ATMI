@@ -38,8 +38,7 @@ class LoginForm extends React.Component {
     };
 
     validate(values) {
-     //For frontend dev
-        /*         axios.get("/user/" + values.username + "/" + values.password).then(res => {
+        axios.get("/user/" + values.username + "/" + values.password).then(res => {
             const user = res.data;
             if (user.length > 0) {
                 this.username = values.username;
@@ -49,10 +48,11 @@ class LoginForm extends React.Component {
             }
         }).catch(error => {
             message.error('Login failed, please contact admin.');
-        }) */
-
-        this.username = values.username;
-        this.checkLogin();
+        }) 
+ 
+        //For frontend dev
+        /*this.username = values.username;
+        this.checkLogin();*/
 
         /*   let response;
            try{

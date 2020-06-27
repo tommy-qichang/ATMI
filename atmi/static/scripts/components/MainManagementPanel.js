@@ -46,6 +46,8 @@ export default class MainManagementPanel extends React.Component {
     labelCandidatesBuffer = [];
     annotatorCandidatesBuffer = [];
 
+    //For forntend dev
+/*     
     instanceTableData = [
         {
             name: "001001",
@@ -63,8 +65,8 @@ export default class MainManagementPanel extends React.Component {
         }
     ];
 
-    //For forntend dev
-    userTableData = [
+  */
+/*     userTableData = [
         {
             username: "fuhua06@gmail.com",
             usertype: "Admin"
@@ -73,7 +75,7 @@ export default class MainManagementPanel extends React.Component {
             username: "598561408@qq.com",
             usertype: "Annotator"
         }
-    ];
+    ]; */
 
     listAllUsers = () => {
         axios.get("/user/").then(res => {
@@ -547,8 +549,8 @@ export default class MainManagementPanel extends React.Component {
                 <Row type="flex" justify="start">
                     <Col span={24}>
                         <Table columns={this.userTableColumns}
-                            //dataSource={this.state.userTableData}
-                            dataSource={this.userTableData}
+                            dataSource={this.state.userTableData}
+                            /* dataSource={this.userTableData} */
                             /* bordered  */
                             size="middle"
                             loading={this.state.userTableLoading}
@@ -590,7 +592,8 @@ export default class MainManagementPanel extends React.Component {
                 <Row type="flex" justify="start">
                     <Col span={24}>
                         <Table columns={this.instanceTableColumns}
-                            dataSource={this.instanceTableData}
+                            //dataSource={this.instanceTableData}
+                            dataSource={this.state.instanceTableData}
                             /* bordered  */
                             size="middle"
                             loading={this.state.instanceTableLoading}
