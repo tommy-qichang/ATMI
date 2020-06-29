@@ -15,7 +15,7 @@ Basic Sections:
 3. Workbench:
     Display the DICOM images and could annotate ROIs on the DICOM images.
 
-.. image:: ./docs/usage_guide/imgs/basic.png
+.. image:: ./imgs/basic.png
 
 Toolbars:
 ^^^^^^^^^^^^^^^^
@@ -47,10 +47,12 @@ The function icon will turn red when activated.
 - Up and Down arrow: Navigate the previous and the next series.
 
 
-2. Navigate Studies:
+Navigate Studies:
+^^^^^^^^^^^^^^^^^^^^^^^
 
 
-3. Label Panel:
+Label Panel:
+^^^^^^^^^^^^^^^^^^^^^
 
 
 
