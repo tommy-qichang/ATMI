@@ -13,14 +13,14 @@ Basic Sections:
     Provide multi-level annotation labels, and status/autosave function.
 
 3. Workbench:
-    Display the DICOM images and could annotate ROIs on the DICOM images.
+    Display the DICOM images, basic information and could annotate ROIs on the DICOM images.
 
 .. image:: ./imgs/basic.png
 
 Toolbars:
 ^^^^^^^^^^^^^^^^
 
-The function icon will turn red when activated.
+The function icon will turn red when activated. You can click the letter/number in the bracket as the hotkeys.
 
 1.1 Home: back to list and management page.
 
@@ -50,9 +50,36 @@ The function icon will turn red when activated.
 Navigate Studies:
 ^^^^^^^^^^^^^^^^^^^^^^^
 
+Click Studies to show all studies list. Hover on one study item, the list will show all the series extracted in current study.
+Each series display description in DICOM tag, and DICOM files number belongs to this series.
+
+.. image:: ./imgs/nav.png
 
 Label Panel:
 ^^^^^^^^^^^^^^^^^^^^^
+
+1. Auto save indicator and manual save button.
+
+This button will turn gray when start saving annotations, and will return green with time stamp when the annotation successfully saved from backend. You can also manually save the annotations by clicking the button.
+
+.. image:: ./imgs/label1.png
+
+2. Study Labels
+
+This section is used for annotations shared across the study. The annotation type could be text, select box, radio box etc.
+
+``This section's contents can be customized in management page.``
+
+3. Labels:
+
+Functions in this section:
+
+.. image:: ./imgs/label.png
+
+
+``This section's content can be customized in management page.``
+
+
 
 
 
