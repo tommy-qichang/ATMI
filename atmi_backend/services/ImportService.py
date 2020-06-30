@@ -82,7 +82,11 @@ class ImportService:
             studyService = StudiesService(self.conn)
             seriesService = SeriesService(self.conn)
             labelService = LabelService(self.conn)
+
+            labeldb = labeldb['train']
+
             for study_and_series_id in labeldb.keys():
+
                 split_str = study_and_series_id.split("-")
                 study_uid = split_str[0][6:]
                 series_uid = split_str[1][7:]
@@ -112,7 +116,8 @@ class ImportService:
 if __name__ == "__main__":
     ini_service = InitialService()
     importService = ImportService(ini_service.get_connection())
-    importService.import_annotations("h5", "/Users/qichang/PycharmProjects/pytorch-template/data/ACDC/processed/Export-1-Cardial_MRI_DB-0-predict-final-x4.h5")
+    # importService.import_annotations("h5", "/Users/qichang/PycharmProjects/pytorch-template/data/ACDC/processed/Export-1-Cardial_MRI_DB-0-predict-final-x4.h5")
+    importService.import_annotations("h5","/ajax/users/qc58/work/projects/pytorch-template/saved/test_results/ACDC_segmentation_exp1/test_result-ACDC_segmentation_exp1_512x512_smooth.h5")
 
 # http://127.0.0.1:5000/load_data/2/NYU_CMR_Raw
 # http://127.0.0.1:5000/export_label/studies/2

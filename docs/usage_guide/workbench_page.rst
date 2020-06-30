@@ -7,7 +7,7 @@ Workbench Page Manual Book(v0.1)
 Basic Sections:
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 1. Toolbars:
-    Provide multiple functions during annotation process. You can click the letter/number in the bracket as the hotkeys.
+    Provide multiple functions during annotation process. You can use the letter/number in the bracket as the hotkeys.
 
 2. Label Panel:
     Provide multi-level annotation labels, and status/autosave function.

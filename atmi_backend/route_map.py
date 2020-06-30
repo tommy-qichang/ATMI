@@ -278,10 +278,11 @@ def setup_route_map(app, app_path):
         save_label = to_bool_or_none(request.args.get('save_label', default='True'))
         save_data = to_bool_or_none(request.args.get('save_data', default='True'))
         compression = request.args.get('compression', default='gzip')
-        if compression != "gzip":
+        if compression != "gzip" and compression != "lzf":
             compression = None
-
         start_idx = request.args.get('start_idx', default=0, type=int)
+
+        app.logger.info(f"Export all data(data:{save_data},label:{save_label}), with store type:{store_type}, split entry number:{split_entry_num}, start file idx:{start_idx}, and compression type:{compression}")
 
         export_service = ExportService(get_conn())
         msg = export_service.save_studies(instance_id, split_entry_num, start_idx, store_type, save_label, save_data, compression)

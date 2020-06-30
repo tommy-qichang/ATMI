@@ -132,7 +132,7 @@ class MainNav extends React.Component {
                     <div
                         className={`${style.navlist}  ${this.state.currentTool === "FreehandScissors" ? style.active : ""}`}
                         onClick={() => this.selectTool('FreehandScissors')}><i
-                        className={`fas fa-hand-paper ${style.i}`}/><br/>freehand(3)
+                        className={`fas fa-hand-paper ${style.i}`}/><br/>Freehand(3)
                     </div>
                     {/*<div*/}
                     {/*    className={`${style.navlist} }`}*/}
@@ -157,37 +157,37 @@ class MainNav extends React.Component {
                     <div
                         className={`${style.navlist} ${this.state.currentTool === "CorrectionScissors" ? style.active : ""}`}
                         onClick={() => this.selectTool('CorrectionScissors')}><i
-                        className={`fas fa-eraser ${style.i}`}/><br/>correction(6)
+                        className={`fas fa-eraser ${style.i}`}/><br/>Correction(6)
                     </div>
                     <div
                         className={`${style.navlist} ${this.state.currentTool === "Brush" ? style.active : ""}`}
                         onClick={() => this.selectTool('Brush', 1)}><i
-                        className={`fas fa-backspace ${style.i}`}/><br/>erase(7)
+                        className={`fas fa-backspace ${style.i}`}/><br/>Erase(7)
                     </div>
 
                     <div className={style.navlist}/>
                     <div
                         className={`${style.navlist} ${this.state.currentTool === "Play" ? style.active : ""}`}
                         onClick={(e) => navSlice({'keyCode': 80})}><i
-                        className={`fas fa-play-circle ${style.i}`}/><br/>play(p)
+                        className={`fas fa-play-circle ${style.i}`}/><br/>Play(p)
                     </div>
 
                     <div
                         className={`${style.navlist} `}
                         onClick={(e) => this.undo()}><i
-                        className={`fas fa-undo ${style.i}`}/><br/>undo(u)
+                        className={`fas fa-undo ${style.i}`}/><br/>Undo(u)
                     </div>
                     <div
                         className={`${style.navlist} `}
                         onClick={(e) => this.redo()}><i
-                        className={`fas fa-redo ${style.i}`}/><br/>redo(r)
+                        className={`fas fa-redo ${style.i}`}/><br/>Redo(r)
                     </div>
 
 
                     <div
                         className={`${style.navlist} `}
                         onClick={(e) => this.propagate()}><i
-                        className={`fas fa-copy ${style.i}`}/><br/>propagate(c)
+                        className={`fas fa-copy ${style.i}`}/><br/>Propagate(c)
                     </div>
 
                 </div>
