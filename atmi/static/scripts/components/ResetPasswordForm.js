@@ -32,10 +32,10 @@ class ResetPasswordForm extends React.Component {
     }
 
     validate(values) {
-        let email = this.props.username;
-        if (ATMI_STATUS.ini_admin) {
+        let email = values.username;
+/*         if (ATMI_STATUS.ini_admin) {
             email = this.state.userName;
-        }
+        }  */
         axios.put("/user/", {
             email: email,
             password: values.password
