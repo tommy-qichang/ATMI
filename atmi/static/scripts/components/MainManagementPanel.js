@@ -36,6 +36,7 @@ export default class MainManagementPanel extends React.Component {
 
     newUsername = null;
     newInstanceName = null;
+    newInstanceModality = "CT";
     newInstanceDescription = null;
     newInstancePath = null;
     newLabelName = null;
@@ -113,7 +114,7 @@ export default class MainManagementPanel extends React.Component {
                     'description': instances[i]['description'],
                     'progress': progress,
                     'data_path': instances[i]['data_path']
-                })
+                });
             }
             this.setState({"instanceTableData": instanceTableData})
         }).catch(error => {
@@ -215,9 +216,36 @@ export default class MainManagementPanel extends React.Component {
         //Add instance into the backend
         //New added labels are cached in this.labelCandidatesBuffer
         //New added annotatos are cached in this.annotatorCandidatesBuffer
+        let cleanValue = this.newInstanceName.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "");
+        if(cleanValue === "") 
+        {
+            message.error("Instance name can not be empty");
+            return;
+        }
+
+/*         console.log("this.newInstanceName: ", this.newInstanceName.input.value);
+        console.log("this.newInstanceModality: ", this.newInstanceModality);
+        console.log("this.newInstanceDescription: ", this.newInstanceDescription.textAreaRef.value);
+        console.log("this.this.labelCandidatesBuffer: ", this.labelCandidatesBuffer);
+        console.log("this.annotatorCandidatesBuffer: ", this.annotatorCandidatesBuffer); */
+
+        let newInstanceData = {
+            name: this.newInstanceName.input.value, 
+            modality: this.newInstanceModality, 
+            description:this.newInstanceDescription.textAreaRef.value
+        };
+
+        //Uncomment when the backend is ready
+/*         axios.post(newInstanceData).then(res => {
+           
+        }).catch(error => {
+            message.error('Add instance error');
+            console.log(error);
+        }); */
 
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
+        this.newInstanceModality = "CT";
         this.setState({
             showAddInstance: false,
             hideColorPicker: true,
@@ -231,6 +259,7 @@ export default class MainManagementPanel extends React.Component {
     handleAddInstanceCancel = e => {
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
+        this.newInstanceModality = "CT";
         this.setState({
             showAddInstance: false,
             hideColorPicker: true,
@@ -338,10 +367,10 @@ export default class MainManagementPanel extends React.Component {
         this.props.onInstanceDetailClick();
     };
 
-    onModifyInstanceClick = e => {
+    onModifyInstanceClick = (record) => {
         //Load instance data from the backend
         //The parameter "record" means the table record of the instance
-
+        
         this.setState({
             showModifyInstance: true
         });
@@ -349,17 +378,28 @@ export default class MainManagementPanel extends React.Component {
 
     onDeleteUserConfirm = (record) => {
         //Delete record from the backend
+        axios.delete(`/users/${record.username}`).then(res => {
+            this.listAllUsers();
+            message.success('User has been deleted', 2);
+        }).catch(error => {
+            message.error('Delete user error');
+            console.log(error);
+        });
+    };
 
-        this.listAllUsers();
-        message.success('User has been deleted', 2);
-    }
-
-    
     onDeleteInstanceConfirm = (record) => {
         //Delete record from the backend
+        axios.delete(`/instances/${record.instanceid}`).then(res => {
+            this.listAllInstance();
+            message.success('Instance has been deleted', 2); 
+        }).catch(error => {
+            message.error('Delete Instance error');
+            console.log(error);
+        });
+    };
 
-        this.listAllInstance();
-        message.success('Instance has been deleted', 2); 
+    onNewInstanceModalityChange = (value) => {
+        this.newInstanceModality = value;
     }
 
     userTableColumns = [
@@ -712,7 +752,9 @@ export default class MainManagementPanel extends React.Component {
                             <div style={{ height: 6 }} />
                             <Row>
                                 <Col>
-                                    <Select defaultValue="CT" style={{ width: '100%' }}>
+                                    <Select defaultValue="CT" style={{ width: '100%' }}
+                                     /* ref={target => (this.newInstanceModality = target)} */
+                                     onChange={this.onNewInstanceModalityChange}>
                                         <Select.Option value="CT">
                                             CT
                                         </Select.Option>
