@@ -10,7 +10,7 @@
     "@babel/polyfill": "7.4.4",
     "antd": "3.7.0",
     "axios": "0.19.0",
-    "bootstrap": "3.3.7",
+    "bootstrap": "3.4.1",
     "cornerstone-core": "2.3.0",
     "cornerstone-math": "0.1.8",
     "cornerstone-tools": "4.0.1",
