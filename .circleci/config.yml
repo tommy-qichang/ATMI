@@ -50,6 +50,8 @@ jobs:
           command: |
             . venv/bin/activate
             pytest tests --html=ut-result-atmi.html --self-contained-html --cov=atmi --cov-report xml:coverage-reports/coverage-pytest.xml --cov-report term-missing:skip-covered
+            pylama tests atmi_backend atmi/*.py
+            codecov -t 1e3f5443-0c0e-44b5-87bb-104fca7f7bbc
 
       - store_artifacts:
           path: test-reports

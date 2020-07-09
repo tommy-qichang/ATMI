@@ -5,9 +5,6 @@
 [![codecov](https://codecov.io/gh/tommy-qichang/ATMI/branch/master/graph/badge.svg)](https://codecov.io/gh/tommy-qichang/ATMI)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-https://circleci.com/gh/circleci/circleci-docs.svg?style=svg
-https://circleci.com/gh/tommychang1983/ATMI/tree/master.svg?style=svg
-
 The ATMI (Annotation Tool for Medical Image) provides a user friendly and comprehensive tool for medical annotation purpose. 
 
 The following features will be implemented in this system:
