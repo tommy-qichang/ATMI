@@ -3,7 +3,7 @@ import io
 import os
 from os import path
 
-from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect
+from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json
 
 from atmi_backend.config import REGISTER_MAX_HOURS
 from atmi_backend.db_interface.InitialService import InitialService
@@ -18,14 +18,13 @@ from atmi_backend.services.ImportService import ImportService
 from atmi_backend.utils import to_bool_or_none
 
 
-def setup_route_map(app, app_path):
+def setup_route_map(app, app_path):  # noqa: C901
     def get_conn():
         ini_service = InitialService()
         return ini_service.get_connection()
 
     """
-    Page Response 
-    
+    Page Response
     """
 
     @app.route("/", methods=['GET'])
@@ -50,7 +49,7 @@ def setup_route_map(app, app_path):
                     return render_template("index.html", data={'username': username, 'ini_admin': "false"})
                 else:
                     return redirect("/", code=302)
-            except:
+            except Exception:
                 return redirect("/", code=302)
         elif len(user_service.query({})) == 0:
             return redirect("/ini_admin", code=302)
@@ -159,26 +158,111 @@ def setup_route_map(app, app_path):
         session['email'] = ""
         return '{}', 200
 
-    @app.route('/instance/<int:instance_id>', methods=['GET'])
+    @app.route('/instance/<int:instance_id>', methods=['GET', 'DELETE', "PUT"])
     def instance_detail(instance_id):
-
+        """
+        [POST]  /instance/<instance_id>
+        name, modality, description, annotator_ids(split by vbar), auditor_ids,
+        label_candidates:
+        :return:
+        """
         instance_service = InstanceService(get_conn())
-        instance_info = instance_service.query({"instance_id": instance_id})
-        if len(instance_info) == 0:
-            return jsonify({}), 200
-        label_candidate_service = LabelCandidatesService(get_conn())
-        label_candidates = label_candidate_service.query({"instance_id": instance_id})
+        label_candidates_service = LabelCandidatesService(get_conn())
+        if request.method == "GET":
+            instance_info = instance_service.query({"instance_id": instance_id})
+            if len(instance_info) == 0:
+                return jsonify({}), 200
+            label_candidate_service = LabelCandidatesService(get_conn())
+            label_candidates = label_candidate_service.query({"instance_id": instance_id})
 
-        json_result = instance_info[0]
-        json_result['label_candidates'] = label_candidates
+            json_result = instance_info[0]
+            json_result['label_candidates'] = label_candidates
 
-        return jsonify(json_result), 200
+            return jsonify(json_result), 200
+        elif request.method == "DELETE":
+            status = instance_service.delete({"instance_id": instance_id})
+            instance_service.delete_all_users_in_instance(instance_id)
+            label_candidates_service.delete({"instance_id": instance_id})
+            if status:
+                return jsonify({}), 200
+            else:
+                return jsonify({}), 404
+        elif request.method == "PUT":
 
-    @app.route('/instances', methods=['GET'])
+            instance_info = instance_service.query({"instance_id": instance_id})
+            if len(instance_info) == 0:
+                return jsonify({}), 200
+
+            data = json.loads(request.data)
+            name = data.get("name", "New instance")
+            modality = data.get("modality", "CT")
+            description = data.get("description", "")
+            # data_path = ""  # Set the data_path as default now.
+            has_audit = False
+            annotator_id = list(filter(None, str.split(data.get("annotator_id", ""), "|")))
+            auditor_id = list(filter(None, str.split(data.get("auditor_id", ""), "|")))
+            label_candidates = data.get("label_candidates", [])
+
+            instance_service.update({"instance_id": instance_id}, {
+                "name": name,
+                "modality": modality,
+                "description": description,
+                "has_audit": has_audit
+            })
+
+            instance_service.delete_all_users_in_instance(instance_id)
+            for user_id in annotator_id:
+                instance_service.insert_user_in_instance(instance_id, user_id, False)
+            for user_id in auditor_id:
+                instance_service.insert_user_in_instance(instance_id, user_id, True)
+
+            # Delete all label candidates for current instance and add again.
+            label_candidates_service.delete({"instance_id": instance_id})
+            for label in label_candidates:
+                label_type = int(label['label_type'])
+                input_type = int(label['input_type'])
+                text = label['text']
+                contour_label_value = label['contour_label_value']
+                label_candidates_service.insert(instance_id, label_type, input_type, text, contour_label_value)
+
+            return jsonify({"instance_id": instance_id}), 201
+
+    @app.route('/instances', methods=['GET', 'POST'])
     def instance_list():
+
         instance_service = InstanceService(get_conn())
-        instances = instance_service.query({})
-        return jsonify(instances), 200
+        label_candidates_service = LabelCandidatesService(get_conn())
+        if request.method == "GET":
+            instances = instance_service.query({})
+            return jsonify(instances), 200
+        elif request.method == "POST":
+            data = json.loads(request.data)
+            name = data.get("name", "New instance")
+            modality = data.get("modality", "CT")
+            description = data.get("description", "")
+            data_path = ""  # Set the data_path as default now.
+            has_audit = False
+            status = 0
+            annotator_id = list(filter(None, str.split(data.get("annotator_id", ""), "|")))
+            auditor_id = list(filter(None, str.split(data.get("auditor_id", ""), "|")))
+            label_candidates = data.get("label_candidates", [])
+
+            instance_id = instance_service.insert(name, modality, description, data_path, has_audit, 0, 0, status)
+            if instance_id == -1:
+                # Instance name already exist.
+                return jsonify({"err": "Instance Name exist"}), 409
+            for user_id in annotator_id:
+                instance_service.insert_user_in_instance(instance_id, user_id, False)
+            for user_id in auditor_id:
+                instance_service.insert_user_in_instance(instance_id, user_id, True)
+            for label in label_candidates:
+                label_type = int(label['label_type'])
+                input_type = int(label['input_type'])
+                text = label['text']
+                contour_label_value = label['contour_label_value']
+                label_candidates_service.insert(instance_id, label_type, input_type, text, contour_label_value)
+
+            return jsonify({"instance_id": instance_id}), 201
 
     @app.route('/instances/<instance_id>/studies', methods=['GET'])
     def list_studies_info(instance_id):
@@ -232,7 +316,8 @@ def setup_route_map(app, app_path):
         if status:
             return jsonify({}), 201
         else:
-            return jsonify({status:"Transaction Rollback."}), 404
+            return jsonify({status: "Transaction Rollback."}), 404
+
     @app.route('/series/<int:series_id>/labels', methods=['GET'])
     def get_labels(series_id):
         # Temporary mock the user Id.
@@ -282,10 +367,12 @@ def setup_route_map(app, app_path):
             compression = None
         start_idx = request.args.get('start_idx', default=0, type=int)
 
-        app.logger.info(f"Export all data(data:{save_data},label:{save_label}), with store type:{store_type}, split entry number:{split_entry_num}, start file idx:{start_idx}, and compression type:{compression}")
+        app.logger.info(
+            f"Export all data(data:{save_data},label:{save_label}), with store type:{store_type}, split entry number:{split_entry_num}, start file idx:{start_idx}, and compression type:{compression}")
 
         export_service = ExportService(get_conn())
-        msg = export_service.save_studies(instance_id, split_entry_num, start_idx, store_type, save_label, save_data, compression)
+        msg = export_service.save_studies(instance_id, split_entry_num, start_idx, store_type, save_label, save_data,
+                                          compression)
         return jsonify({'msg': msg}), 200
 
     @app.route('/export_label/studies/<study_id>', methods=['GET'])

@@ -18,20 +18,21 @@ class LabelCandidatesService:
         """
 
         sql = prepare_query("label_candidates", query_obj,
-                            ["candidate_id", "instance_id", "label_type", "input_type", "text"])
+                            ["candidate_id", "instance_id", "label_type", "contour_label_value", "input_type", "text"])
         cur = self.sql_connection.cursor()
         cur.execute(sql)
         result = cur.fetchall()
         result = [dict(item) for item in result]
         return result
 
-    def insert(self, instance_id, label_type, input_type, text):
+    def insert(self, instance_id, label_type, input_type, text, contour_label_value=-1):
         """
         Insert new record for LabelCandidates.
         :param instance_id:
         :param label_type:
         :param input_type:
         :param text:
+        :param contour_label_value: id for contour label. -1 for default self-increasing id.
         :return:
         """
 
@@ -44,10 +45,10 @@ class LabelCandidatesService:
         cur = self.sql_connection.cursor()
         sql, v = prepare_insert("label_candidates",
                                 {"instance_id": instance_id, "label_type": label_type, "input_type": input_type,
-                                 "text": text})
+                                 "text": text, "contour_label_value": contour_label_value})
         cur.execute(sql, v)
         self.sql_connection.commit()
-        return True
+        return cur.lastrowid
 
     def delete(self, del_condition):
         """
@@ -75,7 +76,8 @@ class LabelCandidatesService:
         if len(self.query(update_condition)) == 0:
             return False
         sql, v_tuple = prepare_update("label_candidates", update_condition, modify_obj,
-                                      ["candidate_id", "instance_id", "label_type", "input_type", "text"])
+                                      ["candidate_id", "instance_id", "label_type", "input_type", "text",
+                                       "contour_label_value"])
         cur = self.sql_connection.cursor()
         cur.execute(sql, v_tuple)
         self.sql_connection.commit()

@@ -20,7 +20,8 @@ class ExportService:
     def __init__(self, connection):
         self.conn = connection
 
-    def save_studies(self, instance_id, split_entry_num=100, start_idx=0,store_type="train", save_label=True, save_data=True, compression=None):
+    def save_studies(self, instance_id, split_entry_num=100, start_idx=0, store_type="train", save_label=True,
+                     save_data=True, compression=None):
         """
         Save all annotations and and dicom data for each study in the instance
         :param instance_id:
@@ -38,7 +39,7 @@ class ExportService:
         instance_name = instance[0]['name']
         study_service = StudiesService(self.conn)
         studies = study_service.query({"instance_id": instance_id})
-        study_num = split_entry_num*start_idx
+        study_num = split_entry_num * start_idx
 
         study_h5 = None
         time_stamp = str(int(time.time()))
@@ -88,7 +89,7 @@ class ExportService:
                 pixel_data = content['labelmap2D']['pixelData']
 
                 for label in pixel_data:
-                    pixel_data_xy = np.zeros((x_dim,y_dim))
+                    pixel_data_xy = np.zeros((x_dim, y_dim))
                     label_int = int(float(label))
                     content_1D = np.reshape(pixel_data_xy, x_dim * y_dim)
                     content_1D[pixel_data[label]] = label_int

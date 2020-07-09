@@ -5,8 +5,8 @@ from queue import Queue
 
 log = logging.getLogger(__name__)
 
-class DbPool:
 
+class DbPool:
     DATABASE_PATH = './atmi_backend/db'
     DATABASE_NAME = 'atmi_db'
     SCHEMA_NAME = 'schema.sql'
@@ -35,7 +35,6 @@ class DbPool:
             self._queue.put(self.item)
             self.item = None
 
-
     def get_db_instance(self):
         """
         Initialize database and setup tables structure.
@@ -60,6 +59,8 @@ class DbPool:
             log.warning(e)
             return None
 
+    def close_connection(self):
+        self.get_db_instance()
 
 # if __name__ == '__main__':
 #

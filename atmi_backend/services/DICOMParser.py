@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 class DICOMParser:
 
-    @staticmethod
+    @staticmethod  # noqa: C901
     def extract_series(parent_path, file_list):
         """
         Extract list of dicom by series id.
@@ -227,7 +227,7 @@ class DicomSeries(object):
         # row, column
         if 'PixelSpacing' not in ds1:
             # ds1 = list(ds1)
-            ds1.add_new(0x00280030, "PixelData", (0.5,0.5))
+            ds1.add_new(0x00280030, "PixelData", (0.5, 0.5))
             log.warning("Warning:PixelSpacing is missing, replace with (.5, .5)")
 
         sampling = float(ds1.PixelSpacing[0]), float(ds1.PixelSpacing[1])

@@ -1,6 +1,6 @@
 def to_bool_or_none(bool_str):
     if bool_str is None:
-            return None
+        return None
     if bool_str.lower() == "true":
         return True
     if bool_str.lower() == "false":

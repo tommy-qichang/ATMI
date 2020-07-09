@@ -14,14 +14,14 @@ class LabelService:
 
     def exist(self, query_obj):
         sql = prepare_exists("labels", query_obj,
-                            ["label_id", "series_id", "user_id", "file_id", "content"])
+                             ["label_id", "series_id", "user_id", "file_id", "content"])
         cur = self.sql_connection.cursor()
         cur.execute(sql)
         result = cur.fetchall()
 
         result = dict(result[0])
 
-        if len(result)>0 and dict(result[0]).values()[0] ==1:
+        if len(result) > 0 and dict(result[0]).values()[0] == 1:
             return True
 
         return False
@@ -40,7 +40,10 @@ class LabelService:
         result = cur.fetchall()
         result = [dict(item) for item in result]
         for record in result:
-            record['content'] = record['content'].decode('utf-8')
+            if isinstance(record['content'], bytes):
+                record['content'] = record['content'].decode('utf-8')
+            else:
+                record['content'] = record['content']
         return result
 
     def insert(self, series_id, user_id, file_id, content):
@@ -60,7 +63,7 @@ class LabelService:
 
         if has_record:
             status = self.update({"series_id": series_id, "user_id": user_id, "file_id": file_id},
-                        {"content": content})
+                                 {"content": content})
         else:
             sql, v = prepare_insert("labels",
                                     {"series_id": series_id, "user_id": user_id,
@@ -105,7 +108,7 @@ class LabelService:
             cur.execute(sql, v_tuple)
             self.sql_connection.commit()
 
-        except:
+        except Exception:
             self.sql_connection.rollback()
             return False
 

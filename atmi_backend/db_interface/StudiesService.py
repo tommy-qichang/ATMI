@@ -58,7 +58,7 @@ class StudiesService:
             return False
         sql = prepare_delete("studies", del_condition,
                              ['study_id', 'instance_id', 'patient_uid', 'study_uid', 'suid', 'folder_name',
-                              'total_files_number','annotators','auditors'])
+                              'total_files_number', 'annotators', 'auditors'])
 
         cur = self.sql_connection.cursor()
 
@@ -77,7 +77,7 @@ class StudiesService:
             return False
         sql, v_tuple = prepare_update("studies", update_condition, modify_obj,
                                       ['study_id', 'suid', 'patient_uid', 'study_uid', 'instance_id', 'folder_name',
-                                       'total_files_number','annotators','auditors'])
+                                       'total_files_number', 'annotators', 'auditors'])
         cur = self.sql_connection.cursor()
 
         cur.execute(sql, v_tuple)

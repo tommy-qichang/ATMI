@@ -18,9 +18,9 @@ class TestSeriesExtractionService:
     def test_list_files(self):
         se = SeriesExtractionService()
         list = se.list_files("./tests/services/sample_data")
-        assert len(list) == 4
+        assert len(list) == 3
         assert os.path.join("./tests/services/sample_data", "Dicom_691_2") in list
-        assert os.path.join("./tests/services/sample_data", "Raw_1003", "SAX_tagging_apex") in list
+        assert os.path.join("./tests/services/sample_data", "Raw_1003", "3CH_tagging") in list
         assert list[os.path.join("./tests/services/sample_data", "Dicom_691_2")][0] == "IM-0118-0001.dcm"
 
     def test_extract_series_from_path(self):
@@ -28,7 +28,8 @@ class TestSeriesExtractionService:
         data_path = "./tests/services/sample_data"
         series_list = se.extract_series_from_path(data_path)
 
-        assert len(series_list) == 4
-        assert len(series_list["./tests/services/sample_data/Dicom_691_2"]) == 1
-        assert len(series_list["./tests/services/sample_data/Raw_1003/3CH_tagging"]) == 2
-        assert [i for i in series_list.keys()][0] == "./tests/services/sample_data/Dicom_691_2"
+        assert len(series_list) == 2
+        assert len(series_list['1.2.840.113619.2.248.116520525445.30208.1391089807062.2'][
+                       "./tests/services/sample_data/Dicom_691_2"]) == 1
+        assert len(series_list['1.2.840.114350.2.232.2.798268.2.230853335.1'][
+                       "./tests/services/sample_data/Raw_1003/3CH_tagging"]) == 1

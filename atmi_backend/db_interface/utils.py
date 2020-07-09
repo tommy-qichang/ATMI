@@ -14,9 +14,11 @@ def gen_multiple_condition(query_obj, candidate_keys=None):
 
     return " and ".join(segment)
 
+
 def prepare_exists(table_name, query_obj={}, candidate_keys=None):
     query_str = prepare_query(table_name, query_obj, candidate_keys)
     return f'SELECT EXISTS({query_str});'
+
 
 def prepare_query(table_name, query_obj={}, candidate_keys=None):
     """

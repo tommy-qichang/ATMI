@@ -4,9 +4,9 @@ import os
 import sqlite3
 
 from flask import Flask
+from atmi_backend.db_interface.utils import prepare_query, prepare_insert, prepare_delete, prepare_update
 
 app = Flask("atmi.app")
-from atmi_backend.db_interface.utils import prepare_query, prepare_insert, prepare_delete, prepare_update
 
 
 class UserService:

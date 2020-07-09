@@ -30,29 +30,29 @@ class TestInstanceService:
         instance_service = InstanceService(conn)
 
         # query_mock = mocker.patch.object(instance_service, "query", return_value=None)
-        insert_status = instance_service.insert("Stroke Annotation", "CT", "Stroke annotation descriptions.",
-                                                "./data/stroke_instance",
-                                                0, 50, 10)
+        insert_rowid = instance_service.insert("Stroke Annotation", "CT", "Stroke annotation descriptions.",
+                                               "./data/stroke_instance",
+                                               0, 50, 10, 0)
 
         # assert query_mock.called
         # assert query_mock.call_count == 2
-        assert insert_status is True
+        assert insert_rowid == 1
 
         cursor.execute("SELECT * from instances")
         records = cursor.fetchall()
         assert len(records) == 1
 
         # name is a unique key, should not insert two times.
-        result = instance_service.insert("Stroke Annotation", "CT2", "Stroke annotation descriptions2.",
-                                         "./data/stroke_instance2",
-                                         0, 50, 10)
-        assert result is False
+        result_rowid = instance_service.insert("Stroke Annotation", "CT", "Stroke annotation descriptions2.",
+                                               "./data/stroke_instance2",
+                                               0, 50, 10, 0)
+        assert result_rowid == -1
 
-        # data_path is a unique key, should not insert two times.
-        result = instance_service.insert("Stroke Annotation2", "CT2", "Stroke annotation descriptions2.",
-                                         "./data/stroke_instance",
-                                         0, 50, 10)
-        assert result is False
+        # name is different, insert.
+        result_rowid = instance_service.insert("Stroke Annotation2", "CT", "Stroke annotation descriptions2.",
+                                               "./data/stroke_instance",
+                                               0, 50, 10, 0)
+        assert result_rowid == 2
 
     def test_query_one_record(self):
         ini_service = InitialService()
@@ -62,7 +62,7 @@ class TestInstanceService:
         # In case the record doesn't exist.
         try:
             instance_service.insert("Stroke Annotation", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_instance", 0, 50, 10)
+                                    "./data/stroke_instance", 0, 50, 10, 0)
         except Error:
             print(Error)
             pass
@@ -84,9 +84,9 @@ class TestInstanceService:
         # In case the record doesn't exist.
         try:
             instance_service.insert("Stroke Annotation2", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_instance2", 0, 50, 10)
+                                    "./data/stroke_instance2", 0, 50, 10, 0)
             instance_service.insert("Stroke Annotation3", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_instance3", 0, 50, 10)
+                                    "./data/stroke_instance3", 0, 50, 10, 0)
         except Error:
             pass
 
@@ -115,9 +115,9 @@ class TestInstanceService:
         # In case the record doesn't exist.
         try:
             instance_service.insert("Stroke Annotation-del1", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_instance-del1", 0, 50, 10)
+                                    "./data/stroke_instance-del1", 0, 50, 10, 0)
             instance_service.insert("Stroke Annotation-del2", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_instance-del2", 0, 50, 10)
+                                    "./data/stroke_instance-del2", 0, 50, 10, 0)
         except Error:
             pass
         result = instance_service.delete({"name": "Stroke Annotation-del1"})
@@ -157,9 +157,9 @@ class TestInstanceService:
         # In case the record doesn't exist.
         try:
             instance_service.insert("Stroke Annotation-user", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_instance-user", 0, 50, 10)
+                                    "./data/stroke_instance-user", 0, 50, 10, 0)
             instance_service.insert("Stroke Annotation-user2", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_instance-user2", 0, 50, 10)
+                                    "./data/stroke_instance-user2", 0, 50, 10, 0)
             user_service.insert("tommy.qichang@gmail.com", "qi chang", "*HGE&EF#", "", 1)
             user_service.insert("mk@gmail.com", "Michael Jackson", "*HGE&EF#", "", 0)
             user_service.insert("mozart@gmail.com", "Mozart", "*HGE&EF#", "", 0)

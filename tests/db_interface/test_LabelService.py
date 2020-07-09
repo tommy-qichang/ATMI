@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 
+from atmi_backend.db_interface.DbPool import DbPool
 from atmi_backend.db_interface.InitialService import InitialService
 from atmi_backend.db_interface.LabelService import LabelService
 from tests.db_interface import setup_sql, teardown_sql
@@ -12,7 +13,7 @@ class TestLabelCandidatesService:
     def setup_class(self):
         print("Setup Testing Environment....")
         setup_sql()
-        qry = open(os.path.join(InitialService.DATABASE_PATH, "mock_data.sql"), 'r').read()
+        qry = open(os.path.join(DbPool.DATABASE_PATH, "mock_data.sql"), 'r').read()
 
         ini_service = InitialService()
         conn = ini_service.get_connection()

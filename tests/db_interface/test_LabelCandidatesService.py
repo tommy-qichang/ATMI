@@ -33,11 +33,11 @@ class TestLabelCandidatesService:
         assert insert_status is False
 
         instance_service = InstanceService(conn)
-        instance_service.insert("Stroke annotation", "CT", "description...", "./data/stroke_data", 0, 100, 10)
+        instance_service.insert("Stroke annotation", "CT", "description...", "./data/stroke_data", 0, 100, 10, 0)
         last_rowid = instance_service.query({"name": "Stroke annotation"})[0]["instance_id"]
 
-        insert_status = labelcandidates_service.insert(last_rowid, 0, None, "Ischemic Stroke")
-        assert insert_status is True
+        insert_rowid = labelcandidates_service.insert(last_rowid, 0, None, "Ischemic Stroke")
+        assert insert_rowid == 1
 
     def test_query_one_record(self):
         ini_service = InitialService()
@@ -48,7 +48,7 @@ class TestLabelCandidatesService:
         # In case the record doesn't exist.
         try:
             instance_service.insert("Stroke annotation", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_data", 0, 50, 10)
+                                    "./data/stroke_data", 0, 50, 10, 0)
         except Error:
             print(Error)
             pass
@@ -65,7 +65,7 @@ class TestLabelCandidatesService:
         # In case the record doesn't exist.
         try:
             instance_service.insert("Stroke Annotation-del1", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_instance-del1", 0, 50, 10)
+                                    "./data/stroke_instance-del1", 0, 50, 10, 0)
         except Error:
             pass
 
@@ -95,7 +95,7 @@ class TestLabelCandidatesService:
         instance_service = InstanceService(conn)
         try:
             instance_service.insert("Stroke Annotation-update1", "CT", "Stroke annotation descriptions.",
-                                    "./data/stroke_instance-update1", 0, 50, 10)
+                                    "./data/stroke_instance-update1", 0, 50, 10, 0)
         except Error:
             pass
 

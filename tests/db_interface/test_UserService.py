@@ -88,13 +88,13 @@ class TestUserService:
             user_result = user_service.query({'email': 'tommy.qichang@gmail.com'})
             assert user_result[0]['name'] == 'qi chang'
             assert 'pwd' not in user_result
-            assert user_result[0]['init_code'] == None
+            assert user_result[0]['init_code'] is None
             assert user_result[0]['user_type'] == 0
 
             user_result = user_service.query({'email': 'tommy.qichang@gmail.com', 'pwd': '**(SDFDSF'})
             assert user_result[0]['name'] == 'qi chang'
             assert 'pwd' not in user_result
-            assert user_result[0]['init_code'] == None
+            assert user_result[0]['init_code'] is None
             assert user_result[0]['user_type'] == 0
 
             user_result = user_service.query({'email': 'tommy.qichang@gmail.com', 'pwd': 'WrongPwd'})
@@ -119,7 +119,6 @@ class TestUserService:
 
         user_result = user_service.query({'email': 'tommy.qichang@gmail.com', 'pwd': '**(SDFDSF'})
         assert len(user_result) == 0
-
 
         # not existing email will return False
         result = user_service.update("not_existy@gmail.com",

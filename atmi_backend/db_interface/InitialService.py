@@ -1,16 +1,13 @@
-import sqlite3
-from sqlite3 import Error
-import os
-
 from atmi_backend.db_interface.DbPool import DbPool
 
 db_pool = None
 
-class InitialService:
 
+class InitialService:
 
     def __init__(self, pool_num=20):
         global db_pool
+        self.db_pool = db_pool
         if db_pool is None:
             db_pool = DbPool(count=pool_num)
 
@@ -21,7 +18,6 @@ class InitialService:
         """
         with db_pool as conn:
             return conn
-
 
     def has_records(self):
         """

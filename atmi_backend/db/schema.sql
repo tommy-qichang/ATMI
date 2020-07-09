@@ -18,10 +18,11 @@ CREATE TABLE IF NOT EXISTS instances
     name          TEXT    NOT NULL UNIQUE,
     modality      TEXT,
     description   TEXT,
-    data_path     TEXT    NOT NULL UNIQUE,
+    data_path     TEXT    NOT NULL,
     has_audit     INTEGER NOT NULL, --0: not have auditor, 1: have auditor
     study_num     INTEGER NOT NULL,
-    annotated_num INTEGER NOT NULL
+    annotated_num INTEGER NOT NULL,
+    status        INTEGER    --0:initialized;1:importing data;2:annotating;3:finished;
 );
 
 
@@ -40,11 +41,12 @@ CREATE TABLE IF NOT EXISTS instances_users
 
 CREATE TABLE IF NOT EXISTS label_candidates
 (
-    candidate_id INTEGER PRIMARY KEY,
-    instance_id  INTEGER,
-    label_type   INTEGER NOT NULL, --0: contour label, 1: study label
-    input_type   INTEGER,          --label_type:0 means annotation label, so no input textbox needed. 1: select box. 2: text input.
-    text         TEXT,
+    candidate_id        INTEGER PRIMARY KEY,
+    instance_id         INTEGER,
+    label_type          INTEGER NOT NULL, --0: contour label, 1: study label
+    contour_label_value INTEGER,          --the real contour value for each label.
+    input_type          INTEGER,          --label_type:0 means annotation label, so no input textbox needed. 1: select box. 2: text input.
+    text                TEXT,
     FOREIGN KEY (instance_id) REFERENCES instances (instance_id) ON DELETE SET NULL ON UPDATE NO ACTION
 );
 
@@ -54,7 +56,7 @@ CREATE TABLE IF NOT EXISTS studies
     study_id           INTEGER PRIMARY KEY,
     instance_id        INTEGER,
     suid               TEXT,
-    patient_uid         TEXT,
+    patient_uid        TEXT,
     study_uid          TEXT,
     folder_name        TEXT,
     total_files_number INTEGER NOT NULL,
@@ -104,11 +106,11 @@ CREATE TABLE IF NOT EXISTS series
 
 CREATE TABLE IF NOT EXISTS labels
 (
-    label_id     INTEGER PRIMARY KEY,
-    series_id    INTEGER,
-    user_id      INTEGER,
-    file_id      TEXT,
-    content      TEXT,
+    label_id  INTEGER PRIMARY KEY,
+    series_id INTEGER,
+    user_id   INTEGER,
+    file_id   TEXT,
+    content   TEXT,
     FOREIGN KEY (series_id) REFERENCES series (series_id) ON DELETE SET NULL ON UPDATE NO ACTION,
     FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE SET NULL ON UPDATE NO ACTION
 );
