@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
-    <title>Flask with WebPack</title>
+    <title>ATMI - Annotation Tool for Medical Image</title>
     {{ stylesheet_tag("main_css") | safe }}
-  </head>
-  <body>
-    <div id=main></div>
-    <div id="root"></div>
-    {{ javascript_tag("app_js") | safe }}
-  </body>
+    <script>
+        ATMI_STATUS = {'username': '{{data.username}}', 'ini_admin':{{data.ini_admin}}}
+    </script>
+</head>
+<body>
+<div id=main></div>
+<div id="root"></div>
+{{ javascript_tag("app_js") | safe }}
+</body>
 </html>

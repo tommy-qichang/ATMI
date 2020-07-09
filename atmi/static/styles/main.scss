@@ -1,9 +1,62 @@
-$font-stack: Droid Sans, Arial, Helvetica, sans;
-$primary-color: #222;
+body {
+  background-color: #343434;
+  color: #969596;
+  font-size: 16px;
+  font-family: "Helvetica Neue", Helvetica, Arial;
+  margin: 0;
+  padding: 0;
+}
 
-//body {
-//    font-family: $font-stack;
-//    color: $primary-color;
-//}
+#root > div {
+  height: 100vh;
+  display: flex;
+  flex-flow: column;
+}
+.clearfix{
+  overflow: auto;
+}
 
-@import "demo";
+.mainnav {
+  z-index: 100;
+  width: 100%;
+  flex: 0 1 auto;
+}
+
+
+.mainPanel {
+  width: 80%;
+  flex: 1 1 auto;
+  display: flex;
+}
+.viewportElement{
+  height: calc(100vh - 3.4rem);
+}
+
+.mainlabel {
+  position: absolute;
+  right: 0;
+  top: 3.4rem;
+  width: 20%;
+}
+
+.hide{
+  display: none;
+}
+.arrow-right {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid black;
+  position: absolute;
+  right: 0.2rem;
+  top:0.2rem;
+}
+a {
+  text-decoration: none;
+  font-size: 14px;
+  color: black;
+}
+a:hover{
+  color:red;
+}

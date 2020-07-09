@@ -1,0 +1,66 @@
+.studies{
+    position: absolute;
+    top: 2.4rem;
+    left:0;
+    color: #333;
+    padding: 0.5rem;
+    width: 30.2rem;
+    text-align: left;
+    background-color: rgba(20,20,20,0.5);
+    font-size: 14px;
+    max-height: 35rem;
+    padding-right: 14px;
+    overflow: auto;
+}
+.studies div{
+    position: relative;
+}
+
+.studies li{
+    list-style-type: none;
+    background-color: #A5A5A5;
+    border: 1px solid #424242;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    padding: 0.6rem 0.3rem;
+    margin: 0.3rem 0;
+    width:14.3rem;
+}
+.studies>li:hover{
+    color: lightsalmon;
+}
+.studies>li>div{
+    overflow-wrap: break-word;
+}
+.series{
+    position: fixed;
+    left: 21rem;
+    top: 3rem;
+    padding: 0.5rem;
+    background-color: rgba(20,20,20,0.5);
+    color: #333!important;
+    max-height: 35rem;
+    overflow: scroll;
+    border-radius: 5px;
+}
+.series li{
+    min-width: 10rem;
+    list-style-type: none;
+    background-color: #A5A5A5;
+    border: 1px solid #424242;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    padding: 0.6rem 0.3rem;
+    margin: 0.3rem 0;
+    position: relative;
+}
+
+.hide{
+    display: none;
+}
+
+.selected{
+    background-color: lightsteelblue!important;
+}

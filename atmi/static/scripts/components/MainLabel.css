@@ -1,0 +1,132 @@
+
+.title {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #333;
+    background: #424242;
+}
+.status{
+    float: left;
+}
+.autosave{
+    font-size: 10px;
+    float: left;
+    padding: 1px 4px 3px 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    color: black;
+    cursor:pointer;
+}
+
+.autosave_ok{
+    background-color: limegreen;
+}
+.autosave_err{
+    background-color: #aaa;
+}
+
+.labelitem {
+    margin: 0.5rem 1rem;
+    padding: 0.8rem 1rem 0.8rem 0;
+    cursor: pointer;
+    text-align: left;
+    background-color: #A5A5A5;
+    color: #333;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    position: relative;
+    border-bottom: 1px solid #424242;
+}
+
+.labelitem i {
+    display: block;
+    float: left;
+    margin: -0.6rem 0 0 0.3rem;
+    height: 5px;
+    width: 5px;
+    background-color: #fff;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.labelitem:hover i {
+    background: tomato;
+}
+
+.studylabelitem {
+    margin: 0.5rem 1rem;
+    padding: 0.8rem 1rem 0.8rem 0;
+    cursor: pointer;
+    text-align: left;
+
+}
+
+.studylabelitem input, .studylabelitem select {
+    width: 8rem;
+}
+
+.active {
+    background: tomato !important;
+}
+
+.labeled {
+    background-color: lightsteelblue;
+}
+
+.delete {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 2rem;
+    padding: 0.8rem 0;
+}
+
+.delete:hover, .hide:hover {
+    color: tomato;
+}
+
+.hide {
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    width: 2rem;
+    padding: 0.8rem 0;
+}
+
+.icon {
+    display: block;
+    float: left;
+    margin-right: 5px;
+    margin-left: 2rem;
+    height: 1rem;
+    width: 1rem;
+    border: 1px solid #969696;
+}
+
+.table {
+    display: table;
+}
+
+.table input, .table select {
+    -webkit-border-radius: .25rem;
+    -moz-border-radius: .25rem;
+    border-radius: .25rem;
+    border: 1px solid #ced4da;
+    line-height: 1.5;
+    padding: .2rem;
+    width: 100%;
+    margin: .2rem 0
+
+}
+
+.row {
+    display: table-row;
+}
+
+.cell {
+    display: table-cell;
+    padding: .5rem;
+}

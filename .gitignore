@@ -24,6 +24,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+atmi/node_modules
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -104,3 +105,7 @@ venv.bak/
 .mypy_cache/
 
 .idea/
+/data/
+
+# IDE config
+.vscode/

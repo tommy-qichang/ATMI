@@ -1,5 +1,4 @@
   mypy==0.641
-  black==18.9b0
   pylama>=7,<8
   pylint>=2,<3
   snapshottest>=0,<1
@@ -10,3 +9,4 @@
   pytest-datadir>=1,<2
   pytest-flask>=0,<1
   pytest-html>=1
+  simpleitk==1.2.0

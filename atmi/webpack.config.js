@@ -2,7 +2,8 @@ var path = require("path"),
     webpack = require("webpack"),
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
     ManifestRevisionPlugin = require("manifest-revision-webpack-plugin"),
-    MiniCssExtractPlugin = require('mini-css-extract-plugin');
+    MiniCssExtractPlugin = require('mini-css-extract-plugin'),
+    CleanObsoleteChunks = require('webpack-clean-obsolete-chunks');
 
 const isDevelopment = !(process.env.NODE_ENV === 'production');
 
@@ -13,6 +14,7 @@ var root = "./static";
 
 module.exports = {
     entry: {
+        main_js: [root + "/scripts/main.js"],
         app_js: [
             root + "/scripts/app.js"
         ],
@@ -20,7 +22,14 @@ module.exports = {
             root + "/styles/main.scss"
         ]
     },
+
+    devtool: 'source-map',
+
     output: {
+
+        //publicPath: '/',
+		devtoolModuleFilenameTemplate: '../[resource-path]',
+
         path: path.resolve(__dirname, 'public'),
         publicPath: "/assets/",
         filename: "[name].[hash].js",
@@ -40,9 +49,80 @@ module.exports = {
                 exclude: /node_modules/,
                 loader: "babel-loader",
                 query: {
-                    presets: ['env', 'react']
+                    presets: ['@babel/preset-env', '@babel/preset-react']
                 }
-            }, {
+            },
+            {
+                test: /\.s(a|c)ss$/,
+                exclude: /\.module.(s(a|c)ss)$/,
+                loader: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    {
+                        loader: 'sass-loader',
+                        options: {
+                            sourceMap: isDevelopment
+                        }
+                    }
+                ]
+            },
+             {//loader for common css files
+                test: /\.css$/,
+                loader: "style-loader!css-loader?modules",
+                exclude: /node_modules/
+            },
+
+            {//loader for antd css files
+              test:/\.css$/,
+              exclude:/static/,
+              use:[
+                  { loader: "style-loader",},
+                  {
+                      loader: "css-loader",
+                      options:{
+                          importLoaders:1
+                      }
+                  }
+              ]
+            },
+            {
+                test: /\.(png|jpg|gif|svg)$/,
+                loader: 'file-loader',
+                options: {
+                    name: '/static/img/[name].[ext]?[hash]'
+                }
+            }
+
+            /* {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true
+                        }
+                    }]
+            } */
+/*             {
+                test: /\.m?js$/,
+                exclude: /(node_modules|bower_components)/,
+                use: {
+                  loader: 'babel-loader',
+                  options: {
+                    presets: ['@babel/preset-env']
+                  }
+                }
+              }, */
+/*             {
+                test: /\.js$/i,
+                exclude: /node_modules/,
+                loader: "babel-loader",
+                query: {
+                    presets: ['@babel/preset-env', '@babel/preset-react']
+                }
+            },  */
+           /*  {
                 test: /\.s(a|c)ss$/,
                 exclude: /\.module.(s(a|c)ss)$/,
                 loader: [
@@ -57,8 +137,15 @@ module.exports = {
                 ]
             }, {
                 test: /\.css$/,
-                loader: 'style!css-loader?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]'
-            }
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true
+                        }
+                    }]
+            }*/
         ]
     },
     plugins: [
@@ -71,6 +158,7 @@ module.exports = {
             filename: '[name].[hash].css',
             chunkFilename: '[id].[hash].css'
         }),
+        new CleanObsoleteChunks()
         // new webpack.optimize.UglifyJsPlugin(),
         // new webpack.optimize.DedupePlugin(),
         // new webpack.DefinePlugin({
@@ -78,5 +166,8 @@ module.exports = {
         //         NODE_ENV: '"production"'
         //     }
         // })
-    ]
+    ],
+    node: {
+        fs: "empty"
+    }
 };
