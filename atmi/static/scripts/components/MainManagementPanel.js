@@ -31,7 +31,8 @@ export default class MainManagementPanel extends React.Component {
         userTableData: [],
         instanceTableData: [],
         hideMainPanel: false,
-        hideStudyList: true
+        hideStudyList: true,
+        defaultNewLabelValue: 1
     };
 
     newUsername = null;
@@ -45,6 +46,7 @@ export default class MainManagementPanel extends React.Component {
     modifyInstancePath = null;
     labelCandidatesBuffer = [];
     annotatorCandidatesBuffer = [];
+    existingMaxLabelValue = 0;
 
     //For forntend dev
 /*     
@@ -216,6 +218,8 @@ export default class MainManagementPanel extends React.Component {
         //New added labels are cached in this.labelCandidatesBuffer
         //New added annotatos are cached in this.annotatorCandidatesBuffer
 
+        
+
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
         this.setState({
@@ -266,6 +270,9 @@ export default class MainManagementPanel extends React.Component {
     };
 
     handleAddLabel = e => {
+
+        if(this.newLabelName.input.value === "")
+
         this.labelCandidatesBuffer.push({
             name: this.newLabelName.input.value,
             value: this.newLabelValue.input.value,
@@ -275,6 +282,11 @@ export default class MainManagementPanel extends React.Component {
             labelCandidatesBuffer: this.labelCandidatesBuffer,
             //colorBlockColor: "#FF8000"
         });
+        
+        this.existingMaxLabelValue = 
+        parseInt(this.newLabelValue.input.value)>this.existingMaxLabelValue?
+        parseInt(this.newLabelValue.input.value):this.existingMaxLabelValue;
+
         this.newLabelName.input.value = "";
         this.newLabelValue.input.value = "";
     };
@@ -852,7 +864,7 @@ export default class MainManagementPanel extends React.Component {
                                             ref={target => (this.newLabelName = target)} />
                                     </Col>
                                     <Col span={4}>
-                                        <Input placeholder="1"
+                                        <Input placeholder={this.state.defaultNewLabelValue}
                                             size="small"
                                             style={{ fontStyle: "italic" }}
                                             ref={target => (this.newLabelValue = target)} />
