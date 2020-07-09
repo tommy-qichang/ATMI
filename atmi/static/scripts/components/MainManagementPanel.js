@@ -250,13 +250,15 @@ export default class MainManagementPanel extends React.Component {
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
         this.newInstanceModality = "CT";
+        this.existingMaxLabelValue = 0;
         this.setState({
             showAddInstance: false,
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
             hideAddLabelControls: false,
-            hideAddAnnotatorControls: false
+            hideAddAnnotatorControls: false,
+            defaultNewLabelValue: 1
         });
     };
 
@@ -264,13 +266,15 @@ export default class MainManagementPanel extends React.Component {
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
         this.newInstanceModality = "CT";
+        this.existingMaxLabelValue = 0;
         this.setState({
             showAddInstance: false,
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
             hideAddLabelControls: false,
-            hideAddAnnotatorControls: false
+            hideAddAnnotatorControls: false,
+            defaultNewLabelValue: 1
         });
     };
 
@@ -292,29 +296,71 @@ export default class MainManagementPanel extends React.Component {
 
     onLabelCloseIconClick = e => {
         //console.log("e.target.dataset.index: ", e.currentTarget.dataset.index);
+        let deletedValue = this.labelCandidatesBuffer[e.currentTarget.dataset.index].value;        
         this.labelCandidatesBuffer.splice(e.currentTarget.dataset.index, 1);
+        if(this.labelCandidatesBuffer.length === 0)
+        {
+            this.existingMaxLabelValue = 0;
+        }
+        else if(deletedValue === this.existingMaxLabelValue)
+        {
+            let secondMaxValue = 1;
+            this.labelCandidatesBuffer.forEach(element => {
+                if(element.value > secondMaxValue)
+                {
+                    secondMaxValue = element.value;
+                }
+            });
+            this.existingMaxLabelValue = secondMaxValue;
+        }
+
         this.setState({
-            labelCandidatesBuffer: this.labelCandidatesBuffer
+            labelCandidatesBuffer: this.labelCandidatesBuffer,
+            defaultNewLabelValue: this.existingMaxLabelValue + 1
         });
     };
 
     handleAddLabel = e => {
-
-        if(this.newLabelName.input.value === "")
+        //Verify the input
+        if(this.newLabelName.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "") === "")
+        {
+            message.error("Label name can not be empty");
+            return;
+        }
+        if(this.newLabelValue.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "") === "")
+        {
+            message.error("Label value can not be empty");
+            return;
+        }
+        let inputValue = parseInt(this.newLabelValue.input.value);
+        if(!inputValue)
+        {
+            message.error("Label value must be a number");
+            return;
+        }
+        if(this.labelCandidatesBuffer.findIndex((element, index, arr) => {
+            return element.value === inputValue;
+        }) > -1) 
+        {
+            message.error("This value of label has already existed");
+            return;
+        }
 
         this.labelCandidatesBuffer.push({
             name: this.newLabelName.input.value,
-            value: this.newLabelValue.input.value,
+            value: parseInt(this.newLabelValue.input.value),
             //color: this.state.colorBlockColor
         });
-        this.setState({
-            labelCandidatesBuffer: this.labelCandidatesBuffer,
-            //colorBlockColor: "#FF8000"
-        });
-        
+
         this.existingMaxLabelValue = 
         parseInt(this.newLabelValue.input.value)>this.existingMaxLabelValue?
         parseInt(this.newLabelValue.input.value):this.existingMaxLabelValue;
+
+        this.setState({
+            labelCandidatesBuffer: this.labelCandidatesBuffer,
+            defaultNewLabelValue: this.existingMaxLabelValue + 1
+            //colorBlockColor: "#FF8000"
+        });
 
         this.newLabelName.input.value = "";
         this.newLabelValue.input.value = "";
