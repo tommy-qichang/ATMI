@@ -1,9 +1,7 @@
-import pkg_resources
-
 from os import environ, path
+
 from flask import Flask, render_template, send_from_directory
 from flask_webpack import Webpack
-
 
 # __version__ = pkg_resources.require("atmi")[0].version
 here = path.abspath(path.dirname(__file__))
