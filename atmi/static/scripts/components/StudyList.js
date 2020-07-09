@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Col, Icon, Input, message, Modal, Progress, Row, Select, Table } from 'antd';
 import styles from '../../styles/ManagementPanel.css';
-import axios from "axios";
+//import axios from "axios";
 
 export default class StudyList extends React.Component {
 
