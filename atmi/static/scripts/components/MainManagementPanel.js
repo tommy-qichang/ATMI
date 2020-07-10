@@ -20,7 +20,7 @@ export default class MainManagementPanel extends React.Component {
         showAddUser: false,
         showAddInstance: false,
         showModifyInstance: false,
-        //showInstanceDetail: false,
+        showInstanceDetail: false,
         hideColorPicker: true,
         colorBlockColor: "#FF8000",
         colorPickerColor: "#FF8000",
@@ -30,9 +30,11 @@ export default class MainManagementPanel extends React.Component {
         hideAddAnnotatorControls: false,
         userTableData: [],
         instanceTableData: [],
+        studiesListTableData: [],
         hideMainPanel: false,
         hideStudyList: true,
-        defaultNewLabelValue: 1
+        defaultNewLabelValue: 1,
+        current_instance_id: ""
     };
 
     newUsername = null;
@@ -50,7 +52,7 @@ export default class MainManagementPanel extends React.Component {
     existingMaxLabelValue = 0;
 
     //For forntend dev
-/*     
+     
     instanceTableData = [
         {
             name: "001001",
@@ -68,7 +70,7 @@ export default class MainManagementPanel extends React.Component {
         }
     ];
 
-  */
+
 /*     userTableData = [
         {
             username: "fuhua06@gmail.com",
@@ -422,7 +424,45 @@ export default class MainManagementPanel extends React.Component {
     };
 
     onInstanceDetailClick = e => {
-        this.props.onInstanceDetailClick();
+        //this.props.onInstanceDetailClick();
+        let instance_id = e.target.dataset.instanceid;
+        let instance_name = e.target.dataset.instancename;
+
+        // name: "Study 1",
+        // path: "D:\\dev\\projects\\Git repositories\\ATMI\\",
+        // annotators: "calkufu@hotmail.com",
+        // auditors: "fuhua06@gmail.com",
+        // filesNo: 5,
+        // status: "Ready"
+
+        axios.get("/instances/" + instance_id + "/studies").then(res => {
+            let studyTableData = [];
+            const studies = res.data;
+            for (let i = 0; i < studies.length; i++) {
+                status = studies[i].status;
+                if (status === "1") status = "Ready to annotate.";
+                else if (status === "2") status = "Auditing";
+                else if (status === "3") status = "Finished";
+                studyTableData.push({
+                    name: studies[i].study_uid,
+                    instance_id: instance_id,
+                    study_id: studies[i].study_id,
+                    annotators: studies[i].annotators,
+                    auditors: studies[i].auditors,
+                    status: status,
+                    path: eval(studies[i].folder_name)[0] + "...",
+                    file_number: studies[i].total_files_number
+                })
+            }
+            this.setState({
+                showInstanceDetail: true,
+                "studiesListTableData": studyTableData,
+                current_instance_id: instance_name
+            })
+        }).catch(error => {
+            message.error('Studies load error');
+            console.log(error);
+        });
     };
 
     onModifyInstanceClick = (record) => {
@@ -458,6 +498,12 @@ export default class MainManagementPanel extends React.Component {
 
     onNewInstanceModalityChange = (value) => {
         this.newInstanceModality = value;
+    }
+
+    handleInstanceDetailOk = e => {
+        this.setState({
+            showInstanceDetail: false
+        });
     }
 
     userTableColumns = [
@@ -521,8 +567,9 @@ export default class MainManagementPanel extends React.Component {
             render: (text, record) => (
                 <div
                     className={(record.name === this.state.instanceNameEntered) ? styles.highightTableRow : styles.font}>
-                    <a href="javascript:;" title="Show studies list" style={{ color: "#0099FF" }}
-                        onClick={this.onInstanceDetailClick} data-instancename={text}>
+                    <a href="javascript:void(0);" title="Show studies list" style={{ color: "#0099FF" }}
+                        onClick={this.onInstanceDetailClick} data-instancename={text}
+                        data-instanceid={record.instanceid}>
                         {text}
                     </a>
                 </div>
@@ -603,7 +650,8 @@ export default class MainManagementPanel extends React.Component {
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/details.png" title='Show studies list'
                                 alt='Show studies list' style={{ width: 18, height: 18 }}
-                                onClick={this.onInstanceDetailClick}></img></a>
+                                 onClick={this.onInstanceDetailClick} data-instancename={text}
+                                data-instanceid={record.instanceid}/></a>
                         </Col>
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/modify.png" title='Modify' alt='Modify'
@@ -622,6 +670,59 @@ export default class MainManagementPanel extends React.Component {
                     </Row>
                 </div>
             )
+        }
+    ];
+
+    studiesListTableColumns = [
+        {
+            title: 'Study ID',
+            dataIndex: 'name',
+            key: 'name',
+            width: "16%",
+            align: "center",
+            render: (text, record) => (
+                <div>
+                    <a href={"workbench/instance/" + record.instance_id + "/study/" + record.study_id} target="_blank"
+                       title="Show studies list" style={{color: "#0099FF"}}>
+                        {text}
+                    </a>
+                </div>
+            )
+        },
+        {
+            title: 'Study Path',
+            dataIndex: 'path',
+            key: 'path',
+            width: "24%",
+            align: "center"
+        },
+        {
+            title: 'Annotators',
+            dataIndex: 'annotators',
+            key: 'annotators',
+            width: "16%",
+            align: "center"
+        },
+        {
+            title: 'Auditors',
+            dataIndex: 'auditors',
+            key: 'auditors',
+            width: "16%",
+            align: "center"
+        },
+        {
+            title: 'Total Files Number',
+            dataIndex: 'file_number',
+            key: 'file_number',
+            width: "10%",
+            align: "center"
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            width: "18%",
+            align: "center"
         }
     ];
 
@@ -1322,6 +1423,51 @@ export default class MainManagementPanel extends React.Component {
                             </div>
                         </div>
                     </div>
+                </Modal>
+
+                <Modal
+                    title={(<div style={{height: 12}}>Studies List</div>)}
+                    width="85%"
+                    visible={this.state.showInstanceDetail}
+                    onOk={this.handleInstanceDetailOk}
+                    onCancel={this.handleInstanceDetailOk}
+                    destroyOnClose={true}
+                    footer={[
+                        <Button key="submit" type="primary" onClick={this.handleInstanceDetailOk}>
+                            Ok
+                        </Button>,
+                        <Button key="back" onClick={this.handleInstanceDetailOk}>
+                            Cancel
+                        </Button>,
+                    ]}
+                    bodyStyle={{marginTop: 6, paddingTop: 6}}
+                >
+                    <Row type="flex" justify="center" align="middle">
+                        <Col span={24}>
+                            <div style={{textAlign: "center"}}>
+                                <h2>Studies in {this.state.current_instance_id}</h2>
+                            </div>
+                        </Col>
+                    </Row>
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <Table columns={this.studiesListTableColumns}
+                                   dataSource={this.state.studiesListTableData}
+                                /* bordered  */
+                                   size="middle"
+                                   loading={this.state.instanceTableLoading}
+                                   actionToken={this.state.instanceTableActionToken}
+                                   onRow={this.onInstanceTableRow}
+                                //rowClassName={this.setRowClassName}
+                                   pagination={{
+                                       current: this.state.currentInstanceTablePage,
+                                       onChange: this.onInstanceTablePageChange,
+                                       showSizeChanger: true,
+                                       showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                                   }}
+                            />
+                        </Col>
+                    </Row>
                 </Modal>
             </div>
         )
