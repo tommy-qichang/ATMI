@@ -4,7 +4,6 @@ import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dicomParser from "dicom-parser";
 import Hammer from "hammerjs";
-import {forEach} from "react-bootstrap/cjs/ElementChildren";
 
 /***
  * Cornerstone and Cornerstone tool wrapper with utils.
@@ -286,7 +285,8 @@ let cornerstoneWrapper = {
             "labelmap2D": {
                 "pixelData": compressedPixelData,
                 "segmentsOnLabelmap": labelmap.labelmap2D.segmentsOnLabelmap,
-                "dataLength": rawPixelData.length
+                "dataLength": rawPixelData.length,
+                "dim":data.dim
             }
         };
 

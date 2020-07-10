@@ -55,12 +55,10 @@ class LabelService:
         :param content:
         :return:
         """
-
         cur = self.sql_connection.cursor()
         has_record = len(self.query({"series_id": series_id, "user_id": user_id, "file_id": file_id})) > 0
 
         # has_record = self.exist({"series_id": series_id, "user_id": user_id, "file_id": file_id})
-
         if has_record:
             status = self.update({"series_id": series_id, "user_id": user_id, "file_id": file_id},
                                  {"content": content})
@@ -69,7 +67,6 @@ class LabelService:
                                     {"series_id": series_id, "user_id": user_id,
                                      "file_id": file_id, "content": content})
             cur.execute(sql, v)
-            # print(f"Insert labels without commit!")
             self.sql_connection.commit()
             status = True
         return status
