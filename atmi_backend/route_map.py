@@ -2,6 +2,7 @@ import datetime
 import io
 import os
 from os import path
+from threading import Thread
 
 from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json
 
@@ -92,7 +93,7 @@ def setup_route_map(app, app_path):  # noqa: C901
 
         result = {"instance_id": instance_id, "study_id": study_id, "series_id": series_id,
                   "study_path": os.path.join(study_info["folder_name"], ""), "label_candidates": label_candidates,
-                  "series_detail": series}
+                  "series_detail": series, "dim":[series['x_dimension'],series['y_dimension'],series['z_dimension']]}
 
         return render_template("workbench.html", data=result)
 
@@ -329,6 +330,23 @@ def setup_route_map(app, app_path):  # noqa: C901
             return jsonify([]), 200
         return jsonify(result), 200
 
+    class ImportDcm(Thread):
+        def __init__(self, instance_id, data_path):
+            Thread.__init__(self)
+            self.instance_id = instance_id
+            self.data_path = data_path
+
+        def run(self):
+            print("Start importing...")
+            instance_service = InstanceService(get_conn())
+            instance_service.update({"instance_id":self.instance_id},{"status":1})
+            import_service = ImportService(get_conn())
+            result = import_service.import_dcm(self.instance_id, self.data_path)
+            instance_service.update({"instance_id":self.instance_id},{"status":2})
+            print("End importing process")
+
+
+
     @app.route('/import/instance/<instance_id>', methods=['GET'])
     def load_data(instance_id):
         """
@@ -340,10 +358,10 @@ def setup_route_map(app, app_path):  # noqa: C901
         data_path = request.args.get('data_path', default=None)
         if data_path is None:
             return jsonify({}), 404
-        import_service = ImportService(get_conn())
-        result = import_service.import_dcm(instance_id, data_path)
+        thread_import_dcm = ImportDcm(instance_id, data_path)
+        thread_import_dcm.start()
 
-        return jsonify({'result': result}), 201
+        return jsonify({'result': 'thread import data'}), 201
 
     @app.route('/export/instance/<instance_id>', methods=['GET'])
     def export_all_label(instance_id):
@@ -353,8 +371,8 @@ def setup_route_map(app, app_path):  # noqa: C901
         split_entry_num: entry numbers for each hdf5 file. Will create separate files end with ids. Default is 100 entries per file.
         store_type: default root path in the hdf5 is "train"
         save_data/save_label: indicate if save dcm data or labels in the hdf5 file.
-        compression: indicate whether the hdf5 compressed using "gzip or lzf".
-        start_idx: Specify the start index of h5 file, useful for continuous export files.
+        compression: indicate whether the hdf5 compressed using "None, gzip or lzf". default: None. But gzip recommend
+        start_idx: Specify the start index of h5 file, useful for continuous export files. default:0
         :param instance_id:
         :return:
         """

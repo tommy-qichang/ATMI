@@ -2,7 +2,6 @@ from atmi_backend.db_interface.DbPool import DbPool
 
 db_pool = None
 
-
 class InitialService:
 
     def __init__(self, pool_num=20):
