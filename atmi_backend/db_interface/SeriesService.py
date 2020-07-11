@@ -23,7 +23,7 @@ class SeriesService:
                              'series_files_number',
                              'window_width', 'window_level', 'x_spacing', 'y_spacing', 'z_spacing', 'x_dimension',
                              'y_dimension', 'z_dimension', 'patient_id', 'series_instance_uid', 'study_date',
-                             'intercept', 'slop'])
+                             'intercept', 'slop', 'status'])
 
         cur = self.sql_connection.cursor()
         cur.execute(sql)
@@ -34,7 +34,7 @@ class SeriesService:
 
     def insert(self, study_id, series_description, series_path, series_files_list, series_files_number,
                window_width, window_level, x_spacing, y_spacing, z_spacing, x_dimension, y_dimension, z_dimension,
-               patient_id, series_instance_uid, study_date, intercept, slop):
+               patient_id, series_instance_uid, study_date, intercept, slop, status=0):
         """
         :param study_id:
         :param series_description:
@@ -82,7 +82,8 @@ class SeriesService:
                                            "y_spacing": y_spacing, "z_spacing": z_spacing, "x_dimension": x_dimension,
                                            "y_dimension": y_dimension, "z_dimension": z_dimension,
                                            "patient_id": patient_id, 'series_instance_uid': series_instance_uid,
-                                           "study_date": study_date, "intercept": intercept, "slop": slop})
+                                           "study_date": study_date, "intercept": intercept, "slop": slop,
+                                           "status": status})
         cur.execute(sql, v)
         self.sql_connection.commit()
         return True
@@ -99,7 +100,7 @@ class SeriesService:
                              ['series_id', 'study_id', 'series_description', 'series_path', 'series_files_list',
                               'series_files_number', 'window_width', 'window_level', 'x_spacing', 'y_spacing',
                               'z_spacing', 'x_dimension', 'y_dimension', 'z_dimension', 'patient_id',
-                              'series_instance_uid', 'study_date', 'intercept', 'slop'])
+                              'series_instance_uid', 'study_date', 'intercept', 'slop', 'status'])
 
         cur = self.sql_connection.cursor()
 
@@ -121,7 +122,7 @@ class SeriesService:
                                        'series_files_list', 'series_files_number', 'window_width', 'window_level',
                                        'x_spacing', 'y_spacing', 'z_spacing', 'x_dimension', 'y_dimension',
                                        'z_dimension', 'patient_id', 'series_instance_uid', 'study_date', 'intercept',
-                                       'slop'])
+                                       'slop', 'status'])
         cur = self.sql_connection.cursor()
 
         cur.execute(sql, v_tuple)
@@ -134,8 +135,8 @@ class SeriesService:
         :param instance_id:
         :return:
         """
-        sql = f'select st.instance_id, st.study_id, st.patient_uid, st.study_uid, se.series_id, st.annotators, st.auditors, se.series_path, ' \
-              f'st.status, st.total_files_number, se.series_description, se.series_files_number, se.series_instance_uid, ins.data_path ' \
+        sql = f'select st.instance_id, st.study_id, st.patient_uid, st.study_uid, se.series_id, st.annotators, st.auditors, st.status as study_status, se.series_path, ' \
+              f'se.status as series_status, st.total_files_number, se.series_description, se.series_files_number, se.series_instance_uid, st.status, ins.data_path ' \
               f' from studies as st ' \
               f' inner join series as se on st.study_id = se.study_id and st.instance_id == {instance_id}' \
               f' inner join instances as ins on st.instance_id = ins.instance_id'

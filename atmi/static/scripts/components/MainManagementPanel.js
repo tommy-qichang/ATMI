@@ -20,7 +20,7 @@ export default class MainManagementPanel extends React.Component {
         showAddUser: false,
         showAddInstance: false,
         showModifyInstance: false,
-        //showInstanceDetail: false,
+        showInstanceDetail: false,
         hideColorPicker: true,
         colorBlockColor: "#FF8000",
         colorPickerColor: "#FF8000",
@@ -30,12 +30,16 @@ export default class MainManagementPanel extends React.Component {
         hideAddAnnotatorControls: false,
         userTableData: [],
         instanceTableData: [],
+        studiesListTableData: [],
         hideMainPanel: false,
-        hideStudyList: true
+        hideStudyList: true,
+        defaultNewLabelValue: 1,
+        current_instance_id: ""
     };
 
     newUsername = null;
     newInstanceName = null;
+    newInstanceModality = "CT";
     newInstanceDescription = null;
     newInstancePath = null;
     newLabelName = null;
@@ -45,9 +49,10 @@ export default class MainManagementPanel extends React.Component {
     modifyInstancePath = null;
     labelCandidatesBuffer = [];
     annotatorCandidatesBuffer = [];
+    existingMaxLabelValue = 0;
 
     //For forntend dev
-/*     
+     
     instanceTableData = [
         {
             name: "001001",
@@ -65,7 +70,7 @@ export default class MainManagementPanel extends React.Component {
         }
     ];
 
-  */
+
 /*     userTableData = [
         {
             username: "fuhua06@gmail.com",
@@ -113,7 +118,7 @@ export default class MainManagementPanel extends React.Component {
                     'description': instances[i]['description'],
                     'progress': progress,
                     'data_path': instances[i]['data_path']
-                })
+                });
             }
             this.setState({"instanceTableData": instanceTableData})
         }).catch(error => {
@@ -215,29 +220,63 @@ export default class MainManagementPanel extends React.Component {
         //Add instance into the backend
         //New added labels are cached in this.labelCandidatesBuffer
         //New added annotatos are cached in this.annotatorCandidatesBuffer
+        let cleanValue = this.newInstanceName.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "");
+        if(cleanValue === "") 
+        {
+            message.error("Instance name can not be empty");
+            return;
+        }
+
+/*         console.log("this.newInstanceName: ", this.newInstanceName.input.value);
+        console.log("this.newInstanceModality: ", this.newInstanceModality);
+        console.log("this.newInstanceDescription: ", this.newInstanceDescription.textAreaRef.value);
+        console.log("this.this.labelCandidatesBuffer: ", this.labelCandidatesBuffer);
+        console.log("this.annotatorCandidatesBuffer: ", this.annotatorCandidatesBuffer); */
+
+        let newInstanceData = {
+            name: this.newInstanceName.input.value, 
+            modality: this.newInstanceModality, 
+            description:this.newInstanceDescription.textAreaRef.value
+        };
+
+        //Uncomment when the backend is ready
+/*         axios.post(newInstanceData).then(res => {
+           
+        }).catch(error => {
+            message.error('Add instance error');
+            console.log(error);
+        }); */
+
+        
 
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
+        this.newInstanceModality = "CT";
+        this.existingMaxLabelValue = 0;
         this.setState({
             showAddInstance: false,
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
             hideAddLabelControls: false,
-            hideAddAnnotatorControls: false
+            hideAddAnnotatorControls: false,
+            defaultNewLabelValue: 1
         });
     };
 
     handleAddInstanceCancel = e => {
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
+        this.newInstanceModality = "CT";
+        this.existingMaxLabelValue = 0;
         this.setState({
             showAddInstance: false,
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
             hideAddLabelControls: false,
-            hideAddAnnotatorControls: false
+            hideAddAnnotatorControls: false,
+            defaultNewLabelValue: 1
         });
     };
 
@@ -259,22 +298,72 @@ export default class MainManagementPanel extends React.Component {
 
     onLabelCloseIconClick = e => {
         //console.log("e.target.dataset.index: ", e.currentTarget.dataset.index);
+        let deletedValue = this.labelCandidatesBuffer[e.currentTarget.dataset.index].value;        
         this.labelCandidatesBuffer.splice(e.currentTarget.dataset.index, 1);
+        if(this.labelCandidatesBuffer.length === 0)
+        {
+            this.existingMaxLabelValue = 0;
+        }
+        else if(deletedValue === this.existingMaxLabelValue)
+        {
+            let secondMaxValue = 1;
+            this.labelCandidatesBuffer.forEach(element => {
+                if(element.value > secondMaxValue)
+                {
+                    secondMaxValue = element.value;
+                }
+            });
+            this.existingMaxLabelValue = secondMaxValue;
+        }
+
         this.setState({
-            labelCandidatesBuffer: this.labelCandidatesBuffer
+            labelCandidatesBuffer: this.labelCandidatesBuffer,
+            defaultNewLabelValue: this.existingMaxLabelValue + 1
         });
     };
 
     handleAddLabel = e => {
+        //Verify the input
+        if(this.newLabelName.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "") === "")
+        {
+            message.error("Label name can not be empty");
+            return;
+        }
+        if(this.newLabelValue.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "") === "")
+        {
+            message.error("Label value can not be empty");
+            return;
+        }
+        let inputValue = parseInt(this.newLabelValue.input.value);
+        if(!inputValue)
+        {
+            message.error("Label value must be a number");
+            return;
+        }
+        if(this.labelCandidatesBuffer.findIndex((element, index, arr) => {
+            return element.value === inputValue;
+        }) > -1) 
+        {
+            message.error("This value of label has already existed");
+            return;
+        }
+
         this.labelCandidatesBuffer.push({
             name: this.newLabelName.input.value,
-            value: this.newLabelValue.input.value,
+            value: parseInt(this.newLabelValue.input.value),
             //color: this.state.colorBlockColor
         });
+
+        this.existingMaxLabelValue = 
+        parseInt(this.newLabelValue.input.value)>this.existingMaxLabelValue?
+        parseInt(this.newLabelValue.input.value):this.existingMaxLabelValue;
+
         this.setState({
             labelCandidatesBuffer: this.labelCandidatesBuffer,
+            defaultNewLabelValue: this.existingMaxLabelValue + 1
             //colorBlockColor: "#FF8000"
         });
+
         this.newLabelName.input.value = "";
         this.newLabelValue.input.value = "";
     };
@@ -335,13 +424,51 @@ export default class MainManagementPanel extends React.Component {
     };
 
     onInstanceDetailClick = e => {
-        this.props.onInstanceDetailClick();
+        //this.props.onInstanceDetailClick();
+        let instance_id = e.target.dataset.instanceid;
+        let instance_name = e.target.dataset.instancename;
+
+        // name: "Study 1",
+        // path: "D:\\dev\\projects\\Git repositories\\ATMI\\",
+        // annotators: "calkufu@hotmail.com",
+        // auditors: "fuhua06@gmail.com",
+        // filesNo: 5,
+        // status: "Ready"
+
+        axios.get("/instances/" + instance_id + "/studies").then(res => {
+            let studyTableData = [];
+            const studies = res.data;
+            for (let i = 0; i < studies.length; i++) {
+                status = studies[i].status;
+                if (status === "1") status = "Ready to annotate.";
+                else if (status === "2") status = "Auditing";
+                else if (status === "3") status = "Finished";
+                studyTableData.push({
+                    name: studies[i].study_uid,
+                    instance_id: instance_id,
+                    study_id: studies[i].study_id,
+                    annotators: studies[i].annotators,
+                    auditors: studies[i].auditors,
+                    status: status,
+                    path: eval(studies[i].folder_name)[0] + "...",
+                    file_number: studies[i].total_files_number
+                })
+            }
+            this.setState({
+                showInstanceDetail: true,
+                "studiesListTableData": studyTableData,
+                current_instance_id: instance_name
+            })
+        }).catch(error => {
+            message.error('Studies load error');
+            console.log(error);
+        });
     };
 
-    onModifyInstanceClick = e => {
+    onModifyInstanceClick = (record) => {
         //Load instance data from the backend
         //The parameter "record" means the table record of the instance
-
+        
         this.setState({
             showModifyInstance: true
         });
@@ -349,17 +476,34 @@ export default class MainManagementPanel extends React.Component {
 
     onDeleteUserConfirm = (record) => {
         //Delete record from the backend
+        axios.delete(`/users/${record.username}`).then(res => {
+            this.listAllUsers();
+            message.success('User has been deleted', 2);
+        }).catch(error => {
+            message.error('Delete user error');
+            console.log(error);
+        });
+    };
 
-        this.listAllUsers();
-        message.success('User has been deleted', 2);
-    }
-
-    
     onDeleteInstanceConfirm = (record) => {
         //Delete record from the backend
+        axios.delete(`/instances/${record.instanceid}`).then(res => {
+            this.listAllInstance();
+            message.success('Instance has been deleted', 2); 
+        }).catch(error => {
+            message.error('Delete Instance error');
+            console.log(error);
+        });
+    };
 
-        this.listAllInstance();
-        message.success('Instance has been deleted', 2); 
+    onNewInstanceModalityChange = (value) => {
+        this.newInstanceModality = value;
+    }
+
+    handleInstanceDetailOk = e => {
+        this.setState({
+            showInstanceDetail: false
+        });
     }
 
     userTableColumns = [
@@ -423,8 +567,9 @@ export default class MainManagementPanel extends React.Component {
             render: (text, record) => (
                 <div
                     className={(record.name === this.state.instanceNameEntered) ? styles.highightTableRow : styles.font}>
-                    <a href="javascript:;" title="Show studies list" style={{ color: "#0099FF" }}
-                        onClick={this.onInstanceDetailClick} data-instancename={text}>
+                    <a href="javascript:void(0);" title="Show studies list" style={{ color: "#0099FF" }}
+                        onClick={this.onInstanceDetailClick} data-instancename={text}
+                        data-instanceid={record.instanceid}>
                         {text}
                     </a>
                 </div>
@@ -505,7 +650,8 @@ export default class MainManagementPanel extends React.Component {
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/details.png" title='Show studies list'
                                 alt='Show studies list' style={{ width: 18, height: 18 }}
-                                onClick={this.onInstanceDetailClick}></img></a>
+                                 onClick={this.onInstanceDetailClick} data-instancename={text}
+                                data-instanceid={record.instanceid}/></a>
                         </Col>
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/modify.png" title='Modify' alt='Modify'
@@ -524,6 +670,59 @@ export default class MainManagementPanel extends React.Component {
                     </Row>
                 </div>
             )
+        }
+    ];
+
+    studiesListTableColumns = [
+        {
+            title: 'Study ID',
+            dataIndex: 'name',
+            key: 'name',
+            width: "16%",
+            align: "center",
+            render: (text, record) => (
+                <div>
+                    <a href={"workbench/instance/" + record.instance_id + "/study/" + record.study_id} target="_blank"
+                       title="Show studies list" style={{color: "#0099FF"}}>
+                        {text}
+                    </a>
+                </div>
+            )
+        },
+        {
+            title: 'Study Path',
+            dataIndex: 'path',
+            key: 'path',
+            width: "24%",
+            align: "center"
+        },
+        {
+            title: 'Annotators',
+            dataIndex: 'annotators',
+            key: 'annotators',
+            width: "16%",
+            align: "center"
+        },
+        {
+            title: 'Auditors',
+            dataIndex: 'auditors',
+            key: 'auditors',
+            width: "16%",
+            align: "center"
+        },
+        {
+            title: 'Total Files Number',
+            dataIndex: 'file_number',
+            key: 'file_number',
+            width: "10%",
+            align: "center"
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            width: "18%",
+            align: "center"
         }
     ];
 
@@ -712,7 +911,9 @@ export default class MainManagementPanel extends React.Component {
                             <div style={{ height: 6 }} />
                             <Row>
                                 <Col>
-                                    <Select defaultValue="CT" style={{ width: '100%' }}>
+                                    <Select defaultValue="CT" style={{ width: '100%' }}
+                                     /* ref={target => (this.newInstanceModality = target)} */
+                                     onChange={this.onNewInstanceModalityChange}>
                                         <Select.Option value="CT">
                                             CT
                                         </Select.Option>
@@ -852,7 +1053,7 @@ export default class MainManagementPanel extends React.Component {
                                             ref={target => (this.newLabelName = target)} />
                                     </Col>
                                     <Col span={4}>
-                                        <Input placeholder="1"
+                                        <Input placeholder={this.state.defaultNewLabelValue}
                                             size="small"
                                             style={{ fontStyle: "italic" }}
                                             ref={target => (this.newLabelValue = target)} />
@@ -1222,6 +1423,51 @@ export default class MainManagementPanel extends React.Component {
                             </div>
                         </div>
                     </div>
+                </Modal>
+
+                <Modal
+                    title={(<div style={{height: 12}}>Studies List</div>)}
+                    width="85%"
+                    visible={this.state.showInstanceDetail}
+                    onOk={this.handleInstanceDetailOk}
+                    onCancel={this.handleInstanceDetailOk}
+                    destroyOnClose={true}
+                    footer={[
+                        <Button key="submit" type="primary" onClick={this.handleInstanceDetailOk}>
+                            Ok
+                        </Button>,
+                        <Button key="back" onClick={this.handleInstanceDetailOk}>
+                            Cancel
+                        </Button>,
+                    ]}
+                    bodyStyle={{marginTop: 6, paddingTop: 6}}
+                >
+                    <Row type="flex" justify="center" align="middle">
+                        <Col span={24}>
+                            <div style={{textAlign: "center"}}>
+                                <h2>Studies in {this.state.current_instance_id}</h2>
+                            </div>
+                        </Col>
+                    </Row>
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <Table columns={this.studiesListTableColumns}
+                                   dataSource={this.state.studiesListTableData}
+                                /* bordered  */
+                                   size="middle"
+                                   loading={this.state.instanceTableLoading}
+                                   actionToken={this.state.instanceTableActionToken}
+                                   onRow={this.onInstanceTableRow}
+                                //rowClassName={this.setRowClassName}
+                                   pagination={{
+                                       current: this.state.currentInstanceTablePage,
+                                       onChange: this.onInstanceTablePageChange,
+                                       showSizeChanger: true,
+                                       showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                                   }}
+                            />
+                        </Col>
+                    </Row>
                 </Modal>
             </div>
         )

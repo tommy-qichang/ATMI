@@ -4,7 +4,6 @@ import * as cornerstoneMath from "cornerstone-math";
 import * as cornerstoneWADOImageLoader from "cornerstone-wado-image-loader";
 import * as dicomParser from "dicom-parser";
 import Hammer from "hammerjs";
-import {forEach} from "react-bootstrap/cjs/ElementChildren";
 
 /***
  * Cornerstone and Cornerstone tool wrapper with utils.
@@ -286,13 +285,22 @@ let cornerstoneWrapper = {
             "labelmap2D": {
                 "pixelData": compressedPixelData,
                 "segmentsOnLabelmap": labelmap.labelmap2D.segmentsOnLabelmap,
-                "dataLength": rawPixelData.length
+                "dataLength": rawPixelData.length,
+                "dim":data.dim
             }
         };
 
+        //If current study status is 1: ready to annotate, then should change the status to 2: annotating
+        let appendx = "";
+        if(data['series_detail']['status'] <3){
+            appendx += "?update_status=True";
+            data['series_detail']['status'] = 3
+        }
+
+
         let fileId_new = fileId.replace(/^.+\/+/ig, '');
         var _this = this;
-        fetch(`/series/${seriesId}/files/${fileId_new}/labels`, {
+        fetch(`/series/${seriesId}/files/${fileId_new}/labels${appendx}`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',

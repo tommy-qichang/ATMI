@@ -3,7 +3,6 @@ import {render} from 'react-dom'
 import MainPanel from "./components/MainPanel.js"
 import MainNav from "./components/MainNav.js"
 
-
 class MainPage extends React.Component {
 
     constructor(props) {

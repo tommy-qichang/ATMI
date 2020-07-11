@@ -106,7 +106,7 @@ class MainNav extends React.Component {
 
     render() {
         return (
-            <div className="mainnav row">
+            <div className={`mainnav ${style.row}`}>
                 <div className={style.barstyle}>
                     <div className={style.navlist}><a href="/" className={style.home}><i
                         className={`fas fa-home ${style.i}`}/><br/>Home</a></div>

@@ -84,13 +84,13 @@ export default class ManagementPanel extends React.Component {
         })
     };
 
-    onInstanceDetailClick = e => {
+/*     onInstanceDetailClick = e => {
         this.setState({
             //showInstanceDetail: true
             hideMainPanel: true,
             hideStudyList: false
         });
-    };
+    }; */
 
     goBackToMainPanel = e => {
         this.setState({
@@ -105,7 +105,7 @@ export default class ManagementPanel extends React.Component {
             <div>
                 <div hidden={this.state.hideMainPanel}>
                 <MainManagementPanel 
-                onInstanceDetailClick={this.onInstanceDetailClick}/>
+                /* onInstanceDetailClick={this.onInstanceDetailClick} *//>
             </div>
             <div hidden={this.state.hideStudyList}>
                 <StudyList 
