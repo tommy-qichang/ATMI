@@ -82,7 +82,8 @@ class SeriesService:
                                            "y_spacing": y_spacing, "z_spacing": z_spacing, "x_dimension": x_dimension,
                                            "y_dimension": y_dimension, "z_dimension": z_dimension,
                                            "patient_id": patient_id, 'series_instance_uid': series_instance_uid,
-                                           "study_date": study_date, "intercept": intercept, "slop": slop,"status":status})
+                                           "study_date": study_date, "intercept": intercept, "slop": slop,
+                                           "status": status})
         cur.execute(sql, v)
         self.sql_connection.commit()
         return True
@@ -121,7 +122,7 @@ class SeriesService:
                                        'series_files_list', 'series_files_number', 'window_width', 'window_level',
                                        'x_spacing', 'y_spacing', 'z_spacing', 'x_dimension', 'y_dimension',
                                        'z_dimension', 'patient_id', 'series_instance_uid', 'study_date', 'intercept',
-                                       'slop','status'])
+                                       'slop', 'status'])
         cur = self.sql_connection.cursor()
 
         cur.execute(sql, v_tuple)

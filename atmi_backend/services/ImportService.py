@@ -112,7 +112,7 @@ class ImportService:
                                            "dataLength": content_1D.shape[0]}}
                         labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
                                             str.encode(json.dumps(content)))
-                    seriesService.update({"series_instance_uid": series_uid},{SERIES_STATUS.mask_is_ready.value})
+                    seriesService.update({"series_instance_uid": series_uid}, {SERIES_STATUS.mask_is_ready.value})
 
         elif load_type == 'mhd':
             raise NotImplementedError()

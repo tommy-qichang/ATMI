@@ -33,12 +33,6 @@ REGISTER_MAX_HOURS = 10000000
 
 SECRET_KEY = "dbe924ec-7767-4186-ad8a-b68face4a8fa"
 
-INSTANCE_STATUS = Enum("INSTANCE_STATUS","init importing_dicom ready_to_annotate annotating finished auditing")
-STUDY_STATUS = Enum("STUDY_STATUS","ready_to_annotate annotating finished auditing")
-SERIES_STATUS = Enum("SERIES_STATUS","init mask_is_ready annotating finished auditing")
-
-
-
-
-
-
+INSTANCE_STATUS = Enum("INSTANCE_STATUS", "init importing_dicom ready_to_annotate annotating finished auditing")
+STUDY_STATUS = Enum("STUDY_STATUS", "ready_to_annotate annotating finished auditing")
+SERIES_STATUS = Enum("SERIES_STATUS", "init mask_is_ready annotating finished auditing")
