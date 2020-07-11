@@ -71,8 +71,8 @@ class TestRouteMap:
         assert result[0]["name"] == "Stroke Annotation Task"
 
         studies_service = StudiesService(conn)
-        studies_service.insert(1, "Dicom_691_2", 25, 0, "folder", 100)
-        studies_service.insert(1, "Raw_1003/3CH_tagging", 30, 1, "folder", 100)
+        studies_service.insert(1, "Dicom_691_2", 25, 0, "folder", 100,1)
+        studies_service.insert(1, "Raw_1003/3CH_tagging", 30, 1, "folder", 100,1)
 
         series_service = SeriesService(conn)
         series_service.insert(1, "series1", "series1/path", ["1"], 1, "200", "200", "0.5", "0.5", "0.5", 512, 512, 512,
@@ -171,3 +171,9 @@ class TestRouteMap:
 
         assert res.status == "404 NOT FOUND"
         assert res.content_type == "application/json"
+
+    # def test_finish_series(self, client):
+    #
+    #     res = client.post(url_for('finish_series'))
+
+

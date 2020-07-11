@@ -6,7 +6,7 @@ from threading import Thread
 
 from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json
 
-from atmi_backend.config import REGISTER_MAX_HOURS
+from atmi_backend.config import REGISTER_MAX_HOURS, SERIES_STATUS, STUDY_STATUS, INSTANCE_STATUS
 from atmi_backend.db_interface.InitialService import InitialService
 from atmi_backend.db_interface.InstanceService import InstanceService
 from atmi_backend.db_interface.LabelCandidatesService import LabelCandidatesService
@@ -306,6 +306,33 @@ def setup_route_map(app, app_path):  # noqa: C901
 
         return jsonify(series), 200
 
+    @app.route('/series/<series_id>/finished', methods=['POST'])
+    def finish_series(series_id):
+        """
+        Mark the status of current series as finished(4)
+        If all the labeled series in current study arenot annotating, then set current study as finished.
+        :param series_id:
+        :return:
+        """
+        series_service = SeriesService(get_conn())
+        series = series_service.query({"series_id":series_id})
+        if(len(series)>0):
+            study_id = series[0]['study_id']
+            series_service.update({"series_id":series_id},{"status": SERIES_STATUS.finished.value})
+
+            series_in_current_study = series_service.query({"study_id":study_id})
+            all_complete = True
+            for one_stu in series_in_current_study:
+                status = one_stu['status']
+                if status == SERIES_STATUS.annotating.value:
+                    all_complete = False
+            if all_complete:
+                study_service = StudiesService(get_conn())
+                study_service.update({"study_id":study_id},{'status': STUDY_STATUS.finished.value})
+
+        return jsonify({}), 200
+
+
     @app.route('/series/<int:series_id>/files/<file_name>/labels', methods=['POST'])
     def add_labels(series_id, file_name):
         # Temporary mock the user Id.
@@ -313,6 +340,27 @@ def setup_route_map(app, app_path):  # noqa: C901
         data = request.data
         label_service = LabelService(get_conn())
         status = label_service.insert(series_id, user_id, file_name, data)
+
+        update_status = request.args.get('update_status', type=bool, default=False)
+        if update_status:
+            series_service = SeriesService(get_conn())
+            study_service = StudiesService(get_conn())
+            instance_service = InstanceService(get_conn())
+            series = series_service.query({'series_id':series_id})
+            if len(series)>0:
+                study_id = series[0]['study_id']
+                status = series[0]['status']
+                if status < SERIES_STATUS.annotating.value:
+                    series_service.update({'series_id':series_id}, {'status': SERIES_STATUS.annotating.value})
+                study = study_service.query({'study_id': study_id})
+                instance_id = study[0]['instance_id']
+                if study[0]['status'] != STUDY_STATUS.annotating.value:
+                    study_service.update({'study_id': study_id},{'status':STUDY_STATUS.annotating.value})
+                instance = instance_service.query({'instance_id':instance_id})
+                if instance[0]['status'] != INSTANCE_STATUS.annotating.value:
+                    instance_service.update({'instance_id':instance_id},{'status': INSTANCE_STATUS.annotating.value})
+
+
 
         if status:
             return jsonify({}), 201
@@ -338,11 +386,8 @@ def setup_route_map(app, app_path):  # noqa: C901
 
         def run(self):
             print("Start importing...")
-            instance_service = InstanceService(get_conn())
-            instance_service.update({"instance_id":self.instance_id},{"status":1})
             import_service = ImportService(get_conn())
             result = import_service.import_dcm(self.instance_id, self.data_path)
-            instance_service.update({"instance_id":self.instance_id},{"status":2})
             print("End importing process")
 
 

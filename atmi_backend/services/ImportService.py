@@ -4,8 +4,9 @@ import os
 import h5py
 import numpy as np
 
-from atmi_backend.config import DATA_ROOT
+from atmi_backend.config import DATA_ROOT, INSTANCE_STATUS, STUDY_STATUS, SERIES_STATUS
 from atmi_backend.db_interface.InitialService import InitialService
+from atmi_backend.db_interface.InstanceService import InstanceService
 from atmi_backend.db_interface.LabelService import LabelService
 from atmi_backend.db_interface.SeriesService import SeriesService
 from atmi_backend.db_interface.StudiesService import StudiesService
@@ -17,6 +18,9 @@ class ImportService:
         self.conn = connection
 
     def import_dcm(self, instance_id, data_path):
+
+        instance_service = InstanceService(self.conn)
+        instance_service.update({'instance_id': instance_id}, {'status': INSTANCE_STATUS.importing_dicom.value})
         series_extraction_service = SeriesExtractionService()
         all_series_list = series_extraction_service.extract_series_from_path(os.path.join(DATA_ROOT, data_path))
         study_service = StudiesService(self.conn)
@@ -26,7 +30,7 @@ class ImportService:
             series = all_series_list[suid]
             patient_uid = 0
             study_uid = 0
-            study_service.insert(instance_id, patient_uid, study_uid, suid, "[]", 0)
+            study_service.insert(instance_id, patient_uid, study_uid, suid, "[]", 0, 0)
             study = study_service.query({"instance_id": instance_id, "suid": suid})
             study = study[0]
             total_files_number = 0
@@ -56,12 +60,14 @@ class ImportService:
                                       series_info.get("WindowCenter"), one_series.sampling[1], one_series.sampling[1],
                                       one_series.sampling[0], x_dim, y_dim, z_dim, series_info.get("PatientID"),
                                       series_info.get("SeriesInstanceUID"), series_info.get("StudyDate") or "", "",
-                                      "")
+                                      "", SERIES_STATUS.init.value)
 
             study_service.update({"instance_id": instance_id, "suid": suid},
                                  {"total_files_number": total_files_number, "patient_uid": patient_uid,
-                                  "study_uid": study_uid, "folder_name": str(folder_name_arr)})
+                                  "study_uid": study_uid, "folder_name": str(folder_name_arr),
+                                  "status": STUDY_STATUS.ready_to_annotate.value})
 
+        instance_service.update({'instance_id': instance_id}, {'status': INSTANCE_STATUS.ready_to_annotate.value})
         return True
 
     def import_annotations(self, load_type, annotation_path, erase_old=True):
@@ -106,6 +112,7 @@ class ImportService:
                                            "dataLength": content_1D.shape[0]}}
                         labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
                                             str.encode(json.dumps(content)))
+                    seriesService.update({"series_instance_uid": series_uid},{SERIES_STATUS.mask_is_ready.value})
 
         elif load_type == 'mhd':
             raise NotImplementedError()

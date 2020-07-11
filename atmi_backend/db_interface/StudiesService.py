@@ -18,14 +18,14 @@ class StudiesService:
 
         sql = prepare_query("studies", query_obj,
                             ['study_id', 'instance_id', 'patient_uid', 'study_uid', 'suid', 'folder_name',
-                             'total_files_number', 'annotators', 'auditors'])
+                             'total_files_number', 'annotators', 'auditors', 'status'])
         cur = self.sql_connection.cursor()
         cur.execute(sql)
         result = cur.fetchall()
         result = [dict(item) for item in result]
         return result
 
-    def insert(self, instance_id, patient_uid, study_uid, suid, folder_name, total_files_number):
+    def insert(self, instance_id, patient_uid, study_uid, suid, folder_name, total_files_number, status):
         """
         Insert record for new instance.
         :param instance_id:
@@ -33,6 +33,7 @@ class StudiesService:
         :param study_uid:
         :param folder_name:
         :param total_files_number:
+        :param status: study status updates
         :return:
         """
 
@@ -43,7 +44,7 @@ class StudiesService:
         sql, v = prepare_insert("studies",
                                 {"instance_id": instance_id, "patient_uid": patient_uid, "study_uid": study_uid,
                                  "suid": suid, "folder_name": folder_name,
-                                 "total_files_number": total_files_number, "status": 1})
+                                 "total_files_number": total_files_number, "status": status})
         cur.execute(sql, v)
         self.sql_connection.commit()
         return True
@@ -58,7 +59,7 @@ class StudiesService:
             return False
         sql = prepare_delete("studies", del_condition,
                              ['study_id', 'instance_id', 'patient_uid', 'study_uid', 'suid', 'folder_name',
-                              'total_files_number', 'annotators', 'auditors'])
+                              'total_files_number', 'annotators', 'auditors', 'status'])
 
         cur = self.sql_connection.cursor()
 
@@ -77,7 +78,7 @@ class StudiesService:
             return False
         sql, v_tuple = prepare_update("studies", update_condition, modify_obj,
                                       ['study_id', 'suid', 'patient_uid', 'study_uid', 'instance_id', 'folder_name',
-                                       'total_files_number', 'annotators', 'auditors'])
+                                       'total_files_number', 'annotators', 'auditors', 'status'])
         cur = self.sql_connection.cursor()
 
         cur.execute(sql, v_tuple)

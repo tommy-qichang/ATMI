@@ -290,9 +290,17 @@ let cornerstoneWrapper = {
             }
         };
 
+        //If current study status is 1: ready to annotate, then should change the status to 2: annotating
+        let appendx = "";
+        if(data['series_detail']['status'] <3){
+            appendx += "?update_status=True";
+            data['series_detail']['status'] = 3
+        }
+
+
         let fileId_new = fileId.replace(/^.+\/+/ig, '');
         var _this = this;
-        fetch(`/series/${seriesId}/files/${fileId_new}/labels`, {
+        fetch(`/series/${seriesId}/files/${fileId_new}/labels${appendx}`, {
             method: "POST",
             headers: {
                 'Accept': 'application/json',

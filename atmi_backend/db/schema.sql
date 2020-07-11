@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS instances
     has_audit     INTEGER NOT NULL, --0: not have auditor, 1: have auditor
     study_num     INTEGER NOT NULL,
     annotated_num INTEGER NOT NULL,
-    status        INTEGER    --0:initialized;1:importing data;2:annotating;3:finished;
+    status        INTEGER           --0:initialized;1:importing data;2:annotating;3:finished;
 );
 
 
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS studies
     total_files_number INTEGER NOT NULL,
     annotators         TEXT,             --cache all annotators' ids
     auditors           TEXT,             --cache all auditors' ids
-    status             INTEGER NOT NULL, -- 0: init, 1: Ready to annotate.2: Auditing (read only for others)3: Finished
+    status             INTEGER NOT NULL, -- 0: init, 1: Imported label 2:Annotating 3: Finished 5.Auditing (read only for others)
     FOREIGN KEY (instance_id) REFERENCES instances (instance_id) ON DELETE SET NULL ON UPDATE NO ACTION
 );
 
@@ -99,7 +99,8 @@ CREATE TABLE IF NOT EXISTS series
     series_instance_uid TEXT,
     study_date          TEXT,
     intercept           TEXT,
-    slop                TEXT, --real_v = slop*V + intercept
+    slop                TEXT,             --real_v = slop*V + intercept
+    status              INTEGER NOT NULL, -- 0: init, 1: imported label.2: Annotating3: Finished
     FOREIGN KEY (study_id) REFERENCES studies (study_id) ON DELETE SET NULL ON UPDATE NO ACTION
 );
 
@@ -120,5 +121,5 @@ PRAGMA main.page_size = 4096;
 PRAGMA main.cache_size=10000;
 -- PRAGMA main.locking_mode=EXCLUSIVE;
 -- PRAGMA main.synchronous=NORMAL;
-PRAGMA main.journal_mode=WAL;
+PRAGMA main.journal_mode= WAL;
 PRAGMA main.temp_store = MEMORY;
