@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Col, Icon, Input, message, Modal, Progress, Row, Select, Table, Popconfirm } from 'antd';
+import { Button, Col, Icon, Input, message, Modal, Progress, Row, Select, Table, Popconfirm, Checkbox } from 'antd';
 //import {SketchPicker} from 'react-color';
 import StudyList from './StudyList';
 import styles from '../../styles/ManagementPanel.css';
@@ -34,7 +34,8 @@ export default class MainManagementPanel extends React.Component {
         hideMainPanel: false,
         hideStudyList: true,
         defaultNewLabelValue: 1,
-        current_instance_id: ""
+        current_instance_id: "",
+        userRightsMatrix: [] //To cache the user rights settings in creat/modify instance windows
     };
 
     newUsername = null;
@@ -51,7 +52,7 @@ export default class MainManagementPanel extends React.Component {
     annotatorCandidatesBuffer = [];
     existingMaxLabelValue = 0;
 
-    //For forntend dev
+    //For forntend dev only
      
     instanceTableData = [
         {
@@ -67,6 +68,18 @@ export default class MainManagementPanel extends React.Component {
             modality: "Ultra-Sound",
             type: "Breasts",
             description: "Lorum ipsum..."
+        }
+    ];
+
+    addAnnotatorTableData = [
+        {
+            username: "calkufu@hotmail.com"
+        },
+        {
+            username: "598561408@qq.com"
+        },
+        {
+            username: "fuhua06@gmail.com"
         }
     ];
 
@@ -90,7 +103,8 @@ export default class MainManagementPanel extends React.Component {
                 userTableData.push({
                     username: user[i].email,
                     nickname: user[i].name,
-                    usertype: user[i].user_type == 0 ? "Admin" : "Annotator"
+                    usertype: user[i].user_type == 0 ? "Admin" : "Annotator",
+                    userid: user[i].user_id
                 })
             }
             this.setState({"userTableData": userTableData})
@@ -156,8 +170,18 @@ export default class MainManagementPanel extends React.Component {
     };
 
     onNewInstanceButtonClick = e => {
+        let userRightsMatrix = [];
+        this.state.userTableData.forEach(userRecord => {
+            userRightsMatrix.push({
+                username: userRecord.username,
+                userid: userRecord.userid,
+                isAnnotator: false,
+                isAuditor: false
+            });
+        });
         this.setState({
-            showAddInstance: true
+            showAddInstance: true,
+            userRightsMatrix
         });
     };
 
@@ -469,7 +493,13 @@ export default class MainManagementPanel extends React.Component {
     onModifyInstanceClick = (record) => {
         //Load instance data from the backend
         //The parameter "record" means the table record of the instance
-        
+
+        axios.get("/instances/" + record.instanceid).then(res => {
+            console.log("res.data: ", res.data);
+        }).catch(error => {
+            message.error('Instance details load error');
+            console.log(error);
+        });
         this.setState({
             showModifyInstance: true
         });
@@ -505,6 +535,20 @@ export default class MainManagementPanel extends React.Component {
         this.setState({
             showInstanceDetail: false
         });
+    }
+
+    onAddAnnotatorCheckboxChange = (e, record, index) => {
+        //console.log("e: ", e.target.checked);
+        //console.log("record: ", record.username);
+        this.state.userRightsMatrix[index].isAnnotator = !this.state.userRightsMatrix[index].isAnnotator;
+        //console.log("userRightsMatrix: ", this.state.userRightsMatrix);
+    }
+
+    onAddAuditorCheckboxChange = (e, record, index) => {
+        //console.log("e: ", e.target.checked);
+        //console.log("record: ", record.username);
+        this.state.userRightsMatrix[index].isAuditor = !this.state.userRightsMatrix[index].isAuditor;
+        //console.log("userRightsMatrix: ", this.state.userRightsMatrix);
     }
 
     userTableColumns = [
@@ -725,6 +769,46 @@ export default class MainManagementPanel extends React.Component {
             width: "18%",
             align: "center"
         }
+    ];
+
+    addAnnotatorTableColumns = [
+        {
+            title: 'Username',
+            dataIndex: 'username',
+            key: 'username',
+            width: "50%",
+            align: "center"
+        },
+        {
+            title: 'Annotator',
+            dataIndex: 'annotator',
+            key: 'annotator',
+            width: "25%",
+            align: "center",
+            render: (text, record, index) => (
+                <div>
+                    <Checkbox 
+                    defaultChecked={record.isAnnotator}
+                    onChange={(e) => this.onAddAnnotatorCheckboxChange(e, record, index)}
+                    />
+                </div>
+            )
+        },
+        {
+            title: 'Auditor',
+            dataIndex: 'auditor',
+            key: 'auditor',
+            width: "25%",
+            align: "center",
+            render: (text, record, index) => (
+                <div>
+                    <Checkbox 
+                    defaultChecked={record.isAuditor}
+                    onChange={(e) => this.onAddAuditorCheckboxChange(e, record, index)}
+                    />
+                </div>
+            )
+        },
     ];
 
     render() {
@@ -1109,6 +1193,25 @@ export default class MainManagementPanel extends React.Component {
 
                             <div hidden={this.state.hideAddAnnotatorControls}>
                                 <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <Table columns={this.addAnnotatorTableColumns}
+                                            dataSource={this.state.userRightsMatrix}
+                                            /* bordered  */
+                                            size="small"
+                                            //loading={this.state.instanceTableLoading}
+                                            //actionToken={this.state.instanceTableActionToken}
+                                            //onRow={this.onInstanceTableRow}
+                                            //rowClassName={this.setRowClassName}
+                                            pagination={{
+                                                current: this.state.currentInstanceTablePage,
+                                                onChange: this.onInstanceTablePageChange,
+                                                showSizeChanger: true,
+                                                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                                            }}
+                                        />
+                                    </Col>
+                                </Row>
+                                {/* <Row type="flex" justify="start">
                                     <Col>
                                         <div style={{ color: "#ccc" }}>
                                             Username
@@ -1152,7 +1255,7 @@ export default class MainManagementPanel extends React.Component {
                                             Add
                                         </Button>
                                     </Col>
-                                </Row>
+                                </Row> */}
                             </div>
                         </div>
                     </div>
@@ -1400,7 +1503,7 @@ export default class MainManagementPanel extends React.Component {
                             </Row>
 
                             <div hidden={this.state.hideAddAnnotatorControls}>
-                                <Row type="flex" justify="start">
+                                {/* <Row type="flex" justify="start">
                                     <Col>
                                         <div style={{ color: "#ccc" }}>
                                             Username
@@ -1444,7 +1547,7 @@ export default class MainManagementPanel extends React.Component {
                                             Add
                                         </Button>
                                     </Col>
-                                </Row>
+                                </Row> */}
                             </div>
                         </div>
                     </div>
