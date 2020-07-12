@@ -48,6 +48,7 @@ class DbPool:
         try:
             conn = sqlite3.connect(os.path.join(self.DATABASE_PATH, self.DATABASE_NAME),
                                    check_same_thread=False)
+
             if setup_schema:
                 cursor = conn.cursor()
                 with open(os.path.join(self.DATABASE_PATH, self.SCHEMA_NAME)) as fp:

@@ -443,6 +443,7 @@ export default class MainManagementPanel extends React.Component {
                 if (status === "1") status = "Ready to annotate.";
                 else if (status === "2") status = "Auditing";
                 else if (status === "3") status = "Finished";
+
                 studyTableData.push({
                     name: studies[i].study_uid,
                     instance_id: instance_id,
@@ -450,7 +451,7 @@ export default class MainManagementPanel extends React.Component {
                     annotators: studies[i].annotators,
                     auditors: studies[i].auditors,
                     status: status,
-                    path: eval(studies[i].folder_name)[0] + "...",
+                    path: studies[i].folder_name.substring(2) + "...",
                     file_number: studies[i].total_files_number
                 })
             }

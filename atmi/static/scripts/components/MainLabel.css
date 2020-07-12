@@ -8,19 +8,69 @@
 .status{
     float: left;
 }
+
 .autosave{
-    font-size: 10px;
-    float: left;
-    padding: 1px 4px 3px 4px;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-    color: black;
-    cursor:pointer;
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: .175rem .55rem;
+    margin-right: 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    cursor: pointer;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+.finished{
+    position: absolute;
+    right: 1rem;
+}
+.disable{
+    background-color: #6c757d!important;
+    border-color: #6c757d!important;
+}
+.autosave:active{
+    color: #fff;
+    background-color: #0062cc;
+    border-color:#005cbf;
+    box-shadow: 0 0 0 0.2rem rgba(38, 143, 255 ,.5)
+}
+.autosave:hover{
+    color: #fff;
+    background-color: #0069d9;
+    border-color:#0062cc;
 }
 
+.autosave_ok:active{
+    color: #fff;
+    background-color: #1e7e34;
+    border-color:#1c7430;
+    box-shadow: 0 0 0 0.2rem rgba(72,180,97,.5)
+}
+.autosave_ok:hover{
+    color: #fff;
+    background-color: #218838;
+    border-color:#1e7e34;
+}
+/*.autosave{*/
+/*    font-size: 10px;*/
+/*    float: left;*/
+/*    padding: 1px 4px 3px 4px;*/
+/*    -webkit-border-radius: 4px;*/
+/*    -moz-border-radius: 4px;*/
+/*    border-radius: 4px;*/
+/*    color: black;*/
+/*    cursor:pointer;*/
+/*}*/
+
 .autosave_ok{
-    background-color: limegreen;
+    background-color: #28a745;
 }
 .autosave_err{
     background-color: #aaa;
@@ -99,8 +149,7 @@
 .icon {
     display: block;
     float: left;
-    margin-right: 5px;
-    margin-left: 2rem;
+    margin: 4px 5px 0 2rem;
     height: 1rem;
     width: 1rem;
     border: 1px solid #969696;
@@ -129,4 +178,7 @@
 .cell {
     display: table-cell;
     padding: .5rem;
+}
+.button{
+
 }

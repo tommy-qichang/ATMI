@@ -21,12 +21,14 @@ class MainStudyList extends React.Component {
             }} className={parseInt(this.state.stack['studyId'])===value[0]['study_id']?styles.selected:""}>
                 <div>
                     {/*{value[0]['patient_uid']}-*/}
+                    <span className={`${styles.status} ${value[0]['study_status']===2?styles.annotating:""} ${value[0]['study_status']===3?styles.finished:""} ${value[0]['study_status']===4?styles.auditing:""}`}>&nbsp;</span>
                     {value[0]['study_uid']}
                     <span className="arrow-right"></span>
                 </div>
                 <ul className={`${styles.series} ${this.state.selectStudy === key ? "" : styles.hide}`}>
                     {value.map((v, k) => {
                         return <li key={k} className={parseInt(this.state.stack['seriesId'])===v['series_id']?styles.selected:""}>
+                            <span className={`${styles.status} ${v['series_status']===2?styles.maskready:""} ${v['series_status']===3?styles.annotating:""} ${v['series_status']===4?styles.finished:""} ${v['series_status']===5?styles.auditing:""}`}>&nbsp;</span>
                             <a href={`/workbench/instance/${v['instance_id']}/study/${v['study_id']}/series/${v['series_id']}`}>
                             {v['series_description'].replace("_"," \n")}<br/>({v['series_files_number']} files)
                             </a>

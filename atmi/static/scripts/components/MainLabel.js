@@ -2,6 +2,7 @@ import React from 'react'
 import style from "./MainLabel.css"
 import cornerstoneWrapper from "./CornerstoneWrapper"
 
+
 class MainLabel extends React.Component {
 
     constructor(props) {
@@ -16,7 +17,8 @@ class MainLabel extends React.Component {
             selectValue: {},
             hideAll:false,
             autosave:true,
-            savetime : ''
+            savetime : '',
+            seriesFinished : data.series_detail.status === 4
         };
 
         this.itemColors = cornerstoneWrapper.getAllSegmentsColor(this.state.labels.length);
@@ -121,6 +123,19 @@ class MainLabel extends React.Component {
             this.props.stack.imageIds[this.props.stack.currentImageIdIndex])
     };
 
+    onFinished = () =>{
+        let seriesId = this.props.stack.seriesId;
+        fetch(`/series/${seriesId}/finished`,{
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then((data)=>{
+            this.setState({"seriesFinished": true})
+        })
+
+    };
     activateTool = (e) => {
         if (e.keyCode === 83) {
             this.onSelectLabel((this.state.currentLabel+1)%this.labelCount)
@@ -155,13 +170,15 @@ class MainLabel extends React.Component {
         return (
             <div className="mainlabel">
                 <div className={style.title}>
-                    <div onClick={this.onSaveLabel} className={style.autosave +" "+ saveStyle}>
+                    <div onClick={this.onSaveLabel} className={`${style.autosave} ${saveStyle}`}>
                         {this.state.autosave?(
                             <span>saved({this.state.savetime})</span>
                         ):(
                             <span>saving...</span>
                         )}
                     </div>
+
+                    <div className={`${style.autosave} ${style.finished} ${this.state.seriesFinished?style.disable:""}`} onClick={this.onFinished}>Finished</div>
                     <div style={{clear:'both'}}></div>
                 </div>
                 <div className={style.title} style={{clear:'both'}}>Study Labels</div>

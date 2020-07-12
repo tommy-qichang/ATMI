@@ -28,7 +28,7 @@ module.exports = {
     output: {
 
         //publicPath: '/',
-		devtoolModuleFilenameTemplate: '../[resource-path]',
+        devtoolModuleFilenameTemplate: '../[resource-path]',
 
         path: path.resolve(__dirname, 'public'),
         publicPath: "/assets/",
@@ -66,24 +66,24 @@ module.exports = {
                     }
                 ]
             },
-             {//loader for common css files
+            {//loader for common css files
                 test: /\.css$/,
                 loader: "style-loader!css-loader?modules",
                 exclude: /node_modules/
             },
 
             {//loader for antd css files
-              test:/\.css$/,
-              exclude:/static/,
-              use:[
-                  { loader: "style-loader",},
-                  {
-                      loader: "css-loader",
-                      options:{
-                          importLoaders:1
-                      }
-                  }
-              ]
+                test: /\.css$/,
+                exclude: /static/,
+                use: [
+                    {loader: "style-loader",},
+                    {
+                        loader: "css-loader",
+                        options: {
+                            importLoaders: 1
+                        }
+                    }
+                ]
             },
             {
                 test: /\.(png|jpg|gif|svg)$/,
@@ -91,6 +91,10 @@ module.exports = {
                 options: {
                     name: '/static/img/[name].[ext]?[hash]'
                 }
+            },
+            {
+                test: /\.(woff|woff2|ttf|eot)$/,
+                use: 'file-loader?name=fonts/[name].[ext]!static'
             }
 
             /* {
@@ -104,48 +108,48 @@ module.exports = {
                         }
                     }]
             } */
-/*             {
-                test: /\.m?js$/,
-                exclude: /(node_modules|bower_components)/,
-                use: {
-                  loader: 'babel-loader',
-                  options: {
-                    presets: ['@babel/preset-env']
-                  }
-                }
-              }, */
-/*             {
-                test: /\.js$/i,
-                exclude: /node_modules/,
-                loader: "babel-loader",
-                query: {
-                    presets: ['@babel/preset-env', '@babel/preset-react']
-                }
-            },  */
-           /*  {
-                test: /\.s(a|c)ss$/,
-                exclude: /\.module.(s(a|c)ss)$/,
-                loader: [
-                    MiniCssExtractPlugin.loader,
-                    'css-loader',
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            sourceMap: isDevelopment
-                        }
-                    }
-                ]
-            }, {
-                test: /\.css$/,
-                use: [
-                    'style-loader',
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            modules: true
-                        }
-                    }]
-            }*/
+            /*             {
+                            test: /\.m?js$/,
+                            exclude: /(node_modules|bower_components)/,
+                            use: {
+                              loader: 'babel-loader',
+                              options: {
+                                presets: ['@babel/preset-env']
+                              }
+                            }
+                          }, */
+            /*             {
+                            test: /\.js$/i,
+                            exclude: /node_modules/,
+                            loader: "babel-loader",
+                            query: {
+                                presets: ['@babel/preset-env', '@babel/preset-react']
+                            }
+                        },  */
+            /*  {
+                 test: /\.s(a|c)ss$/,
+                 exclude: /\.module.(s(a|c)ss)$/,
+                 loader: [
+                     MiniCssExtractPlugin.loader,
+                     'css-loader',
+                     {
+                         loader: 'sass-loader',
+                         options: {
+                             sourceMap: isDevelopment
+                         }
+                     }
+                 ]
+             }, {
+                 test: /\.css$/,
+                 use: [
+                     'style-loader',
+                     {
+                         loader: 'css-loader',
+                         options: {
+                             modules: true
+                         }
+                     }]
+             }*/
         ]
     },
     plugins: [

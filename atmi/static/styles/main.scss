@@ -35,8 +35,14 @@ body {
 .mainlabel {
   position: absolute;
   right: 0;
-  top: 3.4rem;
+  top: 3.5rem;
   width: 20%;
+}
+/* Medium devices (tablets, 768px and up)*/
+@media (max-width: 1100px) {
+    .mainlabel{
+        top:4.1rem;
+    }
 }
 
 .hide{
