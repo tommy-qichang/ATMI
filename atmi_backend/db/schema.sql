@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS instances
     has_audit     INTEGER NOT NULL, --0: not have auditor, 1: have auditor
     study_num     INTEGER NOT NULL,
     annotated_num INTEGER NOT NULL,
-    status        INTEGER           --0:initialized;1:importing data;2:annotating;3:finished;
+    status        INTEGER           --1:initialized;2:importing data;3:annotating;4:finished;
 );
 
 
