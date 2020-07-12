@@ -977,8 +977,14 @@ export default class MainManagementPanel extends React.Component {
                                     </div>
                                 </Col>
                                 <Col span={6}>
-                                    <div style={{ float: "right" }}>
+                                    <div style={{ float: "right" }} hidden={!this.state.hideAddLabelControls}>
                                         <Icon type="plus"
+                                            style={{ width: 18, height: 18 }}
+                                            onClick={this.onLabelPlusIconClick}
+                                        />
+                                    </div>
+                                    <div style={{ float: "right" }} hidden={this.state.hideAddLabelControls}>
+                                        <Icon type="minus"
                                             style={{ width: 18, height: 18 }}
                                             onClick={this.onLabelPlusIconClick}
                                         />
@@ -1077,8 +1083,14 @@ export default class MainManagementPanel extends React.Component {
                                     </div>
                                 </Col>
                                 <Col span={6}>
-                                    <div style={{ float: "right" }}>
+                                    <div style={{ float: "right" }} hidden={!this.state.hideAddAnnotatorControls}>
                                         <Icon type="plus"
+                                            style={{ width: 18, height: 18 }}
+                                            onClick={this.onAnnotatorPlusIconClick}
+                                        />
+                                    </div>
+                                    <div style={{ float: "right" }} hidden={this.state.hideAddAnnotatorControls}>
+                                        <Icon type="minus"
                                             style={{ width: 18, height: 18 }}
                                             onClick={this.onAnnotatorPlusIconClick}
                                         />
@@ -1254,8 +1266,14 @@ export default class MainManagementPanel extends React.Component {
                                     </div>
                                 </Col>
                                 <Col span={6}>
-                                    <div style={{ float: "right" }}>
+                                    <div style={{ float: "right" }} hidden={!this.state.hideAddLabelControls}>
                                         <Icon type="plus"
+                                            style={{ width: 18, height: 18 }}
+                                            onClick={this.onLabelPlusIconClick}
+                                        />
+                                    </div>
+                                    <div style={{ float: "right" }} hidden={this.state.hideAddLabelControls}>
+                                        <Icon type="minus"
                                             style={{ width: 18, height: 18 }}
                                             onClick={this.onLabelPlusIconClick}
                                         />
@@ -1357,8 +1375,14 @@ export default class MainManagementPanel extends React.Component {
                                     </div>
                                 </Col>
                                 <Col span={6}>
-                                    <div style={{ float: "right" }}>
+                                    <div style={{ float: "right" }} hidden={!this.state.hideAddAnnotatorControls}>
                                         <Icon type="plus"
+                                            style={{ width: 18, height: 18 }}
+                                            onClick={this.onAnnotatorPlusIconClick}
+                                        />
+                                    </div>
+                                    <div style={{ float: "right" }} hidden={this.state.hideAddAnnotatorControls}>
+                                        <Icon type="minus"
                                             style={{ width: 18, height: 18 }}
                                             onClick={this.onAnnotatorPlusIconClick}
                                         />
