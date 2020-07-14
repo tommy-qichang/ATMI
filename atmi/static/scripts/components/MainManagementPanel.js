@@ -271,7 +271,7 @@ export default class MainManagementPanel extends React.Component {
         let label_candidates = [];
         this.labelCandidatesBuffer.forEach(label => {
             label_candidates.push({
-                label_type: 0,
+                label_type: 1,
                 input_type: 0,
                 text: label.name,
                 contour_label_value: label.value
@@ -282,6 +282,7 @@ export default class MainManagementPanel extends React.Component {
             name: this.newInstanceName.input.value, 
             modality: this.newInstanceModality, 
             description:this.newInstanceDescription.textAreaRef.value,
+            data_path: "",
             has_audit: 0,
             label_candidates,
             annotator_id,
@@ -461,12 +462,6 @@ export default class MainManagementPanel extends React.Component {
             return;
         }
 
-/*         console.log("this.newInstanceName: ", this.newInstanceName.input.value);
-        console.log("this.newInstanceModality: ", this.newInstanceModality);
-        console.log("this.newInstanceDescription: ", this.newInstanceDescription.textAreaRef.value);
-        console.log("this.this.labelCandidatesBuffer: ", this.labelCandidatesBuffer);
-        console.log("this.annotatorCandidatesBuffer: ", this.annotatorCandidatesBuffer); */
-
         let annotator_id = this.annotator_id.join("|");
         let auditor_id = this.auditor_id.join("|");
         let label_candidates = [];
@@ -492,7 +487,7 @@ export default class MainManagementPanel extends React.Component {
 
         //Uncomment when the backend is ready
         axios.put(`/instance/${this.currentModifiedInstanceId}`, modifiedInstanceData).then(res => {
-             console.log("res: ", res);
+            //console.log("res: ", res);
              if(res.status == 201) {
                 message.success('Successfully modified instance');
                 this.listAllInstance();
@@ -512,6 +507,7 @@ export default class MainManagementPanel extends React.Component {
         this.auditor_id = [];
         this.originalInstanceData = {};
         this.currentModifiedInstanceId = null;
+        this.modifiedInstanceModality = null;
         this.setState({
             showModifyInstance: false,
             hideColorPicker: true,
@@ -532,6 +528,7 @@ export default class MainManagementPanel extends React.Component {
         this.auditor_id = [];
         this.originalInstanceData = {};
         this.currentModifiedInstanceId = null;
+        this.modifiedInstanceModality = null;
         this.setState({
             showModifyInstance: false,
             hideColorPicker: true,
@@ -605,6 +602,7 @@ export default class MainManagementPanel extends React.Component {
                 };
 
                 this.currentModifiedInstanceId = record.instanceid;
+                this.modifiedInstanceModality = this.originalInstanceData.modality;
 
                 this.originalInstanceData.label_candidates.forEach(element => {
                     this.labelCandidatesBuffer.push({
