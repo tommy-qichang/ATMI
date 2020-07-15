@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Form, Icon, Input, message, Row, Col } from 'antd';
 import styles from '../../styles/LoginForm.css';
 import axios from "axios";
+import Reg from '../utility/Reg'
 
 class ResetPasswordForm extends React.Component {
 
@@ -99,7 +100,8 @@ class ResetPasswordForm extends React.Component {
                         {getFieldDecorator('username', {
                             rules: [{ required: true, message: 'Please enter your username' },
                             {
-                                pattern: new RegExp(/^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i),
+                                //pattern: new RegExp(/^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i),
+                                pattern: new RegExp(Reg.checkEmail),
                                 message: 'Please enter username of email format'
                             }
                             ],

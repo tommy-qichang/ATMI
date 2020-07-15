@@ -2,11 +2,12 @@ import React from 'react';
 import { Button, Col, Icon, Input, message, Modal, Progress, Row, Select, Table, Popconfirm, Checkbox } from 'antd';
 //import {SketchPicker} from 'react-color';
 import StudyList from './StudyList';
-import styles from '../../styles/ManagementPanel.css';
+import styles from '../../styles/ListPanel.css';
 import axios from "axios";
 //import InfiniteScroll from 'react-infinite-scroller';
+import Reg from '../utility/Reg';
 
-export default class MainManagementPanel extends React.Component {
+export default class List extends React.Component {
 
     state = {
         userTableLoading: false,
@@ -41,7 +42,7 @@ export default class MainManagementPanel extends React.Component {
         modifiedInstanceDescription: ""
     };
 
-    newUsername = null;
+    newUserName = null;
     newInstanceName = null;
     newInstanceModality = "CT";
     newInstanceDescription = null;
@@ -62,7 +63,7 @@ export default class MainManagementPanel extends React.Component {
     currentModifiedInstanceId = null;
 
     //For forntend dev only
-     
+
     instanceTableData = [
         {
             name: "001001",
@@ -93,16 +94,16 @@ export default class MainManagementPanel extends React.Component {
     ];
 
 
-/*     userTableData = [
-        {
-            username: "fuhua06@gmail.com",
-            usertype: "Admin"
-        },
-        {
-            username: "598561408@qq.com",
-            usertype: "Annotator"
-        }
-    ]; */
+    /*     userTableData = [
+            {
+                username: "fuhua06@gmail.com",
+                usertype: "Admin"
+            },
+            {
+                username: "598561408@qq.com",
+                usertype: "Annotator"
+            }
+        ]; */
 
     listAllUsers = () => {
         axios.get("/user/").then(res => {
@@ -116,7 +117,7 @@ export default class MainManagementPanel extends React.Component {
                     userid: user[i].user_id
                 })
             }
-            this.setState({"userTableData": userTableData})
+            this.setState({ "userTableData": userTableData })
         }).catch(error => {
             message.error('List user error');
             console.log(error)
@@ -143,7 +144,7 @@ export default class MainManagementPanel extends React.Component {
                     'data_path': instances[i]['data_path']
                 });
             }
-            this.setState({"instanceTableData": instanceTableData})
+            this.setState({ "instanceTableData": instanceTableData })
         }).catch(error => {
             message.error('Instance list error');
             console.log(error)
@@ -230,41 +231,51 @@ export default class MainManagementPanel extends React.Component {
     };
 
     checkEmail = () => {
-        let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
-        if (!this.newUsername || !this.newUsername.input) {
+        //let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
+        let reg = Reg.checkEmail;
+        if (!this.newUserName || !this.newUserName.input) {
             return;
         }
-        let username = this.newUsername.input.value;
-        if (reg.test(username)) {
-            this.proccessAddUser(username);
+        let userName = this.newUserName.input.value;
+        let dispName = this.newUserDispName.input.value;
+        let userType = this.newUserType.rcSelect.state.value[0];
+        //userType = (userType === "Admin") ? 0 : 1;
+        if (reg.test(userName)) {
+            this.proccessAddUser(userName, dispName, userType);
         } else {
             message.error("Please enter username of email format", 2);
         }
     };
 
-    proccessAddUser = username => {
-        message.success("Sucessfully added user and sent email to user", 2);
-        this.setState({
-            showAddUser: false
+    proccessAddUser = (username, dispname, type) => {
+        debugger;
+        axios.post("/user", { 'email': username, 'name': dispname, 'user_type': type }).then(res => {
+            let url = res.data.url
+            message.success("URL: " + url, 10);
+            this.setState({
+                showAddUser: false
+            });
+        }).catch(error => {
+            message.error('User add error');
+            console.log(error)
         });
-    };
+    }
 
     handleAddInstanceOk = e => {
         //Add instance into the backend
         //New added labels are cached in this.labelCandidatesBuffer
         //New added annotatos are cached in this.annotatorCandidatesBuffer
-        let cleanValue = this.newInstanceName.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "");
-        if(cleanValue === "") 
-        {
+        let cleanValue = this.newInstanceName.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "");
+        if (cleanValue === "") {
             message.error("Instance name can not be empty");
             return;
         }
 
-/*         console.log("this.newInstanceName: ", this.newInstanceName.input.value);
-        console.log("this.newInstanceModality: ", this.newInstanceModality);
-        console.log("this.newInstanceDescription: ", this.newInstanceDescription.textAreaRef.value);
-        console.log("this.this.labelCandidatesBuffer: ", this.labelCandidatesBuffer);
-        console.log("this.annotatorCandidatesBuffer: ", this.annotatorCandidatesBuffer); */
+        /*         console.log("this.newInstanceName: ", this.newInstanceName.input.value);
+                console.log("this.newInstanceModality: ", this.newInstanceModality);
+                console.log("this.newInstanceDescription: ", this.newInstanceDescription.textAreaRef.value);
+                console.log("this.this.labelCandidatesBuffer: ", this.labelCandidatesBuffer);
+                console.log("this.annotatorCandidatesBuffer: ", this.annotatorCandidatesBuffer); */
 
         let annotator_id = this.annotator_id.join("|");
         let auditor_id = this.auditor_id.join("|");
@@ -279,9 +290,9 @@ export default class MainManagementPanel extends React.Component {
         });
 
         let newInstanceData = {
-            name: this.newInstanceName.input.value, 
-            modality: this.newInstanceModality, 
-            description:this.newInstanceDescription.textAreaRef.value,
+            name: this.newInstanceName.input.value,
+            modality: this.newInstanceModality,
+            description: this.newInstanceDescription.textAreaRef.value,
             data_path: "",
             has_audit: 0,
             label_candidates,
@@ -291,19 +302,19 @@ export default class MainManagementPanel extends React.Component {
         };
 
         //Uncomment when the backend is ready
-         axios.post('/instances', newInstanceData).then(res => {
-             console.log("res: ", res);
-             if(res.status == 201) {
+        axios.post('/instances', newInstanceData).then(res => {
+            console.log("res: ", res);
+            if (res.status == 201) {
                 message.success('Successfully added instance');
                 this.listAllInstance();
-             }
-             else if(res.status == 409) {
+            }
+            else if (res.status == 409) {
                 message.error('Instance name conflicts');
-             }
+            }
         }).catch(error => {
             message.error('Add instance error');
             console.log(error);
-        }); 
+        });
 
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
@@ -356,18 +367,15 @@ export default class MainManagementPanel extends React.Component {
 
     onLabelCloseIconClick = e => {
         //console.log("e.target.dataset.index: ", e.currentTarget.dataset.index);
-        let deletedValue = this.labelCandidatesBuffer[e.currentTarget.dataset.index].value;        
+        let deletedValue = this.labelCandidatesBuffer[e.currentTarget.dataset.index].value;
         this.labelCandidatesBuffer.splice(e.currentTarget.dataset.index, 1);
-        if(this.labelCandidatesBuffer.length === 0)
-        {
+        if (this.labelCandidatesBuffer.length === 0) {
             this.existingMaxLabelValue = 0;
         }
-        else if((deletedValue === this.existingMaxLabelValue)&&(deletedValue!==0))
-        {
+        else if ((deletedValue === this.existingMaxLabelValue) && (deletedValue !== 0)) {
             let secondMaxValue = 1;
             this.labelCandidatesBuffer.forEach(element => {
-                if(element.value > secondMaxValue)
-                {
+                if (element.value > secondMaxValue) {
                     secondMaxValue = element.value;
                 }
             });
@@ -382,26 +390,22 @@ export default class MainManagementPanel extends React.Component {
 
     handleAddLabel = e => {
         //Verify the input
-        if(this.newLabelName.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "") === "")
-        {
+        if (this.newLabelName.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "") === "") {
             message.error("Label name can not be empty");
             return;
         }
-        if(this.newLabelValue.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "") === "")
-        {
+        if (this.newLabelValue.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "") === "") {
             message.error("Label value can not be empty");
             return;
         }
         let inputValue = parseInt(this.newLabelValue.input.value);
-        if(!inputValue)
-        {
+        if (!inputValue) {
             message.error("Label value must be a number");
             return;
         }
-        if(this.labelCandidatesBuffer.findIndex((element, index, arr) => {
+        if (this.labelCandidatesBuffer.findIndex((element, index, arr) => {
             return element.value === inputValue;
-        }) > -1) 
-        {
+        }) > -1) {
             message.error("This value of label has already existed");
             return;
         }
@@ -412,9 +416,9 @@ export default class MainManagementPanel extends React.Component {
             //color: this.state.colorBlockColor
         });
 
-        this.existingMaxLabelValue = 
-        parseInt(this.newLabelValue.input.value)>this.existingMaxLabelValue?
-        parseInt(this.newLabelValue.input.value):this.existingMaxLabelValue;
+        this.existingMaxLabelValue =
+            parseInt(this.newLabelValue.input.value) > this.existingMaxLabelValue ?
+                parseInt(this.newLabelValue.input.value) : this.existingMaxLabelValue;
 
         this.setState({
             labelCandidatesBuffer: this.labelCandidatesBuffer,
@@ -432,7 +436,7 @@ export default class MainManagementPanel extends React.Component {
         });
     };
 
-    
+
     onAnnotatorCloseIconClick = e => {
         //console.log("e.target.dataset.index: ", e.currentTarget.dataset.index);
         this.annotatorCandidatesBuffer.splice(e.currentTarget.dataset.index, 1);
@@ -455,9 +459,8 @@ export default class MainManagementPanel extends React.Component {
         //Modify instance in the backend
         //Modified labels are cached in this.labelCandidatesBuffer
         //Modified annotatos are cached in this.annotatorCandidatesBuffer
-        let cleanValue = this.modifiedInstanceName.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "");
-        if(cleanValue === "") 
-        {
+        let cleanValue = this.modifiedInstanceName.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "");
+        if (cleanValue === "") {
             message.error("Instance name can not be empty");
             return;
         }
@@ -475,9 +478,9 @@ export default class MainManagementPanel extends React.Component {
         });
 
         let modifiedInstanceData = {
-            name: this.modifiedInstanceName.input.value, 
-            modality: this.modifiedInstanceModality, 
-            description:this.modifiedInstanceDescription.textAreaRef.value,
+            name: this.modifiedInstanceName.input.value,
+            modality: this.modifiedInstanceModality,
+            description: this.modifiedInstanceDescription.textAreaRef.value,
             has_audit: this.originalInstanceData.has_audit,
             label_candidates,
             annotator_id,
@@ -488,17 +491,17 @@ export default class MainManagementPanel extends React.Component {
         //Uncomment when the backend is ready
         axios.put(`/instance/${this.currentModifiedInstanceId}`, modifiedInstanceData).then(res => {
             //console.log("res: ", res);
-             if(res.status == 201) {
+            if (res.status == 201) {
                 message.success('Successfully modified instance');
                 this.listAllInstance();
-             }
-             else {
+            }
+            else {
                 message.error('Modify instance error');
-             }
+            }
         }).catch(error => {
             message.error('Modify instance error');
             console.log(error);
-        }); 
+        });
 
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
@@ -589,7 +592,7 @@ export default class MainManagementPanel extends React.Component {
         //The parameter "record" means the table record of the instance
         axios.get("/instance/" + record.instanceid).then(res => {
             console.log("res.data: ", res.data);
-            if(res.status === 200) {
+            if (res.status === 200) {
                 this.originalInstanceData = {
                     name: res.data.name,
                     modality: res.data.modality,
@@ -607,12 +610,12 @@ export default class MainManagementPanel extends React.Component {
                 this.originalInstanceData.label_candidates.forEach(element => {
                     this.labelCandidatesBuffer.push({
                         name: element.text,
-                        value: (element.contour_label_value)?element.contour_label_value:0
+                        value: (element.contour_label_value) ? element.contour_label_value : 0
                     });
                 });
                 let existingMaxLabelValue = 0;
                 this.labelCandidatesBuffer.forEach(element => {
-                    if(element.value > existingMaxLabelValue) {
+                    if (element.value > existingMaxLabelValue) {
                         existingMaxLabelValue = element.value
                     }
                 });
@@ -620,13 +623,13 @@ export default class MainManagementPanel extends React.Component {
 
                 let annotator_id = [];
                 let auditor_id = [];
-                if(this.originalInstanceData.annotator_id) {
+                if (this.originalInstanceData.annotator_id) {
                     annotator_id = this.originalInstanceData.annotator_id.split("|");
                     annotator_id.forEach(element => {
                         element = parseInt(element);
                     });
                 }
-                if(this.originalInstanceData.auditor_id) {
+                if (this.originalInstanceData.auditor_id) {
                     auditor_id = this.originalInstanceData.auditor_id.split("|");
                     auditor_id.forEach(element => {
                         element = parseInt(element);
@@ -641,27 +644,25 @@ export default class MainManagementPanel extends React.Component {
                         isAnnotator: false,
                         isAuditor: false
                     });
-                 });
+                });
 
-                 annotator_id.forEach(id => {
+                annotator_id.forEach(id => {
                     let index = userRightsMatrix.findIndex((record, index, arr) => {
                         return id === record.userid;
                     });
-                    if(index > 0)
-                    {
+                    if (index > 0) {
                         userRightsMatrix[index].isAnnotator = true;
                     }
-                 });
-                 auditor_id.forEach(id => {
+                });
+                auditor_id.forEach(id => {
                     let index = userRightsMatrix.findIndex((record, index, arr) => {
                         return id === record.userid;
                     });
-                    if(index > 0)
-                    {
+                    if (index > 0) {
                         userRightsMatrix[index].isAuditor = true;
                     }
-                 });
-                
+                });
+
                 this.setState({
                     modifiedInstanceName: this.originalInstanceData.name,
                     modifiedInstanceModality: this.originalInstanceData.modality,
@@ -673,7 +674,7 @@ export default class MainManagementPanel extends React.Component {
                 });
             }
             else {
-                message.error('Instance details load error'); 
+                message.error('Instance details load error');
             }
         }).catch(error => {
             message.error('Instance details load error');
@@ -695,12 +696,12 @@ export default class MainManagementPanel extends React.Component {
     onDeleteInstanceConfirm = (record) => {
         //Delete record from the backend
         axios.delete(`/instance/${record.instanceid}`).then(res => {
-            if(res.status === 200) {
+            if (res.status === 200) {
                 this.listAllInstance();
-                message.success('Instance has been deleted'); 
+                message.success('Instance has been deleted');
             }
-            else if(res.status === 404) {
-                message.error('Instance not found'); 
+            else if (res.status === 404) {
+                message.error('Instance not found');
             }
 
         }).catch(error => {
@@ -723,17 +724,14 @@ export default class MainManagementPanel extends React.Component {
         //console.log("e: ", e.target.checked);
         //console.log("record: ", record.username);
         this.state.userRightsMatrix[index].isAnnotator = !this.state.userRightsMatrix[index].isAnnotator;
-        if(this.state.userRightsMatrix[index].isAnnotator) 
-        {
+        if (this.state.userRightsMatrix[index].isAnnotator) {
             this.annotator_id.push(record.userid);
         }
-        else 
-        {
+        else {
             let spliceIndex = annotator_id.findIndex((element, index, arr) => {
                 return element === record.userid;
             });
-            if (spliceIndex > -1) 
-            {
+            if (spliceIndex > -1) {
                 annotator_id.splice(spliceIndex, 1);
             }
         }
@@ -744,17 +742,14 @@ export default class MainManagementPanel extends React.Component {
         //console.log("e: ", e.target.checked);
         //console.log("record: ", record.username);
         this.state.userRightsMatrix[index].isAuditor = !this.state.userRightsMatrix[index].isAuditor;
-        if(this.state.userRightsMatrix[index].isAuditor) 
-        {
+        if (this.state.userRightsMatrix[index].isAuditor) {
             this.auditor_id.push(record.userid);
         }
-        else 
-        {
+        else {
             let spliceIndex = auditor_id.findIndex((element, index, arr) => {
                 return element === record.userid;
             });
-            if (spliceIndex > -1) 
-            {
+            if (spliceIndex > -1) {
                 auditor_id.splice(spliceIndex, 1);
             }
         }
@@ -774,7 +769,7 @@ export default class MainManagementPanel extends React.Component {
         this.modifiedInstanceModality = value;
     }
 
-    onModifiedInstanceDescriptionChange= e => {
+    onModifiedInstanceDescriptionChange = e => {
         this.setState({
             modifiedInstanceDescription: e.target.value
         });
@@ -819,12 +814,12 @@ export default class MainManagementPanel extends React.Component {
             render: (text, record) => (
                 <div>
                     <Popconfirm title="Delete User?" onConfirm={() => this.onDeleteUserConfirm(record)} /* data-hscode={record.HSCode} */ okText="Yes" cancelText="No">
-                    <a href="javascript:;"><img src="./assets/static/img/delete.png" title='Delete this user'
-                        alt='Delete User' style={{
-                            width: 18,
-                            height: 18
-                        }}></img></a>
-                     </Popconfirm>
+                        <a href="javascript:;"><img src="./assets/static/img/delete.png" title='Delete this user'
+                            alt='Delete User' style={{
+                                width: 18,
+                                height: 18
+                            }}></img></a>
+                    </Popconfirm>
                 </div>
             )
         }
@@ -877,9 +872,9 @@ export default class MainManagementPanel extends React.Component {
             )
         },
         {
-            title: 'Type',
-            dataIndex: 'type',
-            key: 'type',
+            title: 'Data Path',
+            dataIndex: 'data_path',
+            key: 'data_path',
             width: "18%",
             align: "center",
             className: "table",
@@ -924,8 +919,8 @@ export default class MainManagementPanel extends React.Component {
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/details.png" title='Show studies list'
                                 alt='Show studies list' style={{ width: 18, height: 18 }}
-                                 onClick={this.onInstanceDetailClick} data-instancename={text}
-                                data-instanceid={record.instanceid}/></a>
+                                onClick={this.onInstanceDetailClick} data-instancename={text}
+                                data-instanceid={record.instanceid} /></a>
                         </Col>
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/modify.png" title='Modify' alt='Modify'
@@ -933,13 +928,13 @@ export default class MainManagementPanel extends React.Component {
                                 onClick={() => this.onModifyInstanceClick(record)}></img></a>
                         </Col>
                         <Col span={6}>
-                        <Popconfirm title="Delete Instance?" onConfirm={() => this.onDeleteInstanceConfirm(record)} /* data-hscode={record.HSCode} */ okText="Yes" cancelText="No">
-                            <a href="javascript:;"><img src="./assets/static/img/delete.png"
-                                title='Delete this instance' alt='Delete Instance' style={{
-                                    width: 18,
-                                    height: 18
-                                }}></img></a>
-                        </Popconfirm>
+                            <Popconfirm title="Delete Instance?" onConfirm={() => this.onDeleteInstanceConfirm(record)} /* data-hscode={record.HSCode} */ okText="Yes" cancelText="No">
+                                <a href="javascript:;"><img src="./assets/static/img/delete.png"
+                                    title='Delete this instance' alt='Delete Instance' style={{
+                                        width: 18,
+                                        height: 18
+                                    }}></img></a>
+                            </Popconfirm>
                         </Col>
                     </Row>
                 </div>
@@ -957,7 +952,7 @@ export default class MainManagementPanel extends React.Component {
             render: (text, record) => (
                 <div>
                     <a href={"workbench/instance/" + record.instance_id + "/study/" + record.study_id} target="_blank"
-                       title="Show studies list" style={{color: "#0099FF"}}>
+                        title="Show studies list" style={{ color: "#0099FF" }}>
                         {text}
                     </a>
                 </div>
@@ -1016,9 +1011,9 @@ export default class MainManagementPanel extends React.Component {
             align: "center",
             render: (text, record, index) => (
                 <div>
-                    <Checkbox 
-                    defaultChecked={record.isAnnotator}
-                    onChange={(e) => this.onAddAnnotatorCheckboxChange(e, record, index)}
+                    <Checkbox
+                        defaultChecked={record.isAnnotator}
+                        onChange={(e) => this.onAddAnnotatorCheckboxChange(e, record, index)}
                     />
                 </div>
             )
@@ -1031,9 +1026,9 @@ export default class MainManagementPanel extends React.Component {
             align: "center",
             render: (text, record, index) => (
                 <div>
-                    <Checkbox 
-                    defaultChecked={record.isAuditor}
-                    onChange={(e) => this.onAddAuditorCheckboxChange(e, record, index)}
+                    <Checkbox
+                        defaultChecked={record.isAuditor}
+                        onChange={(e) => this.onAddAuditorCheckboxChange(e, record, index)}
                     />
                 </div>
             )
@@ -1147,15 +1142,30 @@ export default class MainManagementPanel extends React.Component {
                     <Row type="flex" justify="start">
                         <Col span={24}>
                             <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
-                                Username
+                                Email
                             </div>
                         </Col>
                     </Row>
                     <div style={{ height: 6 }} />
                     <Row>
                         <Col>
-                            <Input placeholder="Please enter username (email format)"
-                                ref={target => (this.newUsername = target)} />
+                            <Input placeholder="Please enter new user email"
+                                ref={target => (this.newUserName = target)} />
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                Name
+                            </div>
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row>
+                        <Col>
+                            <Input placeholder="Please enter username"
+                                ref={target => (this.newUserDispName = target)} />
                         </Col>
                     </Row>
                     <div style={{ height: 6 }} />
@@ -1169,11 +1179,12 @@ export default class MainManagementPanel extends React.Component {
                     <div style={{ height: 6 }} />
                     <Row>
                         <Col>
-                            <Select defaultValue="admin" style={{ width: '100%' }}>
-                                <Select.Option value="admin">
+                            <Select defaultValue="0" style={{ width: '100%' }}
+                                ref={target => (this.newUserType = target)}>
+                                <Select.Option value="0">
                                     Admin
                                 </Select.Option>
-                                <Select.Option value="annotator">
+                                <Select.Option value="1">
                                     Annotator
                                 </Select.Option>
                             </Select>
@@ -1226,8 +1237,8 @@ export default class MainManagementPanel extends React.Component {
                             <Row>
                                 <Col>
                                     <Select defaultValue="CT" style={{ width: '100%' }}
-                                     /* ref={target => (this.newInstanceModality = target)} */
-                                     onChange={this.onNewInstanceModalityChange}>
+                                        /* ref={target => (this.newInstanceModality = target)} */
+                                        onChange={this.onNewInstanceModalityChange}>
                                         <Select.Option value="CT">
                                             CT
                                         </Select.Option>
@@ -1537,7 +1548,7 @@ export default class MainManagementPanel extends React.Component {
                             <Row>
                                 <Col>
                                     <Select value={this.state.modifiedInstanceModality} style={{ width: '100%' }}
-                                    onChange={this.onModifiedInstanceModalityChange}
+                                        onChange={this.onModifiedInstanceModalityChange}
                                     /* ref={target => (this.modifiedInstanceModality = target)} */
                                     >
                                         <Select.Option value="CT">
@@ -1629,26 +1640,6 @@ export default class MainManagementPanel extends React.Component {
                             </Row>
 
                             <div hidden={this.state.hideAddLabelControls}>
-{/*                                 <Row type="flex" justify="start" gutter={8}>
-                                    <Col span={10}>
-                                        <div style={{ color: "#ccc" }}>
-                                            Name
-                                        </div>
-                                    </Col>
-                                    <Col span={4}>
-                                        <div style={{ color: "#ccc" }}>
-                                            Value
-                                        </div>
-                                    </Col>
-                                    <Col span={3}>
-                                        <div style={{ color: "#ccc" }}>
-                                            Color
-                                        </div>
-                                    </Col>
-                                    <Col>
-                                    </Col>
-                                </Row> */}
-
                                 <Row type="flex" justify="start" gutter={8}>
                                     <Col span={10}>
                                         <div style={{ color: "#ccc" }}>
@@ -1755,7 +1746,7 @@ export default class MainManagementPanel extends React.Component {
                             </Row>
 
                             <div hidden={this.state.hideAddAnnotatorControls}>
-                            <Row type="flex" justify="start">
+                                <Row type="flex" justify="start">
                                     <Col span={24}>
                                         <Table columns={this.addAnnotatorTableColumns}
                                             dataSource={this.state.userRightsMatrix}
@@ -1818,14 +1809,14 @@ export default class MainManagementPanel extends React.Component {
                                             Add
                                         </Button>
                                     </Col>
-                                </Row> */}     
+                                </Row> */}
                             </div>
                         </div>
                     </div>
                 </Modal>
 
                 <Modal
-                    title={(<div style={{height: 12}}>Studies List</div>)}
+                    title={(<div style={{ height: 12 }}>Studies List</div>)}
                     width="85%"
                     visible={this.state.showInstanceDetail}
                     onOk={this.handleInstanceDetailOk}
@@ -1839,11 +1830,11 @@ export default class MainManagementPanel extends React.Component {
                             Cancel
                         </Button>,
                     ]}
-                    bodyStyle={{marginTop: 6, paddingTop: 6}}
+                    bodyStyle={{ marginTop: 6, paddingTop: 6 }}
                 >
                     <Row type="flex" justify="center" align="middle">
                         <Col span={24}>
-                            <div style={{textAlign: "center"}}>
+                            <div style={{ textAlign: "center" }}>
                                 <h2>Studies in {this.state.current_instance_id}</h2>
                             </div>
                         </Col>
@@ -1851,24 +1842,26 @@ export default class MainManagementPanel extends React.Component {
                     <Row type="flex" justify="start">
                         <Col span={24}>
                             <Table columns={this.studiesListTableColumns}
-                                   dataSource={this.state.studiesListTableData}
+                                dataSource={this.state.studiesListTableData}
                                 /* bordered  */
-                                   size="middle"
-                                   loading={this.state.instanceTableLoading}
-                                   actionToken={this.state.instanceTableActionToken}
-                                   onRow={this.onInstanceTableRow}
+                                size="middle"
+                                loading={this.state.instanceTableLoading}
+                                actionToken={this.state.instanceTableActionToken}
+                                onRow={this.onInstanceTableRow}
                                 //rowClassName={this.setRowClassName}
-                                   pagination={{
-                                       current: this.state.currentInstanceTablePage,
-                                       onChange: this.onInstanceTablePageChange,
-                                       showSizeChanger: true,
-                                       showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
-                                   }}
+                                pagination={{
+                                    current: this.state.currentInstanceTablePage,
+                                    onChange: this.onInstanceTablePageChange,
+                                    showSizeChanger: true,
+                                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                                }}
                             />
                         </Col>
                     </Row>
                 </Modal>
             </div>
-        )
+        );
     }
 }
+
+

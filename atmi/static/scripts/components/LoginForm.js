@@ -2,6 +2,7 @@ import React from 'react';
 import {Button, Checkbox, Col, Form, Icon, Input, message, Modal, Row} from 'antd';
 import styles from '../../styles/LoginForm.css';
 import axios from 'axios';
+import Reg from '../utility/Reg';
 
 //import jwt from 'jsonwebtoken';
 
@@ -90,7 +91,8 @@ class LoginForm extends React.Component {
     }
 
     onUsernameChange = e => {
-        let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
+        //let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
+        let reg = Reg.checkEmail;
         if (e.target.value && reg.test(e.target.value)) {
             this.validUsername = true;
         } else {
@@ -137,7 +139,8 @@ class LoginForm extends React.Component {
 
 
     checkEmail = () => {
-        let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
+        //let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
+        let reg = Reg.checkEmail;
         if (!this.inputConfirmUsername) {
             return;
         }
@@ -219,7 +222,8 @@ class LoginForm extends React.Component {
                         {getFieldDecorator('username', {
                             rules: [{required: true, message: 'Please enter your username'},
                                 {
-                                    pattern: new RegExp(/^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i),
+                                    //pattern: new RegExp(/^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i),
+                                    pattern: new RegExp(Reg.checkEmail),
                                     message: 'Please enter username of email format'
                                 }
                             ],
