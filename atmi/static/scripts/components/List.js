@@ -39,7 +39,8 @@ export default class List extends React.Component {
         userRightsMatrix: [], //To cache the user rights settings in creat/modify instance windows
         modifiedInstanceName: "",
         modifiedInstanceModality: "",
-        modifiedInstanceDescription: ""
+        modifiedInstanceDescription: "",
+        hideProgressBar: true
     };
 
     newUserName = null;
@@ -134,14 +135,18 @@ export default class List extends React.Component {
             let instanceTableData = [];
             const instances = res.data;
             for (let i = 0; i < instances.length; i++) {
-                let progress = Math.round((instances[i]['annotated_num'] / instances[i]['study_num']) * 100);
+                let progress = 0;
+                if(instances[i]['study_num']) {
+                    progress = Math.round((instances[i]['annotated_num'] / instances[i]['study_num']) * 100);
+                }
                 instanceTableData.push({
                     'instanceid': instances[i]['instance_id'],
                     'name': instances[i]['name'],
                     'modality': instances[i]['modality'],
                     'description': instances[i]['description'],
                     'progress': progress,
-                    'data_path': instances[i]['data_path']
+                    'data_path': instances[i]['data_path'],
+                    'status': instances[i]['status']
                 });
             }
             this.setState({ "instanceTableData": instanceTableData })
@@ -485,7 +490,7 @@ export default class List extends React.Component {
             label_candidates,
             annotator_id,
             auditor_id,
-            status: this.originalInstanceData.status
+            //status: this.originalInstanceData.status
         };
 
         //Uncomment when the backend is ready
@@ -775,6 +780,43 @@ export default class List extends React.Component {
         });
     }
 
+    showStatusColor = (status) => {
+        switch (status) {
+            case 0:
+                return "grey";
+            case 1:
+                //return "#0066FF";
+                return"#4178ff";
+            case 2:
+                //return "yellow";
+                return"#ffa754";
+            case 3:
+                //return "#00FF00";
+                return"#378035";
+            case 4:
+                return "red";
+            default:
+                return "red";
+        }
+    }
+
+    showStatusName = (status) => {
+        switch (status) {
+            case 0:
+                return "Initialized";
+            case 1:
+                return "Imported data";
+            case 2:
+                return "Annotating";
+            case 3:
+                return "Finished";
+            case 4:
+                return "Error";
+            default:
+                return "Unknown";
+        }
+    }
+
     userTableColumns = [
         {
             title: 'Username',
@@ -849,11 +891,30 @@ export default class List extends React.Component {
             dataIndex: 'progress',
             key: 'progress',
             width: "14%",
-            align: "center",
+            align: "left",
             className: "table",
             render: (text, record) => (
-                <div>
-                    <Progress percent={text} showInfo={false} strokeColor="#87d068" />
+                <div className={(record.name === this.state.instanceNameEntered) ? styles.highightTableRow : styles.font}>
+                    <Row type="flex" justify="left" align="middle">
+                        <Col>
+                            <div style={{
+                                /* width: 8, height: 8, borderRadius: "50%", */
+                                positon: "absolute", width: 10, height: 10, left: 3, borderRadius: 30, border: "1px solid #eee",
+                                backgroundColor: this.showStatusColor(record.status)
+                            }
+                            } />
+                        </Col>
+                        <Col>
+                            &nbsp; {this.showStatusName(record.status)}
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <div hidden={!(record.status === 2)}>
+                                <Progress percent={record.progress} showInfo={false} strokeColor="#87d068" />
+                            </div>
+                        </Col>
+                    </Row>
                 </div>
             )
         },
@@ -908,7 +969,7 @@ export default class List extends React.Component {
             className: "table",
             render: (text, record) => (
                 <div>
-                    <Row type="flex" justify="start" justify="space-between">
+                    <Row type="flex" justify="start" justifyjustify="space-between">
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/download.png" title='Download'
                                 alt='Download' style={{
