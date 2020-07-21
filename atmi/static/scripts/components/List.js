@@ -40,7 +40,9 @@ export default class List extends React.Component {
         modifiedInstanceName: "",
         modifiedInstanceModality: "",
         modifiedInstanceDescription: "",
-        hideProgressBar: true
+        hideProgressBar: true,
+        showImportdcm: false,
+        importingInstanceName: ""
     };
 
     newUserName = null;
@@ -62,6 +64,8 @@ export default class List extends React.Component {
     auditor_id = [];
     originalInstanceData = {}; //Original instance data before modified
     currentModifiedInstanceId = null;
+    importingInstanceId = null; //Id of the instance that user imports dcm into 
+    dcmPath = null; //The folder path that user imports dcm from 
 
     //For forntend dev only
 
@@ -106,6 +110,17 @@ export default class List extends React.Component {
             }
         ]; */
 
+        
+    componentDidMount() {
+        this.listAllUsers();
+        this.listAllInstance();
+    }
+
+    componentDidUpdate() {
+        //this.listAllUsers();
+        //this.listAllInstance();
+    }
+
     listAllUsers = () => {
         axios.get("/user/").then(res => {
             let userTableData = []
@@ -122,13 +137,9 @@ export default class List extends React.Component {
         }).catch(error => {
             message.error('List user error');
             console.log(error)
-        })
+        });
     };
 
-    componentDidMount() {
-        this.listAllUsers();
-        this.listAllInstance();
-    }
 
     listAllInstance = () => {
         axios.get("/instances").then(res => {
@@ -136,7 +147,7 @@ export default class List extends React.Component {
             const instances = res.data;
             for (let i = 0; i < instances.length; i++) {
                 let progress = 0;
-                if(instances[i]['study_num']) {
+                if (instances[i]['study_num']) {
                     progress = Math.round((instances[i]['annotated_num'] / instances[i]['study_num']) * 100);
                 }
                 instanceTableData.push({
@@ -270,8 +281,14 @@ export default class List extends React.Component {
         //Add instance into the backend
         //New added labels are cached in this.labelCandidatesBuffer
         //New added annotatos are cached in this.annotatorCandidatesBuffer
-        let cleanValue = this.newInstanceName.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "");
-        if (cleanValue === "") {
+        
+        //let cleanValue = this.newInstanceName.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "");
+/*         if (cleanValue === "") {
+            message.error("Instance name can not be empty");
+            return;
+        } */
+
+        if (Reg.isStringEmpty(this.newInstanceName.input.value)) {
             message.error("Instance name can not be empty");
             return;
         }
@@ -395,11 +412,11 @@ export default class List extends React.Component {
 
     handleAddLabel = e => {
         //Verify the input
-        if (this.newLabelName.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "") === "") {
+        if (Reg.isStringEmpty(this.newLabelName.input.value)) {
             message.error("Label name can not be empty");
             return;
         }
-        if (this.newLabelValue.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "") === "") {
+        if (Reg.isStringEmpty(this.newLabelValue.input.value)) {
             message.error("Label value can not be empty");
             return;
         }
@@ -464,8 +481,7 @@ export default class List extends React.Component {
         //Modify instance in the backend
         //Modified labels are cached in this.labelCandidatesBuffer
         //Modified annotatos are cached in this.annotatorCandidatesBuffer
-        let cleanValue = this.modifiedInstanceName.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "");
-        if (cleanValue === "") {
+        if (Reg.isStringEmpty(this.modifiedInstanceName.input.value)) {
             message.error("Instance name can not be empty");
             return;
         }
@@ -702,8 +718,8 @@ export default class List extends React.Component {
         //Delete record from the backend
         axios.delete(`/instance/${record.instanceid}`).then(res => {
             if (res.status === 200) {
-                this.listAllInstance();
                 message.success('Instance has been deleted');
+                this.listAllInstance();
             }
             else if (res.status === 404) {
                 message.error('Instance not found');
@@ -785,16 +801,20 @@ export default class List extends React.Component {
             case 0:
                 return "grey";
             case 1:
-                //return "#0066FF";
-                return"#4178ff";
+                return "grey";          
             case 2:
-                //return "yellow";
-                return"#ffa754";
+                //return "#0066FF";
+                return "grey";
             case 3:
-                //return "#00FF00";
-                return"#378035";
+                return "#4178ff";                
             case 4:
-                return "red";
+                //return "yellow";
+                return "#ffa754";
+            case 5:
+                //return "#00FF00";
+                return "#378035";
+            case 6:
+                return "#ff8065";
             default:
                 return "red";
         }
@@ -805,16 +825,60 @@ export default class List extends React.Component {
             case 0:
                 return "Initialized";
             case 1:
-                return "Imported data";
+                return "Initialized";
             case 2:
-                return "Annotating";
+                return "Importing data"; 
             case 3:
-                return "Finished";
+                return "Ready to annotate";   
             case 4:
-                return "Error";
+                return "Annotating";
+            case 5:
+                return "Finished";
+            case 6:
+                return "Auditing";
             default:
-                return "Unknown";
+                return "Unknown or error";
         }
+    }
+
+    onImportdcmClick = (record) => {
+        this.importingInstanceId = record.instanceid;
+        this.setState({
+            importingInstanceName: record.name,
+            showImportdcm: true
+        });
+    }
+
+    handleImportdcmOk = e => {
+        if(Reg.isStringEmpty(this.dcmPath.textAreaRef.value)) {
+            message.error("Data path can not be empty");
+            return;
+        }
+        
+        axios.get(`/import/instance/${this.importingInstanceId}?data_path=${this.dcmPath.textAreaRef.value}`).then(res => {
+            if(res.status === 201) {
+                message.success('Successfully imported dcm');
+                this.listAllInstance();
+            }
+        }).catch(error => {
+            message.error('Import dcm error');
+            console.log(error);
+        });
+
+        this.importingInstanceId = null;
+        this.setState({
+            showImportdcm: false,
+            importingInstanceName: ""
+        });
+        //this.currentModifiedInstanceId;
+    }
+
+    handleImportdcmCancel = e => {
+        this.importingInstanceId = null;
+        this.setState({
+            showImportdcm: false,
+            importingInstanceName: ""
+        });
     }
 
     userTableColumns = [
@@ -895,7 +959,7 @@ export default class List extends React.Component {
             className: "table",
             render: (text, record) => (
                 <div className={(record.name === this.state.instanceNameEntered) ? styles.highightTableRow : styles.font}>
-                    <Row type="flex" justify="left" align="middle">
+                    <Row type="flex" justify="start" align="middle">
                         <Col>
                             <div style={{
                                 /* width: 8, height: 8, borderRadius: "50%", */
@@ -910,7 +974,7 @@ export default class List extends React.Component {
                     </Row>
                     <Row>
                         <Col>
-                            <div hidden={!(record.status === 2)}>
+                            <div hidden={!(record.status === 4)}>
                                 <Progress percent={record.progress} showInfo={false} strokeColor="#87d068" />
                             </div>
                         </Col>
@@ -971,11 +1035,12 @@ export default class List extends React.Component {
                 <div>
                     <Row type="flex" justify="start" justifyjustify="space-between">
                         <Col span={6}>
-                            <a href="javascript:;"><img src="./assets/static/img/download.png" title='Download'
-                                alt='Download' style={{
-                                    width: 18,
-                                    height: 18
-                                }}></img></a>
+                                 <a href="javascript:;" onClick={() => this.onImportdcmClick(record)}
+                                    ><img src="./assets/static/img/import.png" title='Import dcm'
+                                        alt='Import dcm' style={{
+                                            width: 18,
+                                            height: 18
+                                        }} /></a>
                         </Col>
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/details.png" title='Show studies list'
@@ -1648,15 +1713,38 @@ export default class List extends React.Component {
                                 </Col>
                             </Row>
                             <div style={{ height: 6 }} />
-                            <Row type="flex" justify="start">
+                          {/*   <Row type="flex" justify="start">
                                 <Col span={24}>
                                     <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
-                                        Path
+                                        Data Importing
                                     </div>
                                 </Col>
                             </Row>
-                            <div style={{ height: 6 }} />
-                            <Row type="flex" justify="space-between">
+
+                            <div style={{ height: 4 }} />
+
+                            <Row type="flex" justify="start">
+                                <Col span={24}>
+                                    <div className={styles.borderSpan}>
+                                        <div className={styles.border} />
+                                    </div>
+                                </Col>
+                            </Row>
+
+                            <div style={{ height: 4 }} />
+
+                            <Row type="flex" justify="start" align="bottom">
+                                <Col>
+                                    <a href="javascript:;" onClick={this.onImportdcmClick}
+                                    ><img src="./assets/static/img/import.png" title='Import dcm'
+                                        alt='Import dcm' style={{
+                                            width: 14,
+                                            height: 14
+                                        }} />Import dcm</a>
+                                </Col>
+                            </Row> */}
+
+                            {/*  <Row type="flex" justify="space-between">
                                 <Col span={18}>
                                     <Input placeholder="Please enter the path"
                                         ref={target => (this.modifyInstancePath = target)} />
@@ -1668,8 +1756,7 @@ export default class List extends React.Component {
                                         </Button>
                                     </div>
                                 </Col>
-                            </Row>
-                            <div style={{ height: 6 }} />
+                            </Row> */}
                             <Row type="flex" justify="space-between">
                                 <Col span={18}>
                                     <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
@@ -1917,6 +2004,61 @@ export default class List extends React.Component {
                                     showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
                                 }}
                             />
+                        </Col>
+                    </Row>
+                </Modal>
+                <Modal
+                    title={(<div style={{ height: 12 }}>Import dcm</div>)}
+                    width="30%"
+                    visible={this.state.showImportdcm}
+                    onOk={this.handleImportdcmOk}
+                    onCancel={this.handleImportdcmCancel}
+                    destroyOnClose={true}
+                    footer={[
+                        <Button key="submit" type="primary" onClick={this.handleImportdcmOk}>
+                            Ok
+                        </Button>,
+                        <Button key="back" onClick={this.handleImportdcmCancel}>
+                            Cancel
+                        </Button>,
+                    ]}
+                    bodyStyle={{ marginTop: 6, paddingTop: 6 }}
+                >
+                    {/*                     <Row type="flex" justify="start">
+                        <Col span={24}>
+                            批量输入申报名称
+                    </Col>
+                    </Row> */}
+                    {/*                     <div style={{ height: 3 }} /> */}
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'small' }}>
+                                <strong>
+                                    {this.state.importingInstanceName}
+                                </strong>
+                            </div>
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'x-small' }}>
+                                -Please put your dicom folder under ATMI/data folder.
+                    </div>
+                        </Col>
+                    </Row>
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'x-small' }}>
+                                -And then continue importing the data.
+                    </div>
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row>
+                        <Col>
+                            <Input.TextArea rows={3} placeholder="Input your dicom folder here, starting after /data/"
+                                ref={target => (this.dcmPath = target)} />
                         </Col>
                     </Row>
                 </Modal>
