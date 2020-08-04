@@ -3,7 +3,7 @@ import {Col, Row} from 'antd';
 import LoginForm from './LoginForm';
 import WrappedNormalResetPasswordForm from './ResetPasswordForm';
 //import SettingPanel from './SettingPanel';
-import ManagementPanel from './ManagementPanel';
+import ListPanel from './ListPanel';
 
 
 export default class UserManagement extends React.PureComponent {
@@ -21,7 +21,7 @@ export default class UserManagement extends React.PureComponent {
         hideLoginForm: false,   //Whether to hide LoginForm
         hideResetPasswordForm: true,   //Whether to hide ResetPasswordForm
         hideSettingPanel: true,   //Whether to hide SettingPanel
-        hideManagementPanel: true,   //Whether to hide ManagementPanel
+        hideListPanel: true,   //Whether to hide ManagementPanel
         ResetPasswordUsername: "",   //Username to be reset password for
     };
 
@@ -44,7 +44,7 @@ export default class UserManagement extends React.PureComponent {
                     hideLoginForm: false,
                     hideResetPasswordForm: true,
                     hideSettingPanel: true,
-                    hideManagementPanel: true
+                    hideListPanel: true
                 });
                 break;
             case "WrappedNormalResetPasswordForm":
@@ -52,7 +52,7 @@ export default class UserManagement extends React.PureComponent {
                     hideLoginForm: true,
                     hideResetPasswordForm: false,
                     hideSettingPanel: true,
-                    hideManagementPanel: true
+                    hideListPanel: true
                 });
                 break;
             case "SettingPanel":
@@ -60,15 +60,15 @@ export default class UserManagement extends React.PureComponent {
                     hideLoginForm: true,
                     hideResetPasswordForm: true,
                     hideSettingPanel: false,
-                    hideManagementPanel: true
+                    hideListPanel: true
                 });
                 break;
-            case "ManagementPanel":
+            case "ListPanel":
                 this.setState({
                     hideLoginForm: true,
                     hideResetPasswordForm: true,
                     hideSettingPanel: true,
-                    hideManagementPanel: false
+                    hideListPanel: false
                 });
                 break;
             default:
@@ -82,7 +82,7 @@ export default class UserManagement extends React.PureComponent {
                     hideManagementPanel: false
                 });  */
         this.props.onLoginSuccess(username);
-        this.toManagementMode("ManagementPanel");
+        this.toManagementMode("ListPanel");
     }
 
     toManagementMode = mode => {
@@ -122,9 +122,9 @@ export default class UserManagement extends React.PureComponent {
                         <SettingPanel />
                     </Col>
                 </Row> */}
-                <Row type="flex" justify="center" align="middle" hidden={this.state.hideManagementPanel}>
+                <Row type="flex" justify="center" align="middle" hidden={this.state.hideListPanel}>
                     <Col span={24}>
-                        <ManagementPanel/>
+                        <ListPanel/>
                     </Col>
                 </Row>
             </div>
