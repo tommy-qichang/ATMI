@@ -18,6 +18,12 @@ module.exports = {
         app_js: [
             root + "/scripts/app.js"
         ],
+        crossref_js: [
+            root + "/scripts/crossref.js"
+        ],
+        crossref_css: [
+            root + "/styles/crossref.scss"
+        ],
         main_css: [
             root + "/styles/main.scss"
         ]

@@ -209,11 +209,20 @@ export default class MainManagementPanel extends React.Component {
         }
     };
 
-    proccessAddUser = username => {
-        message.success("Sucessfully added user and sent email to user", 2);
-        this.setState({
-            showAddUser: false
+    proccessAddUser = (username, dispname, type) => {
+        debugger;
+        axios.post("/user", {'email': username, 'name': dispname, 'user_type':type}).then(res => {
+            let url = res.data.url;
+
+            message.success("URL: "+url, 10);
+            this.setState({
+                showAddUser: false
+            });
+        }).catch(error => {
+            message.error('User add error');
+            console.log(error)
         });
+
     };
 
     handleAddInstanceOk = e => {
@@ -451,7 +460,7 @@ export default class MainManagementPanel extends React.Component {
                     annotators: studies[i].annotators,
                     auditors: studies[i].auditors,
                     status: status,
-                    path: studies[i].folder_name.substring(2) + "...",
+                    path: studies[i].folder_name.substring(2,50) + "...",
                     file_number: studies[i].total_files_number
                 })
             }
