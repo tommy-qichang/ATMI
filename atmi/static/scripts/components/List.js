@@ -67,49 +67,6 @@ export default class List extends React.Component {
     importingInstanceId = null; //Id of the instance that user imports dcm into
     dcmPath = null; //The folder path that user imports dcm from
 
-    //For forntend dev only
-
-    instanceTableData = [
-        {
-            name: "001001",
-            progress: 20,
-            modality: "CT",
-            type: "Brain",
-            description: "Lorum ipsum..."
-        },
-        {
-            name: "001002",
-            progress: 80,
-            modality: "Ultra-Sound",
-            type: "Breasts",
-            description: "Lorum ipsum..."
-        }
-    ];
-
-    addAnnotatorTableData = [
-        {
-            username: "calkufu@hotmail.com"
-        },
-        {
-            username: "598561408@qq.com"
-        },
-        {
-            username: "fuhua06@gmail.com"
-        }
-    ];
-
-
-    /*     userTableData = [
-            {
-                username: "fuhua06@gmail.com",
-                usertype: "Admin"
-            },
-            {
-                username: "598561408@qq.com",
-                usertype: "Annotator"
-            }
-        ]; */
-
 
     componentDidMount() {
         this.listAllUsers();
