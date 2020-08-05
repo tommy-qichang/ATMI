@@ -6,9 +6,10 @@
 
 .canvas {
     background: #4d4d4d;
-    height: 100vh;
-    display: -webkit-flex;
-    -webkit-flex-direction: column;
+    height: 100vh; 
+    /* height: 100%; */
+    /* display: -webkit-flex;
+    -webkit-flex-direction: column; */
 }
 
 .font {

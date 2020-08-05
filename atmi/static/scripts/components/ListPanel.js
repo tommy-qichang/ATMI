@@ -1,12 +1,12 @@
 import React from 'react';
 import {message} from 'antd';
 import StudyList from './StudyList';
-import MainManagementPanel from './MainManagementPanel';
-import styles from '../../styles/ManagementPanel.css';
+import List from './List';
+import styles from '../../styles/ListPanel.css';
 import axios from "axios";
 
 
-export default class ManagementPanel extends React.Component {
+export default class ListPanel extends React.Component {
     /*     constructor(props) {
             super(props);
         }
@@ -104,7 +104,7 @@ export default class ManagementPanel extends React.Component {
         return (
             <div>
                 <div hidden={this.state.hideMainPanel}>
-                <MainManagementPanel 
+                <List 
                 /* onInstanceDetailClick={this.onInstanceDetailClick} *//>
             </div>
             <div hidden={this.state.hideStudyList}>

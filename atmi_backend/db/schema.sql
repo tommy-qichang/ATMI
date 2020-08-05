@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS label_candidates
     instance_id         INTEGER,
     label_type          INTEGER NOT NULL, --0: contour label, 1: study label
     contour_label_value INTEGER,          --the real contour value for each label.
-    input_type          INTEGER,          --label_type:0 means annotation label, so no input textbox needed. 1: select box. 2: text input.
+    input_type          INTEGER,          --label_type:0 means contour label, so no input textbox needed. 1: select box. 2: text input.
     text                TEXT,
     FOREIGN KEY (instance_id) REFERENCES instances (instance_id) ON DELETE SET NULL ON UPDATE NO ACTION
 );

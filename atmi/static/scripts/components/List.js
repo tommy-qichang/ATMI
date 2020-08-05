@@ -1,12 +1,13 @@
 import React from 'react';
-import { Button, Col, Icon, Input, message, Modal, Progress, Row, Select, Table, Popconfirm } from 'antd';
+import { Button, Col, Icon, Input, message, Modal, Progress, Row, Select, Table, Popconfirm, Checkbox } from 'antd';
 //import {SketchPicker} from 'react-color';
 import StudyList from './StudyList';
-import styles from '../../styles/ManagementPanel.css';
+import styles from '../../styles/ListPanel.css';
 import axios from "axios";
 //import InfiniteScroll from 'react-infinite-scroller';
+import Reg from '../utility/Reg';
 
-export default class MainManagementPanel extends React.Component {
+export default class List extends React.Component {
 
     state = {
         userTableLoading: false,
@@ -34,10 +35,17 @@ export default class MainManagementPanel extends React.Component {
         hideMainPanel: false,
         hideStudyList: true,
         defaultNewLabelValue: 1,
-        current_instance_id: ""
+        current_instance_id: "",
+        userRightsMatrix: [], //To cache the user rights settings in creat/modify instance windows
+        modifiedInstanceName: "",
+        modifiedInstanceModality: "",
+        modifiedInstanceDescription: "",
+        hideProgressBar: true,
+        showImportdcm: false,
+        importingInstanceName: ""
     };
 
-    newUsername = null;
+    newUserName = null;
     newInstanceName = null;
     newInstanceModality = "CT";
     newInstanceDescription = null;
@@ -45,42 +53,30 @@ export default class MainManagementPanel extends React.Component {
     newLabelName = null;
     newLabelValue = null;
     newAnnotatorCandidate = null;
-    modifyInstanceDescription = null;
+    modifiedInstanceName = null;
+    modifiedInstanceModality = null;
+    modifiedInstanceDescription = null;
     modifyInstancePath = null;
     labelCandidatesBuffer = [];
     annotatorCandidatesBuffer = [];
     existingMaxLabelValue = 0;
-
-    //For forntend dev
-     
-    instanceTableData = [
-        {
-            name: "001001",
-            progress: 20,
-            modality: "CT",
-            type: "Brain",
-            description: "Lorum ipsum..."
-        },
-        {
-            name: "001002",
-            progress: 80,
-            modality: "Ultra-Sound",
-            type: "Breasts",
-            description: "Lorum ipsum..."
-        }
-    ];
+    annotator_id = [];
+    auditor_id = [];
+    originalInstanceData = {}; //Original instance data before modified
+    currentModifiedInstanceId = null;
+    importingInstanceId = null; //Id of the instance that user imports dcm into
+    dcmPath = null; //The folder path that user imports dcm from
 
 
-/*     userTableData = [
-        {
-            username: "fuhua06@gmail.com",
-            usertype: "Admin"
-        },
-        {
-            username: "598561408@qq.com",
-            usertype: "Annotator"
-        }
-    ]; */
+    componentDidMount() {
+        this.listAllUsers();
+        this.listAllInstance();
+    }
+
+    componentDidUpdate() {
+        //this.listAllUsers();
+        //this.listAllInstance();
+    }
 
     listAllUsers = () => {
         axios.get("/user/").then(res => {
@@ -90,37 +86,38 @@ export default class MainManagementPanel extends React.Component {
                 userTableData.push({
                     username: user[i].email,
                     nickname: user[i].name,
-                    usertype: user[i].user_type == 0 ? "Admin" : "Annotator"
+                    usertype: user[i].user_type == 0 ? "Admin" : "Annotator",
+                    userid: user[i].user_id
                 })
             }
-            this.setState({"userTableData": userTableData})
+            this.setState({ "userTableData": userTableData })
         }).catch(error => {
             message.error('List user error');
             console.log(error)
-        })
+        });
     };
 
-    componentDidMount() {
-        this.listAllUsers();
-        this.listAllInstance();
-    }
 
     listAllInstance = () => {
         axios.get("/instances").then(res => {
             let instanceTableData = [];
             const instances = res.data;
             for (let i = 0; i < instances.length; i++) {
-                let progress = Math.round((instances[i]['annotated_num'] / instances[i]['study_num']) * 100);
+                let progress = 0;
+                if (instances[i]['study_num']) {
+                    progress = Math.round((instances[i]['annotated_num'] / instances[i]['study_num']) * 100);
+                }
                 instanceTableData.push({
                     'instanceid': instances[i]['instance_id'],
                     'name': instances[i]['name'],
                     'modality': instances[i]['modality'],
                     'description': instances[i]['description'],
                     'progress': progress,
-                    'data_path': instances[i]['data_path']
+                    'data_path': instances[i]['data_path'],
+                    'status': instances[i]['status']
                 });
             }
-            this.setState({"instanceTableData": instanceTableData})
+            this.setState({ "instanceTableData": instanceTableData })
         }).catch(error => {
             message.error('Instance list error');
             console.log(error)
@@ -156,8 +153,18 @@ export default class MainManagementPanel extends React.Component {
     };
 
     onNewInstanceButtonClick = e => {
+        let userRightsMatrix = [];
+        this.state.userTableData.forEach(userRecord => {
+            userRightsMatrix.push({
+                username: userRecord.username,
+                userid: userRecord.userid,
+                isAnnotator: false,
+                isAuditor: false
+            });
+        });
         this.setState({
-            showAddInstance: true
+            showAddInstance: true,
+            userRightsMatrix
         });
     };
 
@@ -197,22 +204,32 @@ export default class MainManagementPanel extends React.Component {
     };
 
     checkEmail = () => {
-        let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
-        if (!this.newUsername || !this.newUsername.input) {
+        //let reg = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
+        let reg = Reg.checkEmail;
+        if (!this.newUserName || !this.newUserName.input) {
             return;
         }
-        let username = this.newUsername.input.value;
-        if (reg.test(username)) {
-            this.proccessAddUser(username);
+        let userName = this.newUserName.input.value;
+        let dispName = this.newUserDispName.input.value;
+        let userType = this.newUserType.rcSelect.state.value[0];
+        //userType = (userType === "Admin") ? 0 : 1;
+        if (reg.test(userName)) {
+            this.proccessAddUser(userName, dispName, userType);
         } else {
             message.error("Please enter username of email format", 2);
         }
     };
 
-    proccessAddUser = username => {
-        message.success("Sucessfully added user and sent email to user", 2);
-        this.setState({
-            showAddUser: false
+    proccessAddUser = (username, dispname, type) => {
+        axios.post("/user", { 'email': username, 'name': dispname, 'user_type': type }).then(res => {
+            let url = res.data.url
+            message.success("URL: " + url, 10);
+            this.setState({
+                showAddUser: false
+            });
+        }).catch(error => {
+            message.error('User add error');
+            console.log(error)
         });
     };
 
@@ -220,39 +237,69 @@ export default class MainManagementPanel extends React.Component {
         //Add instance into the backend
         //New added labels are cached in this.labelCandidatesBuffer
         //New added annotatos are cached in this.annotatorCandidatesBuffer
-        let cleanValue = this.newInstanceName.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "");
-        if(cleanValue === "") 
-        {
+
+        //let cleanValue = this.newInstanceName.input.value.replace(/[\ ]/g, "").replace(/\s*/g, "");
+/*         if (cleanValue === "") {
+            message.error("Instance name can not be empty");
+            return;
+        } */
+
+        if (Reg.isStringEmpty(this.newInstanceName.input.value)) {
             message.error("Instance name can not be empty");
             return;
         }
 
-/*         console.log("this.newInstanceName: ", this.newInstanceName.input.value);
-        console.log("this.newInstanceModality: ", this.newInstanceModality);
-        console.log("this.newInstanceDescription: ", this.newInstanceDescription.textAreaRef.value);
-        console.log("this.this.labelCandidatesBuffer: ", this.labelCandidatesBuffer);
-        console.log("this.annotatorCandidatesBuffer: ", this.annotatorCandidatesBuffer); */
+        /*         console.log("this.newInstanceName: ", this.newInstanceName.input.value);
+                console.log("this.newInstanceModality: ", this.newInstanceModality);
+                console.log("this.newInstanceDescription: ", this.newInstanceDescription.textAreaRef.value);
+                console.log("this.this.labelCandidatesBuffer: ", this.labelCandidatesBuffer);
+                console.log("this.annotatorCandidatesBuffer: ", this.annotatorCandidatesBuffer); */
+
+        let annotator_id = this.annotator_id.join("|");
+        let auditor_id = this.auditor_id.join("|");
+        let label_candidates = [];
+        this.labelCandidatesBuffer.forEach(label => {
+            label_candidates.push({
+                label_type: 0,
+                input_type: 0,
+                text: label.name,
+                contour_label_value: label.value
+            });
+        });
 
         let newInstanceData = {
-            name: this.newInstanceName.input.value, 
-            modality: this.newInstanceModality, 
-            description:this.newInstanceDescription.textAreaRef.value
+            name: this.newInstanceName.input.value,
+            modality: this.newInstanceModality,
+            description: this.newInstanceDescription.textAreaRef.value,
+            data_path: "",
+            has_audit: 0,
+            label_candidates,
+            annotator_id,
+            auditor_id,
+            status: 0
         };
 
         //Uncomment when the backend is ready
-/*         axios.post(newInstanceData).then(res => {
-           
+        axios.post('/instances', newInstanceData).then(res => {
+            console.log("res: ", res);
+            if (res.status == 201) {
+                message.success('Successfully added instance');
+                this.listAllInstance();
+            }
+            else if (res.status == 409) {
+                message.error('Instance name conflicts');
+            }
         }).catch(error => {
             message.error('Add instance error');
             console.log(error);
-        }); */
-
-        
+        });
 
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
         this.newInstanceModality = "CT";
         this.existingMaxLabelValue = 0;
+        this.annotator_id = [];
+        this.auditor_id = [];
         this.setState({
             showAddInstance: false,
             hideColorPicker: true,
@@ -298,18 +345,15 @@ export default class MainManagementPanel extends React.Component {
 
     onLabelCloseIconClick = e => {
         //console.log("e.target.dataset.index: ", e.currentTarget.dataset.index);
-        let deletedValue = this.labelCandidatesBuffer[e.currentTarget.dataset.index].value;        
+        let deletedValue = this.labelCandidatesBuffer[e.currentTarget.dataset.index].value;
         this.labelCandidatesBuffer.splice(e.currentTarget.dataset.index, 1);
-        if(this.labelCandidatesBuffer.length === 0)
-        {
+        if (this.labelCandidatesBuffer.length === 0) {
             this.existingMaxLabelValue = 0;
         }
-        else if(deletedValue === this.existingMaxLabelValue)
-        {
+        else if ((deletedValue === this.existingMaxLabelValue) && (deletedValue !== 0)) {
             let secondMaxValue = 1;
             this.labelCandidatesBuffer.forEach(element => {
-                if(element.value > secondMaxValue)
-                {
+                if (element.value > secondMaxValue) {
                     secondMaxValue = element.value;
                 }
             });
@@ -324,26 +368,22 @@ export default class MainManagementPanel extends React.Component {
 
     handleAddLabel = e => {
         //Verify the input
-        if(this.newLabelName.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "") === "")
-        {
+        if (Reg.isStringEmpty(this.newLabelName.input.value)) {
             message.error("Label name can not be empty");
             return;
         }
-        if(this.newLabelValue.input.value.replace(/[\ ]/g,"").replace(/\s*/g, "") === "")
-        {
+        if (Reg.isStringEmpty(this.newLabelValue.input.value)) {
             message.error("Label value can not be empty");
             return;
         }
         let inputValue = parseInt(this.newLabelValue.input.value);
-        if(!inputValue)
-        {
+        if (!inputValue) {
             message.error("Label value must be a number");
             return;
         }
-        if(this.labelCandidatesBuffer.findIndex((element, index, arr) => {
+        if (this.labelCandidatesBuffer.findIndex((element, index, arr) => {
             return element.value === inputValue;
-        }) > -1) 
-        {
+        }) > -1) {
             message.error("This value of label has already existed");
             return;
         }
@@ -354,9 +394,9 @@ export default class MainManagementPanel extends React.Component {
             //color: this.state.colorBlockColor
         });
 
-        this.existingMaxLabelValue = 
-        parseInt(this.newLabelValue.input.value)>this.existingMaxLabelValue?
-        parseInt(this.newLabelValue.input.value):this.existingMaxLabelValue;
+        this.existingMaxLabelValue =
+            parseInt(this.newLabelValue.input.value) > this.existingMaxLabelValue ?
+                parseInt(this.newLabelValue.input.value) : this.existingMaxLabelValue;
 
         this.setState({
             labelCandidatesBuffer: this.labelCandidatesBuffer,
@@ -374,7 +414,7 @@ export default class MainManagementPanel extends React.Component {
         });
     };
 
-    
+
     onAnnotatorCloseIconClick = e => {
         //console.log("e.target.dataset.index: ", e.currentTarget.dataset.index);
         this.annotatorCandidatesBuffer.splice(e.currentTarget.dataset.index, 1);
@@ -397,29 +437,87 @@ export default class MainManagementPanel extends React.Component {
         //Modify instance in the backend
         //Modified labels are cached in this.labelCandidatesBuffer
         //Modified annotatos are cached in this.annotatorCandidatesBuffer
+        if (Reg.isStringEmpty(this.modifiedInstanceName.input.value)) {
+            message.error("Instance name can not be empty");
+            return;
+        }
+
+        let annotator_id = this.annotator_id.join("|");
+        let auditor_id = this.auditor_id.join("|");
+        let label_candidates = [];
+        this.labelCandidatesBuffer.forEach(label => {
+            label_candidates.push({
+                label_type: 0,
+                input_type: 0,
+                text: label.name,
+                contour_label_value: label.value
+            });
+        });
+
+        let modifiedInstanceData = {
+            name: this.modifiedInstanceName.input.value,
+            modality: this.modifiedInstanceModality,
+            description: this.modifiedInstanceDescription.textAreaRef.value,
+            has_audit: this.originalInstanceData.has_audit,
+            label_candidates,
+            annotator_id,
+            auditor_id,
+            //status: this.originalInstanceData.status
+        };
+
+        //Uncomment when the backend is ready
+        axios.put(`/instance/${this.currentModifiedInstanceId}`, modifiedInstanceData).then(res => {
+            //console.log("res: ", res);
+            if (res.status == 201) {
+                message.success('Successfully modified instance');
+                this.listAllInstance();
+            }
+            else {
+                message.error('Modify instance error');
+            }
+        }).catch(error => {
+            message.error('Modify instance error');
+            console.log(error);
+        });
 
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
+        this.existingMaxLabelValue = 0;
+        this.annotator_id = [];
+        this.auditor_id = [];
+        this.originalInstanceData = {};
+        this.currentModifiedInstanceId = null;
+        this.modifiedInstanceModality = null;
         this.setState({
             showModifyInstance: false,
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
             hideAddLabelControls: false,
-            hideAddAnnotatorControls: false
+            hideAddAnnotatorControls: false,
+            defaultNewLabelValue: 1,
+            userRightsMatrix: []
         });
     };
 
     handleModifyInstanceCancel = e => {
         this.labelCandidatesBuffer = [];
         this.annotatorCandidatesBuffer = [];
+        this.existingMaxLabelValue = 0;
+        this.annotator_id = [];
+        this.auditor_id = [];
+        this.originalInstanceData = {};
+        this.currentModifiedInstanceId = null;
+        this.modifiedInstanceModality = null;
         this.setState({
             showModifyInstance: false,
             hideColorPicker: true,
             labelCandidatesBuffer: [],
             annotatorCandidatesBuffer: [],
             hideAddLabelControls: false,
-            hideAddAnnotatorControls: false
+            hideAddAnnotatorControls: false,
+            defaultNewLabelValue: 1,
+            userRightsMatrix: []
         });
     };
 
@@ -451,7 +549,7 @@ export default class MainManagementPanel extends React.Component {
                     annotators: studies[i].annotators,
                     auditors: studies[i].auditors,
                     status: status,
-                    path: studies[i].folder_name.substring(2) + "...",
+                    path: studies[i].folder_name.substring(2,50) + "...",
                     file_number: studies[i].total_files_number
                 })
             }
@@ -469,9 +567,95 @@ export default class MainManagementPanel extends React.Component {
     onModifyInstanceClick = (record) => {
         //Load instance data from the backend
         //The parameter "record" means the table record of the instance
-        
-        this.setState({
-            showModifyInstance: true
+        axios.get("/instance/" + record.instanceid).then(res => {
+            console.log("res.data: ", res.data);
+            if (res.status === 200) {
+                this.originalInstanceData = {
+                    name: res.data.name,
+                    modality: res.data.modality,
+                    description: res.data.description,
+                    has_audit: res.data.has_audit,
+                    annotator_id: res.data.annotator_id,
+                    auditor_id: res.data.auditor_id,
+                    label_candidates: res.data.label_candidates,
+                    status: res.data.status
+                };
+
+                this.currentModifiedInstanceId = record.instanceid;
+                this.modifiedInstanceModality = this.originalInstanceData.modality;
+
+                this.originalInstanceData.label_candidates.forEach(element => {
+                    this.labelCandidatesBuffer.push({
+                        name: element.text,
+                        value: (element.contour_label_value) ? element.contour_label_value : 0
+                    });
+                });
+                let existingMaxLabelValue = 0;
+                this.labelCandidatesBuffer.forEach(element => {
+                    if (element.value > existingMaxLabelValue) {
+                        existingMaxLabelValue = element.value
+                    }
+                });
+                this.existingMaxLabelValue = existingMaxLabelValue;
+
+                let annotator_id = [];
+                let auditor_id = [];
+                if (this.originalInstanceData.annotator_id) {
+                    annotator_id = this.originalInstanceData.annotator_id.split("|");
+                    annotator_id.forEach(element => {
+                        element = parseInt(element);
+                    });
+                }
+                if (this.originalInstanceData.auditor_id) {
+                    auditor_id = this.originalInstanceData.auditor_id.split("|");
+                    auditor_id.forEach(element => {
+                        element = parseInt(element);
+                    });
+                }
+
+                let userRightsMatrix = [];
+                this.state.userTableData.forEach(userRecord => {
+                    userRightsMatrix.push({
+                        username: userRecord.username,
+                        userid: userRecord.userid,
+                        isAnnotator: false,
+                        isAuditor: false
+                    });
+                });
+
+                annotator_id.forEach(id => {
+                    let index = userRightsMatrix.findIndex((record, index, arr) => {
+                        return id === record.userid;
+                    });
+                    if (index > 0) {
+                        userRightsMatrix[index].isAnnotator = true;
+                    }
+                });
+                auditor_id.forEach(id => {
+                    let index = userRightsMatrix.findIndex((record, index, arr) => {
+                        return id === record.userid;
+                    });
+                    if (index > 0) {
+                        userRightsMatrix[index].isAuditor = true;
+                    }
+                });
+
+                this.setState({
+                    modifiedInstanceName: this.originalInstanceData.name,
+                    modifiedInstanceModality: this.originalInstanceData.modality,
+                    modifiedInstanceDescription: this.originalInstanceData.description,
+                    labelCandidatesBuffer: this.labelCandidatesBuffer,
+                    userRightsMatrix,
+                    defaultNewLabelValue: existingMaxLabelValue + 1,
+                    showModifyInstance: true
+                });
+            }
+            else {
+                message.error('Instance details load error');
+            }
+        }).catch(error => {
+            message.error('Instance details load error');
+            console.log(error);
         });
     };
 
@@ -488,9 +672,15 @@ export default class MainManagementPanel extends React.Component {
 
     onDeleteInstanceConfirm = (record) => {
         //Delete record from the backend
-        axios.delete(`/instances/${record.instanceid}`).then(res => {
-            this.listAllInstance();
-            message.success('Instance has been deleted', 2); 
+        axios.delete(`/instance/${record.instanceid}`).then(res => {
+            if (res.status === 200) {
+                message.success('Instance has been deleted');
+                this.listAllInstance();
+            }
+            else if (res.status === 404) {
+                message.error('Instance not found');
+            }
+
         }).catch(error => {
             message.error('Delete Instance error');
             console.log(error);
@@ -504,6 +694,146 @@ export default class MainManagementPanel extends React.Component {
     handleInstanceDetailOk = e => {
         this.setState({
             showInstanceDetail: false
+        });
+    }
+
+    onAddAnnotatorCheckboxChange = (e, record, index) => {
+        //console.log("e: ", e.target.checked);
+        //console.log("record: ", record.username);
+        this.state.userRightsMatrix[index].isAnnotator = !this.state.userRightsMatrix[index].isAnnotator;
+        if (this.state.userRightsMatrix[index].isAnnotator) {
+            this.annotator_id.push(record.userid);
+        }
+        else {
+            let spliceIndex = annotator_id.findIndex((element, index, arr) => {
+                return element === record.userid;
+            });
+            if (spliceIndex > -1) {
+                annotator_id.splice(spliceIndex, 1);
+            }
+        }
+        //console.log("userRightsMatrix: ", this.state.userRightsMatrix);
+    }
+
+    onAddAuditorCheckboxChange = (e, record, index) => {
+        //console.log("e: ", e.target.checked);
+        //console.log("record: ", record.username);
+        this.state.userRightsMatrix[index].isAuditor = !this.state.userRightsMatrix[index].isAuditor;
+        if (this.state.userRightsMatrix[index].isAuditor) {
+            this.auditor_id.push(record.userid);
+        }
+        else {
+            let spliceIndex = auditor_id.findIndex((element, index, arr) => {
+                return element === record.userid;
+            });
+            if (spliceIndex > -1) {
+                auditor_id.splice(spliceIndex, 1);
+            }
+        }
+        //console.log("userRightsMatrix: ", this.state.userRightsMatrix);
+    }
+
+    onModifiedInstanceNameChange = e => {
+        this.setState({
+            modifiedInstanceName: e.target.value
+        });
+    }
+
+    onModifiedInstanceModalityChange = (value) => {
+        this.setState({
+            modifiedInstanceModality: value
+        });
+        this.modifiedInstanceModality = value;
+    }
+
+    onModifiedInstanceDescriptionChange = e => {
+        this.setState({
+            modifiedInstanceDescription: e.target.value
+        });
+    }
+
+    showStatusColor = (status) => {
+        switch (status) {
+            case 0:
+                return "grey";
+            case 1:
+                return "grey";
+            case 2:
+                //return "#0066FF";
+                return "grey";
+            case 3:
+                return "#4178ff";
+            case 4:
+                //return "yellow";
+                return "#ffa754";
+            case 5:
+                //return "#00FF00";
+                return "#378035";
+            case 6:
+                return "#ff8065";
+            default:
+                return "red";
+        }
+    }
+
+    showStatusName = (status) => {
+        switch (status) {
+            case 0:
+                return "Initialized";
+            case 1:
+                return "Initialized";
+            case 2:
+                return "Importing data";
+            case 3:
+                return "Ready to annotate";
+            case 4:
+                return "Annotating";
+            case 5:
+                return "Finished";
+            case 6:
+                return "Auditing";
+            default:
+                return "Unknown or error";
+        }
+    }
+
+    onImportdcmClick = (record) => {
+        this.importingInstanceId = record.instanceid;
+        this.setState({
+            importingInstanceName: record.name,
+            showImportdcm: true
+        });
+    }
+
+    handleImportdcmOk = e => {
+        if(Reg.isStringEmpty(this.dcmPath.textAreaRef.value)) {
+            message.error("Data path can not be empty");
+            return;
+        }
+
+        axios.get(`/import/instance/${this.importingInstanceId}?data_path=${this.dcmPath.textAreaRef.value}`).then(res => {
+            if(res.status === 201) {
+                message.success('Successfully imported dcm');
+                this.listAllInstance();
+            }
+        }).catch(error => {
+            message.error('Import dcm error');
+            console.log(error);
+        });
+
+        this.importingInstanceId = null;
+        this.setState({
+            showImportdcm: false,
+            importingInstanceName: ""
+        });
+        //this.currentModifiedInstanceId;
+    }
+
+    handleImportdcmCancel = e => {
+        this.importingInstanceId = null;
+        this.setState({
+            showImportdcm: false,
+            importingInstanceName: ""
         });
     }
 
@@ -546,12 +876,12 @@ export default class MainManagementPanel extends React.Component {
             render: (text, record) => (
                 <div>
                     <Popconfirm title="Delete User?" onConfirm={() => this.onDeleteUserConfirm(record)} /* data-hscode={record.HSCode} */ okText="Yes" cancelText="No">
-                    <a href="javascript:;"><img src="./assets/static/img/delete.png" title='Delete this user'
-                        alt='Delete User' style={{
-                            width: 18,
-                            height: 18
-                        }}></img></a>
-                     </Popconfirm>
+                        <a href="javascript:;"><img src="./assets/static/img/delete.png" title='Delete this user'
+                            alt='Delete User' style={{
+                                width: 18,
+                                height: 18
+                            }}></img></a>
+                    </Popconfirm>
                 </div>
             )
         }
@@ -581,11 +911,30 @@ export default class MainManagementPanel extends React.Component {
             dataIndex: 'progress',
             key: 'progress',
             width: "14%",
-            align: "center",
+            align: "left",
             className: "table",
             render: (text, record) => (
-                <div>
-                    <Progress percent={text} showInfo={false} strokeColor="#87d068" />
+                <div className={(record.name === this.state.instanceNameEntered) ? styles.highightTableRow : styles.font}>
+                    <Row type="flex" justify="start" align="middle">
+                        <Col>
+                            <div style={{
+                                /* width: 8, height: 8, borderRadius: "50%", */
+                                positon: "absolute", width: 10, height: 10, left: 3, borderRadius: 30, border: "1px solid #eee",
+                                backgroundColor: this.showStatusColor(record.status)
+                            }
+                            } />
+                        </Col>
+                        <Col>
+                            &nbsp; {this.showStatusName(record.status)}
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <div hidden={!(record.status === 4)}>
+                                <Progress percent={record.progress} showInfo={false} strokeColor="#87d068" />
+                            </div>
+                        </Col>
+                    </Row>
                 </div>
             )
         },
@@ -604,9 +953,9 @@ export default class MainManagementPanel extends React.Component {
             )
         },
         {
-            title: 'Type',
-            dataIndex: 'type',
-            key: 'type',
+            title: 'Data Path',
+            dataIndex: 'data_path',
+            key: 'data_path',
             width: "18%",
             align: "center",
             className: "table",
@@ -640,19 +989,20 @@ export default class MainManagementPanel extends React.Component {
             className: "table",
             render: (text, record) => (
                 <div>
-                    <Row type="flex" justify="start" justify="space-between">
+                    <Row type="flex" justify="start" justifyjustify="space-between">
                         <Col span={6}>
-                            <a href="javascript:;"><img src="./assets/static/img/download.png" title='Download'
-                                alt='Download' style={{
-                                    width: 18,
-                                    height: 18
-                                }}></img></a>
+                                 <a href="javascript:;" onClick={() => this.onImportdcmClick(record)}
+                                    ><img src="./assets/static/img/import.png" title='Import dcm'
+                                        alt='Import dcm' style={{
+                                            width: 18,
+                                            height: 18
+                                        }} /></a>
                         </Col>
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/details.png" title='Show studies list'
                                 alt='Show studies list' style={{ width: 18, height: 18 }}
-                                 onClick={this.onInstanceDetailClick} data-instancename={text}
-                                data-instanceid={record.instanceid}/></a>
+                                onClick={this.onInstanceDetailClick} data-instancename={text}
+                                data-instanceid={record.instanceid} /></a>
                         </Col>
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/modify.png" title='Modify' alt='Modify'
@@ -660,13 +1010,13 @@ export default class MainManagementPanel extends React.Component {
                                 onClick={() => this.onModifyInstanceClick(record)}></img></a>
                         </Col>
                         <Col span={6}>
-                        <Popconfirm title="Delete Instance?" onConfirm={() => this.onDeleteInstanceConfirm(record)} /* data-hscode={record.HSCode} */ okText="Yes" cancelText="No">
-                            <a href="javascript:;"><img src="./assets/static/img/delete.png"
-                                title='Delete this instance' alt='Delete Instance' style={{
-                                    width: 18,
-                                    height: 18
-                                }}></img></a>
-                        </Popconfirm>
+                            <Popconfirm title="Delete Instance?" onConfirm={() => this.onDeleteInstanceConfirm(record)} /* data-hscode={record.HSCode} */ okText="Yes" cancelText="No">
+                                <a href="javascript:;"><img src="./assets/static/img/delete.png"
+                                    title='Delete this instance' alt='Delete Instance' style={{
+                                        width: 18,
+                                        height: 18
+                                    }}></img></a>
+                            </Popconfirm>
                         </Col>
                     </Row>
                 </div>
@@ -684,7 +1034,7 @@ export default class MainManagementPanel extends React.Component {
             render: (text, record) => (
                 <div>
                     <a href={"workbench/instance/" + record.instance_id + "/study/" + record.study_id} target="_blank"
-                       title="Show studies list" style={{color: "#0099FF"}}>
+                        title="Show studies list" style={{ color: "#0099FF" }}>
                         {text}
                     </a>
                 </div>
@@ -725,6 +1075,46 @@ export default class MainManagementPanel extends React.Component {
             width: "18%",
             align: "center"
         }
+    ];
+
+    addAnnotatorTableColumns = [
+        {
+            title: 'Username',
+            dataIndex: 'username',
+            key: 'username',
+            width: "50%",
+            align: "center"
+        },
+        {
+            title: 'Annotator',
+            dataIndex: 'annotator',
+            key: 'annotator',
+            width: "25%",
+            align: "center",
+            render: (text, record, index) => (
+                <div>
+                    <Checkbox
+                        defaultChecked={record.isAnnotator}
+                        onChange={(e) => this.onAddAnnotatorCheckboxChange(e, record, index)}
+                    />
+                </div>
+            )
+        },
+        {
+            title: 'Auditor',
+            dataIndex: 'auditor',
+            key: 'auditor',
+            width: "25%",
+            align: "center",
+            render: (text, record, index) => (
+                <div>
+                    <Checkbox
+                        defaultChecked={record.isAuditor}
+                        onChange={(e) => this.onAddAuditorCheckboxChange(e, record, index)}
+                    />
+                </div>
+            )
+        },
     ];
 
     render() {
@@ -834,15 +1224,30 @@ export default class MainManagementPanel extends React.Component {
                     <Row type="flex" justify="start">
                         <Col span={24}>
                             <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
-                                Username
+                                Email
                             </div>
                         </Col>
                     </Row>
                     <div style={{ height: 6 }} />
                     <Row>
                         <Col>
-                            <Input placeholder="Please enter username (email format)"
-                                ref={target => (this.newUsername = target)} />
+                            <Input placeholder="Please enter new user email"
+                                ref={target => (this.newUserName = target)} />
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
+                                Name
+                            </div>
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row>
+                        <Col>
+                            <Input placeholder="Please enter username"
+                                ref={target => (this.newUserDispName = target)} />
                         </Col>
                     </Row>
                     <div style={{ height: 6 }} />
@@ -856,11 +1261,12 @@ export default class MainManagementPanel extends React.Component {
                     <div style={{ height: 6 }} />
                     <Row>
                         <Col>
-                            <Select defaultValue="admin" style={{ width: '100%' }}>
-                                <Select.Option value="admin">
+                            <Select defaultValue="0" style={{ width: '100%' }}
+                                ref={target => (this.newUserType = target)}>
+                                <Select.Option value="0">
                                     Admin
                                 </Select.Option>
-                                <Select.Option value="annotator">
+                                <Select.Option value="1">
                                     Annotator
                                 </Select.Option>
                             </Select>
@@ -913,8 +1319,8 @@ export default class MainManagementPanel extends React.Component {
                             <Row>
                                 <Col>
                                     <Select defaultValue="CT" style={{ width: '100%' }}
-                                     /* ref={target => (this.newInstanceModality = target)} */
-                                     onChange={this.onNewInstanceModalityChange}>
+                                        /* ref={target => (this.newInstanceModality = target)} */
+                                        onChange={this.onNewInstanceModalityChange}>
                                         <Select.Option value="CT">
                                             CT
                                         </Select.Option>
@@ -978,8 +1384,14 @@ export default class MainManagementPanel extends React.Component {
                                     </div>
                                 </Col>
                                 <Col span={6}>
-                                    <div style={{ float: "right" }}>
+                                    <div style={{ float: "right" }} hidden={!this.state.hideAddLabelControls}>
                                         <Icon type="plus"
+                                            style={{ width: 18, height: 18 }}
+                                            onClick={this.onLabelPlusIconClick}
+                                        />
+                                    </div>
+                                    <div style={{ float: "right" }} hidden={this.state.hideAddLabelControls}>
+                                        <Icon type="minus"
                                             style={{ width: 18, height: 18 }}
                                             onClick={this.onLabelPlusIconClick}
                                         />
@@ -1078,8 +1490,14 @@ export default class MainManagementPanel extends React.Component {
                                     </div>
                                 </Col>
                                 <Col span={6}>
-                                    <div style={{ float: "right" }}>
+                                    <div style={{ float: "right" }} hidden={!this.state.hideAddAnnotatorControls}>
                                         <Icon type="plus"
+                                            style={{ width: 18, height: 18 }}
+                                            onClick={this.onAnnotatorPlusIconClick}
+                                        />
+                                    </div>
+                                    <div style={{ float: "right" }} hidden={this.state.hideAddAnnotatorControls}>
+                                        <Icon type="minus"
                                             style={{ width: 18, height: 18 }}
                                             onClick={this.onAnnotatorPlusIconClick}
                                         />
@@ -1097,6 +1515,25 @@ export default class MainManagementPanel extends React.Component {
 
                             <div hidden={this.state.hideAddAnnotatorControls}>
                                 <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <Table columns={this.addAnnotatorTableColumns}
+                                            dataSource={this.state.userRightsMatrix}
+                                            /* bordered  */
+                                            size="small"
+                                            //loading={this.state.instanceTableLoading}
+                                            //actionToken={this.state.instanceTableActionToken}
+                                            //onRow={this.onInstanceTableRow}
+                                            //rowClassName={this.setRowClassName}
+                                            pagination={{
+                                                current: this.state.currentInstanceTablePage,
+                                                onChange: this.onInstanceTablePageChange,
+                                                showSizeChanger: true,
+                                                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                                            }}
+                                        />
+                                    </Col>
+                                </Row>
+                                {/* <Row type="flex" justify="start">
                                     <Col>
                                         <div style={{ color: "#ccc" }}>
                                             Username
@@ -1140,7 +1577,7 @@ export default class MainManagementPanel extends React.Component {
                                             Add
                                         </Button>
                                     </Col>
-                                </Row>
+                                </Row> */}
                             </div>
                         </div>
                     </div>
@@ -1175,8 +1612,9 @@ export default class MainManagementPanel extends React.Component {
                             <div style={{ height: 6 }} />
                             <Row>
                                 <Col>
-                                    <Input value="0001001"
-                                        disabled={true}
+                                    <Input value={this.state.modifiedInstanceName}
+                                        onChange={this.onModifiedInstanceNameChange}
+                                        ref={target => (this.modifiedInstanceName = target)}
                                     />
                                 </Col>
                             </Row>
@@ -1191,7 +1629,10 @@ export default class MainManagementPanel extends React.Component {
                             <div style={{ height: 6 }} />
                             <Row>
                                 <Col>
-                                    <Select defaultValue="CT" style={{ width: '100%' }}>
+                                    <Select value={this.state.modifiedInstanceModality} style={{ width: '100%' }}
+                                        onChange={this.onModifiedInstanceModalityChange}
+                                    /* ref={target => (this.modifiedInstanceModality = target)} */
+                                    >
                                         <Select.Option value="CT">
                                             CT
                                         </Select.Option>
@@ -1222,19 +1663,44 @@ export default class MainManagementPanel extends React.Component {
                             <Row>
                                 <Col>
                                     <Input.TextArea rows={3} placeholder="Please enter description"
-                                        ref={target => (this.modifyInstanceDescription = target)} />
+                                        value={this.state.modifiedInstanceDescription}
+                                        onChange={this.onModifiedInstanceDescriptionChange}
+                                        ref={target => (this.modifiedInstanceDescription = target)} />
                                 </Col>
                             </Row>
                             <div style={{ height: 6 }} />
-                            <Row type="flex" justify="start">
+                          {/*   <Row type="flex" justify="start">
                                 <Col span={24}>
                                     <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
-                                        Path
+                                        Data Importing
                                     </div>
                                 </Col>
                             </Row>
-                            <div style={{ height: 6 }} />
-                            <Row type="flex" justify="space-between">
+
+                            <div style={{ height: 4 }} />
+
+                            <Row type="flex" justify="start">
+                                <Col span={24}>
+                                    <div className={styles.borderSpan}>
+                                        <div className={styles.border} />
+                                    </div>
+                                </Col>
+                            </Row>
+
+                            <div style={{ height: 4 }} />
+
+                            <Row type="flex" justify="start" align="bottom">
+                                <Col>
+                                    <a href="javascript:;" onClick={this.onImportdcmClick}
+                                    ><img src="./assets/static/img/import.png" title='Import dcm'
+                                        alt='Import dcm' style={{
+                                            width: 14,
+                                            height: 14
+                                        }} />Import dcm</a>
+                                </Col>
+                            </Row> */}
+
+                            {/*  <Row type="flex" justify="space-between">
                                 <Col span={18}>
                                     <Input placeholder="Please enter the path"
                                         ref={target => (this.modifyInstancePath = target)} />
@@ -1246,8 +1712,7 @@ export default class MainManagementPanel extends React.Component {
                                         </Button>
                                     </div>
                                 </Col>
-                            </Row>
-                            <div style={{ height: 6 }} />
+                            </Row> */}
                             <Row type="flex" justify="space-between">
                                 <Col span={18}>
                                     <div style={{ fontSize: 'x-small', fontWeight: 'bold' }}>
@@ -1255,8 +1720,14 @@ export default class MainManagementPanel extends React.Component {
                                     </div>
                                 </Col>
                                 <Col span={6}>
-                                    <div style={{ float: "right" }}>
+                                    <div style={{ float: "right" }} hidden={!this.state.hideAddLabelControls}>
                                         <Icon type="plus"
+                                            style={{ width: 18, height: 18 }}
+                                            onClick={this.onLabelPlusIconClick}
+                                        />
+                                    </div>
+                                    <div style={{ float: "right" }} hidden={this.state.hideAddLabelControls}>
+                                        <Icon type="minus"
                                             style={{ width: 18, height: 18 }}
                                             onClick={this.onLabelPlusIconClick}
                                         />
@@ -1285,9 +1756,6 @@ export default class MainManagementPanel extends React.Component {
                                         </div>
                                     </Col>
                                     <Col span={3}>
-                                        <div style={{ color: "#ccc" }}>
-                                            Color
-                                        </div>
                                     </Col>
                                     <Col>
                                     </Col>
@@ -1334,7 +1802,7 @@ export default class MainManagementPanel extends React.Component {
                                             ref={target => (this.newLabelName = target)} />
                                     </Col>
                                     <Col span={4}>
-                                        <Input placeholder="1"
+                                        <Input placeholder={this.state.defaultNewLabelValue}
                                             size="small"
                                             style={{ fontStyle: "italic" }}
                                             ref={target => (this.newLabelValue = target)} />
@@ -1358,8 +1826,14 @@ export default class MainManagementPanel extends React.Component {
                                     </div>
                                 </Col>
                                 <Col span={6}>
-                                    <div style={{ float: "right" }}>
+                                    <div style={{ float: "right" }} hidden={!this.state.hideAddAnnotatorControls}>
                                         <Icon type="plus"
+                                            style={{ width: 18, height: 18 }}
+                                            onClick={this.onAnnotatorPlusIconClick}
+                                        />
+                                    </div>
+                                    <div style={{ float: "right" }} hidden={this.state.hideAddAnnotatorControls}>
+                                        <Icon type="minus"
                                             style={{ width: 18, height: 18 }}
                                             onClick={this.onAnnotatorPlusIconClick}
                                         />
@@ -1377,6 +1851,25 @@ export default class MainManagementPanel extends React.Component {
 
                             <div hidden={this.state.hideAddAnnotatorControls}>
                                 <Row type="flex" justify="start">
+                                    <Col span={24}>
+                                        <Table columns={this.addAnnotatorTableColumns}
+                                            dataSource={this.state.userRightsMatrix}
+                                            /* bordered  */
+                                            size="small"
+                                            //loading={this.state.instanceTableLoading}
+                                            //actionToken={this.state.instanceTableActionToken}
+                                            //onRow={this.onInstanceTableRow}
+                                            //rowClassName={this.setRowClassName}
+                                            pagination={{
+                                                current: this.state.currentInstanceTablePage,
+                                                onChange: this.onInstanceTablePageChange,
+                                                showSizeChanger: true,
+                                                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                                            }}
+                                        />
+                                    </Col>
+                                </Row>
+                                {/* <Row type="flex" justify="start">
                                     <Col>
                                         <div style={{ color: "#ccc" }}>
                                             Username
@@ -1420,14 +1913,14 @@ export default class MainManagementPanel extends React.Component {
                                             Add
                                         </Button>
                                     </Col>
-                                </Row>
+                                </Row> */}
                             </div>
                         </div>
                     </div>
                 </Modal>
 
                 <Modal
-                    title={(<div style={{height: 12}}>Studies List</div>)}
+                    title={(<div style={{ height: 12 }}>Studies List</div>)}
                     width="85%"
                     visible={this.state.showInstanceDetail}
                     onOk={this.handleInstanceDetailOk}
@@ -1441,11 +1934,11 @@ export default class MainManagementPanel extends React.Component {
                             Cancel
                         </Button>,
                     ]}
-                    bodyStyle={{marginTop: 6, paddingTop: 6}}
+                    bodyStyle={{ marginTop: 6, paddingTop: 6 }}
                 >
                     <Row type="flex" justify="center" align="middle">
                         <Col span={24}>
-                            <div style={{textAlign: "center"}}>
+                            <div style={{ textAlign: "center" }}>
                                 <h2>Studies in {this.state.current_instance_id}</h2>
                             </div>
                         </Col>
@@ -1453,24 +1946,81 @@ export default class MainManagementPanel extends React.Component {
                     <Row type="flex" justify="start">
                         <Col span={24}>
                             <Table columns={this.studiesListTableColumns}
-                                   dataSource={this.state.studiesListTableData}
+                                dataSource={this.state.studiesListTableData}
                                 /* bordered  */
-                                   size="middle"
-                                   loading={this.state.instanceTableLoading}
-                                   actionToken={this.state.instanceTableActionToken}
-                                   onRow={this.onInstanceTableRow}
+                                size="middle"
+                                loading={this.state.instanceTableLoading}
+                                actionToken={this.state.instanceTableActionToken}
+                                onRow={this.onInstanceTableRow}
                                 //rowClassName={this.setRowClassName}
-                                   pagination={{
-                                       current: this.state.currentInstanceTablePage,
-                                       onChange: this.onInstanceTablePageChange,
-                                       showSizeChanger: true,
-                                       showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
-                                   }}
+                                pagination={{
+                                    current: this.state.currentInstanceTablePage,
+                                    onChange: this.onInstanceTablePageChange,
+                                    showSizeChanger: true,
+                                    showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`
+                                }}
                             />
                         </Col>
                     </Row>
                 </Modal>
+                <Modal
+                    title={(<div style={{ height: 12 }}>Import dcm</div>)}
+                    width="30%"
+                    visible={this.state.showImportdcm}
+                    onOk={this.handleImportdcmOk}
+                    onCancel={this.handleImportdcmCancel}
+                    destroyOnClose={true}
+                    footer={[
+                        <Button key="submit" type="primary" onClick={this.handleImportdcmOk}>
+                            Ok
+                        </Button>,
+                        <Button key="back" onClick={this.handleImportdcmCancel}>
+                            Cancel
+                        </Button>,
+                    ]}
+                    bodyStyle={{ marginTop: 6, paddingTop: 6 }}
+                >
+                    {/*                     <Row type="flex" justify="start">
+                        <Col span={24}>
+                            批量输入申报名称
+                    </Col>
+                    </Row> */}
+                    {/*                     <div style={{ height: 3 }} /> */}
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'small' }}>
+                                <strong>
+                                    {this.state.importingInstanceName}
+                                </strong>
+                            </div>
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'x-small' }}>
+                                -Please put your dicom folder under ATMI/data folder.
+                    </div>
+                        </Col>
+                    </Row>
+                    <Row type="flex" justify="start">
+                        <Col span={24}>
+                            <div style={{ fontSize: 'x-small' }}>
+                                -And then continue importing the data.
+                    </div>
+                        </Col>
+                    </Row>
+                    <div style={{ height: 6 }} />
+                    <Row>
+                        <Col>
+                            <Input.TextArea rows={3} placeholder="Input your dicom folder here, starting after /data/"
+                                ref={target => (this.dcmPath = target)} />
+                        </Col>
+                    </Row>
+                </Modal>
             </div>
-        )
+        );
     }
 }
+
+

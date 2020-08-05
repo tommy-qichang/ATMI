@@ -5,6 +5,7 @@ from os import path
 from threading import Thread
 
 from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json
+from pytictoc import TicToc
 
 from atmi_backend.config import REGISTER_MAX_HOURS, SERIES_STATUS, STUDY_STATUS, INSTANCE_STATUS
 from atmi_backend.db_interface.InitialService import InitialService
@@ -14,6 +15,7 @@ from atmi_backend.db_interface.LabelService import LabelService
 from atmi_backend.db_interface.SeriesService import SeriesService
 from atmi_backend.db_interface.StudiesService import StudiesService
 from atmi_backend.db_interface.UserService import UserService
+from atmi_backend.services.CrossRefService import CrossRefService
 from atmi_backend.services.ExportService import ExportService
 from atmi_backend.services.ImportService import ImportService
 from atmi_backend.utils import to_bool_or_none
@@ -97,6 +99,12 @@ def setup_route_map(app, app_path):  # noqa: C901
 
         return render_template("workbench.html", data=result)
 
+    @app.route("/crossref/instance/<instance_id>/", methods=['GET'])
+    def cross_reference(instance_id):
+        study_service = StudiesService(get_conn())
+        study_info = study_service.query({"instance_id": instance_id})
+        return render_template("cmr_reference.html", studies=study_info, instance=instance_id)
+
     """
     JSON Responses
     """
@@ -144,6 +152,23 @@ def setup_route_map(app, app_path):  # noqa: C901
                 user_service.insert(email, name, "", str(ts), user_type)
             app.logger.info(f"Create user: user={email}&ts={ts}")
             return jsonify({'url': f'?user={email}&ts={ts}'})
+
+    @app.route('/users/<user_name>', methods=['DELETE'])
+    def delete_user(user_name):
+        if "email" in session and session['email'] != '':
+            user_service = UserService(get_conn())
+            user = user_service.query({'email': session['email']})
+            if len(user) > 0:
+                user_service.delete(user_name)
+                return jsonify({"user": user_name}), 200
+
+        return jsonify({}), 404
+
+        user = user_service.query({'email': user_name})
+        if len(user) > 0 and ("email" not in session or session['email'] == ''):
+            session["email"] = user_name
+
+        return jsonify(user), 200
 
     @app.route('/user/<user_name>/<password>', methods=['GET'])
     def login_user(user_name, password):
@@ -243,12 +268,12 @@ def setup_route_map(app, app_path):  # noqa: C901
             description = data.get("description", "")
             data_path = ""  # Set the data_path as default now.
             has_audit = False
-            status = 0
             annotator_id = list(filter(None, str.split(data.get("annotator_id", ""), "|")))
             auditor_id = list(filter(None, str.split(data.get("auditor_id", ""), "|")))
             label_candidates = data.get("label_candidates", [])
 
-            instance_id = instance_service.insert(name, modality, description, data_path, has_audit, 0, 0, status)
+            instance_id = instance_service.insert(name, modality, description, data_path, has_audit, 0, 0,
+                                                  INSTANCE_STATUS.init.value)
             if instance_id == -1:
                 # Instance name already exist.
                 return jsonify({"err": "Instance Name exist"}), 409
@@ -420,17 +445,20 @@ def setup_route_map(app, app_path):  # noqa: C901
         store_type = request.args.get('store_type', default='train')
         save_label = to_bool_or_none(request.args.get('save_label', default='True'))
         save_data = to_bool_or_none(request.args.get('save_data', default='True'))
+        save_pair = to_bool_or_none(request.args.get('save_pair', default='True'))
+
         compression = request.args.get('compression', default='gzip')
         if compression != "gzip" and compression != "lzf":
             compression = None
         start_idx = request.args.get('start_idx', default=0, type=int)
+        end_idx = request.args.get('end_idx', default=-1, type=int)
 
         app.logger.info(
             f"Export all data(data:{save_data},label:{save_label}), with store type:{store_type}, split entry number:{split_entry_num}, start file idx:{start_idx}, and compression type:{compression}")
 
         export_service = ExportService(get_conn())
-        msg = export_service.save_studies(instance_id, split_entry_num, start_idx, store_type, save_label, save_data,
-                                          compression)
+        msg = export_service.save_studies(instance_id, split_entry_num, start_idx, end_idx, store_type, save_pair,
+                                          save_label, save_data, compression)
         return jsonify({'msg': msg}), 200
 
     @app.route('/export_label/studies/<study_id>', methods=['GET'])
@@ -466,3 +494,24 @@ def setup_route_map(app, app_path):  # noqa: C901
     def internal_error(exception):
         app.logger.error(exception)
         return render_template('500.html'), 500
+
+    @app.route("/wireframe/instance/<instance_id>/study/<study_id>/", methods=['GET'])
+    def wireframe_one_study(instance_id, study_id):
+        t = TicToc()
+        t.tic()
+        study_service = StudiesService(get_conn())
+        study_info = study_service.query({"instance_id": instance_id, "study_id": study_id})
+        t.toc("study_info", restart=True)
+        # study_info 0.012129 seconds.
+        export_service = ExportService(get_conn())
+        _, _, labels = export_service.save_onestudy_label(study_id, study_info[0], None, [])
+        t.toc("labels gen", restart=True)
+        # labels gen 31.750854 seconds.
+        crossref_service = CrossRefService()
+        label_list = crossref_service.accumulate_contours(labels)
+        t.toc("label_list", restart=True)
+        # label_list 32.659566 seconds.
+        result = crossref_service.merge_dicom_orientation(label_list)
+        t.toc("merge dicom", restart=True)
+        # merge dicom 8.348602 seconds.
+        return jsonify(result), 200

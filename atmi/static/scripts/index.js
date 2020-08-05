@@ -18,7 +18,7 @@ export default class IndexPage extends React.PureComponent {
         this.setState({
             loggedIn: true,
             username,
-            userManagementMode: "ManagementPanel"
+            userManagementMode: "ListPanel"
         });
     }
 
