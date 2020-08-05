@@ -1,10 +1,11 @@
 import datetime
-from threading import Thread
-
 import io
 import os
-from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json
 from os import path
+from threading import Thread
+
+from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json
+from pytictoc import TicToc
 
 from atmi_backend.config import REGISTER_MAX_HOURS, SERIES_STATUS, STUDY_STATUS, INSTANCE_STATUS
 from atmi_backend.db_interface.InitialService import InitialService
@@ -19,7 +20,6 @@ from atmi_backend.services.ExportService import ExportService
 from atmi_backend.services.ImportService import ImportService
 from atmi_backend.utils import to_bool_or_none
 
-from pytictoc import TicToc
 
 def setup_route_map(app, app_path):  # noqa: C901
     def get_conn():
@@ -157,8 +157,8 @@ def setup_route_map(app, app_path):  # noqa: C901
     def delete_user(user_name):
         if "email" in session and session['email'] != '':
             user_service = UserService(get_conn())
-            user = user_service.query({'email':session['email']})
-            if len(user)>0:
+            user = user_service.query({'email': session['email']})
+            if len(user) > 0:
                 user_service.delete(user_name)
                 return jsonify({"user": user_name}), 200
 
@@ -501,21 +501,17 @@ def setup_route_map(app, app_path):  # noqa: C901
         t.tic()
         study_service = StudiesService(get_conn())
         study_info = study_service.query({"instance_id": instance_id, "study_id": study_id})
-        t.toc("study_info",restart=True)
+        t.toc("study_info", restart=True)
         # study_info 0.012129 seconds.
         export_service = ExportService(get_conn())
         _, _, labels = export_service.save_onestudy_label(study_id, study_info[0], None, [])
-        t.toc("labels gen",restart=True)
+        t.toc("labels gen", restart=True)
         # labels gen 31.750854 seconds.
         crossref_service = CrossRefService()
         label_list = crossref_service.accumulate_contours(labels)
-        t.toc("label_list",restart=True)
+        t.toc("label_list", restart=True)
         # label_list 32.659566 seconds.
         result = crossref_service.merge_dicom_orientation(label_list)
-        t.toc("merge dicom",restart=True)
+        t.toc("merge dicom", restart=True)
         # merge dicom 8.348602 seconds.
         return jsonify(result), 200
-
-
-
-

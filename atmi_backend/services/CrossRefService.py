@@ -1,8 +1,8 @@
-import numpy as np
 import os
+
+import numpy as np
 import pydicom
 from cv2 import cv2
-from skimage import morphology
 
 from atmi_backend.utils import remove_small_3d
 
