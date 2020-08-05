@@ -5,7 +5,6 @@ from os import path
 from threading import Thread
 
 from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json
-from pytictoc import TicToc
 
 from atmi_backend.config import REGISTER_MAX_HOURS, SERIES_STATUS, STUDY_STATUS, INSTANCE_STATUS
 from atmi_backend.db_interface.InitialService import InitialService

@@ -1,0 +1,4 @@
+graft atmi/static
+graft atmi/templates
+global-exclude *.pyc
+global-exclude atmi_db*
