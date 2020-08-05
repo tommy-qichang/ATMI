@@ -153,6 +153,23 @@ def setup_route_map(app, app_path):  # noqa: C901
             app.logger.info(f"Create user: user={email}&ts={ts}")
             return jsonify({'url': f'?user={email}&ts={ts}'})
 
+    @app.route('/users/<user_name>', methods=['DELETE'])
+    def delete_user(user_name):
+        if "email" in session and session['email'] != '':
+            user_service = UserService(get_conn())
+            user = user_service.query({'email':session['email']})
+            if len(user)>0:
+                user_service.delete(user_name)
+                return jsonify({"user": user_name}), 200
+
+        return jsonify({}), 404
+
+        user = user_service.query({'email': user_name})
+        if len(user) > 0 and ("email" not in session or session['email'] == ''):
+            session["email"] = user_name
+
+        return jsonify(user), 200
+
     @app.route('/user/<user_name>/<password>', methods=['GET'])
     def login_user(user_name, password):
         user_service = UserService(get_conn())

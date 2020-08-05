@@ -260,7 +260,7 @@ export default class List extends React.Component {
         let label_candidates = [];
         this.labelCandidatesBuffer.forEach(label => {
             label_candidates.push({
-                label_type: 1,
+                label_type: 0,
                 input_type: 0,
                 text: label.name,
                 contour_label_value: label.value
