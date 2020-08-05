@@ -9,7 +9,7 @@ from atmi_backend.utils import remove_small_3d
 
 class CrossRefService:
 
-    def accumulate_contours(self, labels, scale=4):
+    def accumulate_contours(self, labels, scale=4):  # noqa: C901
 
         label_list = {}
         for label_obj in labels:
