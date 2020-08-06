@@ -1,4 +1,7 @@
 graft atmi/static
 graft atmi/templates
+include atmi/*.json
+include atmi/*.js
+include atmi/*.sh
 global-exclude *.pyc
 global-exclude atmi_db*

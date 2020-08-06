@@ -5,17 +5,26 @@
 [![codecov](https://codecov.io/gh/tommy-qichang/ATMI/branch/master/graph/badge.svg)](https://codecov.io/gh/tommy-qichang/ATMI)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-The ATMI (Annotation Tool for Medical Image) provides a user friendly and comprehensive tool for medical annotation purpose. 
+The ATMI (Annotation Tool for Medical Image) provides a user friendly and comprehensive tool for medical image annotation especially for machine learning purpose. 
 
 The following features will be implemented in this system:
 
-1.	**One Click Install:** Install ATMI just one click without install database, config environments etc. 
-2.	**Multi-tasks capability:** Create multiple instance(tasks) under the same system. So, you don’t need to install multiple times.
-3.	**Audit process embeded:** Audit process embedded. Different annotators could contour one image multiple times and arbitrate by the auditors.
+1.	**Easy to install Install:** Install ATMI just one click without install database, config environments etc. 
+2.	**Multi-tasks capability:** Create multiple instance(annotation tasks) under the same system. So, you don’t need to install multiple times.
+3.	**Audit process embeded<under construction>:** Audit process embedded. Different annotators could contour one case multiple times and arbitrate by the auditors.
 4.	**Support comprehensive annotation methods:** Provide multiple annotation methods to meet the requirements of any medical annotation tasks, especially for machine learning settings. 
 5.	**Support medical operations:** Provide medical professional operations to help annotators view medical images correctly and efficiently. For instance, modify window width/ window level. Could extract multiple series/phases.
 6.	**Support iPad and finger gestures :** Able to annotate using iPad and pencils. Finger gestures friendly.
 7.	**Easy to navigate between different slices/series/cases/tasks:** Able to play medical images frame by frame and paste annotations from the last frame to the current frame.
+8.  **Natually integrate with Machine learning tasks:** Easy to import the masks predicted by any machine learning algorithms. Easy to export the masks as Hdf5 files for future use.
+
+## How to install ATMI.
+You need to install Python3 and Nodejs(v10) first.
+1. <option> Setup an virtual environment for python 3 like [conda](https://docs.conda.io/en/latest/miniconda.html), and activate. 
+2. Unzip/clone the ATMI code folder.   
+3. `pip install` under ATMI folder.
+4. `cd atmi; npm install`   
+6. `cd ..; sh run_flask.sh`
 
 
 ## Steps to setup development environment.
