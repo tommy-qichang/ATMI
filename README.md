@@ -24,7 +24,7 @@ You need to install Python3 and Nodejs(v10) first.
 2. Unzip/clone the ATMI code folder.   
 3. `pip install -r requirements.txt` under ATMI folder.
 4. `cd atmi; npm install;npx webpack`  build JS files
-5. `cd ..; sh run_flask.sh`
+5. `sh run_flask.sh`
 
 
 ## Steps to setup development environment.
