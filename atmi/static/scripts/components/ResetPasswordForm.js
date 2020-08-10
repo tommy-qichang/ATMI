@@ -11,6 +11,15 @@ class ResetPasswordForm extends React.Component {
         userName: ""
     };
 
+    username = "";
+
+    componentDidMount() {
+        if (window.location.search !== "") {
+            let queries = window.location.search.substring(1).split("&");
+            this.username = queries[0].split("=")[1];
+        }
+    }
+
     onPasswordChange = e => {
         if (e.target.value.length >= 6) {
             this.setState({
@@ -33,7 +42,8 @@ class ResetPasswordForm extends React.Component {
     }
 
     validate(values) {
-        let email = values.username;
+        let email = this.username;
+        //let email = values.username;
 /*         if (ATMI_STATUS.ini_admin) {
             email = this.state.userName;
         }  */
@@ -51,7 +61,7 @@ class ResetPasswordForm extends React.Component {
                 message.error('Cannot reset password!');
             }
         }).catch(error => {
-            message.error('Login failed, please contact admin.');
+            message.error('Reset password failed, please contact the admin.');
         })
 
     }
@@ -97,7 +107,7 @@ class ResetPasswordForm extends React.Component {
                         {/*                         <label className={styles.font}>Username:
                             {userInfo}
                         </label> */}
-                        {getFieldDecorator('username', {
+{/*                         {getFieldDecorator('username', {
                             rules: [{ required: true, message: 'Please enter your username' },
                             {
                                 //pattern: new RegExp(/^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i),
@@ -105,16 +115,18 @@ class ResetPasswordForm extends React.Component {
                                 message: 'Please enter username of email format'
                             }
                             ],
-                        })(
+                        })( */}
                             <Input
                                 prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
                                 placeholder="Please enter your username"
                                 //maxLength={11}
                                 onChange={this.onUsernameChange}
                                 autoComplete="off"
-                                defaultValue={userInfo}
-                            />,
-                        )}
+                                disabled
+                                value={this.username}
+                                //defaultValue={userInfo}
+                            />{/* ,
+                        )} */}
                     </Form.Item>
                     <Form.Item>
                         {getFieldDecorator('password', {

@@ -90,13 +90,12 @@ export default class List extends React.Component {
                     userid: user[i].user_id
                 })
             }
-            this.setState({ "userTableData": userTableData })
+            this.setState({ "userTableData": userTableData });
         }).catch(error => {
             message.error('List user error');
-            console.log(error)
+            console.log(error);
         });
     };
-
 
     listAllInstance = () => {
         axios.get("/instances").then(res => {
@@ -117,10 +116,10 @@ export default class List extends React.Component {
                     'status': instances[i]['status']
                 });
             }
-            this.setState({ "instanceTableData": instanceTableData })
+            this.setState({ "instanceTableData": instanceTableData });
         }).catch(error => {
             message.error('Instance list error');
-            console.log(error)
+            console.log(error);
         })
     };
 
@@ -193,8 +192,7 @@ export default class List extends React.Component {
     handleAddUserOk = e => {
         this.checkEmail();
         //Add user into the backend
-
-        this.listAllUsers();
+        //this.listAllUsers();
     };
 
     handleAddUserCancel = e => {
@@ -222,6 +220,7 @@ export default class List extends React.Component {
 
     proccessAddUser = (username, dispname, type) => {
         axios.post("/user", { 'email': username, 'name': dispname, 'user_type': type }).then(res => {
+            this.listAllUsers();
             let url = res.data.url
             message.success("URL: " + url, 10);
             this.setState({
@@ -229,7 +228,7 @@ export default class List extends React.Component {
             });
         }).catch(error => {
             message.error('User add error');
-            console.log(error)
+            console.log(error);
         });
     };
 
@@ -281,7 +280,7 @@ export default class List extends React.Component {
 
         //Uncomment when the backend is ready
         axios.post('/instances', newInstanceData).then(res => {
-            console.log("res: ", res);
+            //console.log("res: ", res);
             if (res.status == 201) {
                 message.success('Successfully added instance');
                 this.listAllInstance();
@@ -568,7 +567,7 @@ export default class List extends React.Component {
         //Load instance data from the backend
         //The parameter "record" means the table record of the instance
         axios.get("/instance/" + record.instanceid).then(res => {
-            console.log("res.data: ", res.data);
+            //console.log("res.data: ", res.data);
             if (res.status === 200) {
                 this.originalInstanceData = {
                     name: res.data.name,

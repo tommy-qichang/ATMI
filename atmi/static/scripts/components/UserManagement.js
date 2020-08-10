@@ -23,6 +23,7 @@ export default class UserManagement extends React.PureComponent {
         hideSettingPanel: true,   //Whether to hide SettingPanel
         hideListPanel: true,   //Whether to hide ManagementPanel
         ResetPasswordUsername: "",   //Username to be reset password for
+        ListPanelRefreshToken: 1   //To refresh ListPanel after login
     };
 
     componentDidMount() {
@@ -83,6 +84,9 @@ export default class UserManagement extends React.PureComponent {
                 });  */
         this.props.onLoginSuccess(username);
         this.toManagementMode("ListPanel");
+        this.setState({
+            ListPanelRefreshToken: this.state.ListPanelRefreshToken * (-1)
+        });
     }
 
     toManagementMode = mode => {
@@ -124,7 +128,7 @@ export default class UserManagement extends React.PureComponent {
                 </Row> */}
                 <Row type="flex" justify="center" align="middle" hidden={this.state.hideListPanel}>
                     <Col span={24}>
-                        <ListPanel/>
+                        <ListPanel refreshToken={this.state.ListPanelRefreshToken}/>
                     </Col>
                 </Row>
             </div>

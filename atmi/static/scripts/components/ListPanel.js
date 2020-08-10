@@ -41,10 +41,10 @@ export default class ListPanel extends React.Component {
     colorPicker = null;
 
     componentDidMount() {
-        this.listAllUsers();
+        //this.listAllUsers();
     }
 
-    listAllUsers = () => {
+   /*  listAllUsers = () => {
         axios.get("/user/").then(res => {
             let userTableData = []
             const user = res.data;
@@ -82,7 +82,7 @@ export default class ListPanel extends React.Component {
             message.error('Instance list error');
             console.log(error)
         })
-    };
+    }; */
 
 /*     onInstanceDetailClick = e => {
         this.setState({
