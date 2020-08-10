@@ -3,6 +3,7 @@ import os
 
 import h5py
 import numpy as np
+from flask import Flask
 
 from atmi_backend.config import DATA_ROOT, INSTANCE_STATUS, STUDY_STATUS, SERIES_STATUS
 from atmi_backend.db_interface.InitialService import InitialService
@@ -11,7 +12,7 @@ from atmi_backend.db_interface.LabelService import LabelService
 from atmi_backend.db_interface.SeriesService import SeriesService
 from atmi_backend.db_interface.StudiesService import StudiesService
 from atmi_backend.services.SeriesExtractionService import SeriesExtractionService
-
+app = Flask("atmi.app")
 
 class ImportService:
     def __init__(self, connection):
@@ -98,7 +99,7 @@ class ImportService:
                 if len(series) > 0:
                     slice_file_name = eval(series[0]['series_files_list'])
                     content_3D = labeldb[f"study:{study_uid}-series:{series_uid}/label"][()]
-                    print(f"Import label for: study:{study_uid}-series:{series_uid}/")
+                    app.logger.info(f"Import label for: study:{study_uid}-series:{series_uid}/")
                     for i in range(len(slice_file_name)):
                         content_2D = content_3D[:, :, i]
                         x_dim = content_2D.shape[0]

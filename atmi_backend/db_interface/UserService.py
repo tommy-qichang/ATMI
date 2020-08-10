@@ -44,7 +44,6 @@ class UserService:
                 return [user]
             return []
         if len(user) > 0:
-            app.logger.debug(f"user exist: {user}")
             for i in user:
                 del i['pwd']
 

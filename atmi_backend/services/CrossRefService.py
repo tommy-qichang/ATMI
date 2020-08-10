@@ -3,9 +3,10 @@ import os
 import numpy as np
 import pydicom
 from cv2 import cv2
+from flask import Flask
 
 from atmi_backend.utils import remove_small_3d
-
+app = Flask("atmi.app")
 
 class CrossRefService:
 
@@ -22,7 +23,7 @@ class CrossRefService:
 
             series_uid = label_obj['series']
             study_uid = label_obj['study']
-            print(f"load dcm:{os.path.join(path, files)}")
+            app.logger.info(f"load dcm:{os.path.join(path, files)}")
 
             label_list[series_uid] = {
                 "SeriesDescription": label_obj['description'],
@@ -33,7 +34,7 @@ class CrossRefService:
             }
             if "SpacingBetweenSlices" in dcm:
                 SpacingDistance = dcm.SpacingBetweenSlices
-            print(
+            app.logger.debug(
                 f"desc:{dcm.SeriesDescription}, position:{dcm.ImagePositionPatient}, orientation:{dcm.ImageOrientationPatient}, study uid:{study_uid}, series uid:{series_uid}")
 
             contours_list = []

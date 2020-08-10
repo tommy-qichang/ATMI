@@ -100,7 +100,6 @@ class LabelService:
                                       ["label_id", "candidate_id", "series_id", "user_id", "file_id", "content"])
         cur = self.sql_connection.cursor()
 
-        # print(f"Insert labels without commit!")
         try:
             cur.execute(sql, v_tuple)
             self.sql_connection.commit()

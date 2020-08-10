@@ -4,7 +4,8 @@ import os
 from os import path
 from threading import Thread
 
-from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json
+from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json, \
+    Flask
 
 from atmi_backend.config import REGISTER_MAX_HOURS, SERIES_STATUS, STUDY_STATUS, INSTANCE_STATUS
 from atmi_backend.db_interface.InitialService import InitialService
@@ -19,7 +20,7 @@ from atmi_backend.services.ExportService import ExportService
 from atmi_backend.services.ImportService import ImportService
 from atmi_backend.utils import to_bool_or_none
 
-
+app = Flask("atmi.app")
 def setup_route_map(app, app_path):  # noqa: C901
     def get_conn():
         ini_service = InitialService()
@@ -159,15 +160,11 @@ def setup_route_map(app, app_path):  # noqa: C901
             user = user_service.query({'email': session['email']})
             if len(user) > 0:
                 user_service.delete(user_name)
+                app.logger.info(f"delete user<${user_name}> successed")
                 return jsonify({"user": user_name}), 200
 
         return jsonify({}), 404
 
-        user = user_service.query({'email': user_name})
-        if len(user) > 0 and ("email" not in session or session['email'] == ''):
-            session["email"] = user_name
-
-        return jsonify(user), 200
 
     @app.route('/user/<user_name>/<password>', methods=['GET'])
     def login_user(user_name, password):
@@ -406,10 +403,10 @@ def setup_route_map(app, app_path):  # noqa: C901
             self.data_path = data_path
 
         def run(self):
-            print("Start importing...")
+            app.logger.info("Start importing...")
             import_service = ImportService(get_conn())
             import_service.import_dcm(self.instance_id, self.data_path)
-            print("End importing process")
+            app.logger.info("End importing process")
 
     @app.route('/import/instance/<instance_id>', methods=['GET'])
     def load_data(instance_id):

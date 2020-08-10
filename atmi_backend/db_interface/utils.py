@@ -1,3 +1,7 @@
+from flask import Flask
+
+app = Flask("atmi.app")
+
 def gen_multiple_condition(query_obj, candidate_keys=None):
     """
     Generate sql segments with multiple conditions.
@@ -10,7 +14,7 @@ def gen_multiple_condition(query_obj, candidate_keys=None):
         if (candidate_keys is None) or (k in candidate_keys):
             segment.append(f'{k}="{v}"')
         elif k not in candidate_keys:
-            print(f"***warning***: query key:{k} is invalid")
+            app.logger.warning(f"***warning***: query key:{k} is invalid")
 
     return " and ".join(segment)
 
@@ -51,7 +55,7 @@ def prepare_insert(table_name, insert_obj, candidate_keys=None):
             v_list.append(v)
             q_list.append("?")
         elif k not in candidate_keys:
-            print(f"warning: query key:{k} is invalid")
+            app.logger.warning(f"warning: query key:{k} is invalid")
 
     sql = f'INSERT INTO {table_name}({" , ".join(k_list)}) VALUES ({" , ".join(q_list)})'
 
@@ -87,7 +91,7 @@ def prepare_update(table_name, condition_obj, insert_obj, candidate_keys=None):
             k_list.append(f'{k} = ?')
             v_list.append(v)
         elif k not in candidate_keys:
-            print(f"warning: query key:{k} is invalid")
+            app.logger.warning(f"warning: query key:{k} is invalid")
 
     for k, v in condition_obj.items():
         condition_list.append(f'{k} = ?')

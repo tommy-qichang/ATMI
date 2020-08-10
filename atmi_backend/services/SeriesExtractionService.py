@@ -1,9 +1,11 @@
 import os
 import re
 
+from flask import Flask
+
 from atmi_backend.config import QUALIFIED_FILE_EXT
 from atmi_backend.services.DICOMParser import DICOMParser
-
+app = Flask("atmi.app")
 
 class SeriesExtractionService:
 
@@ -17,7 +19,7 @@ class SeriesExtractionService:
         parser = DICOMParser()
         all_series_list = {}
         for k, l in files_list.items():
-            print(f'Extract Series from path:{k}...')
+            app.logger.info(f'Extract Series from path:{k}...')
             all_series = parser.extract_series(k, l)
             all_series_list[k] = all_series
 
@@ -30,7 +32,7 @@ class SeriesExtractionService:
                     all_study_list[study_id] = {}
                 all_study_list[study_id][i] = one_series
             else:
-                print(f"Error in series index:{i}")
+                app.logger.warning(f"Error in series index:{i}")
 
         return all_study_list
 
