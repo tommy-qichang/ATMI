@@ -101,7 +101,7 @@ class ImportService:
                     content_3D = labeldb[f"study:{study_uid}-series:{series_uid}/label"][()]
                     app.logger.info(f"Import label for: study:{study_uid}-series:{series_uid}/")
                     for i in range(len(slice_file_name)):
-                        if i < len(content_3D.shape[2]):
+                        if i < content_3D.shape[2]:
                             content_2D = content_3D[:, :, i]
                             x_dim = content_2D.shape[0]
                             y_dim = content_2D.shape[1]
@@ -114,7 +114,7 @@ class ImportService:
                                                "dataLength": content_1D.shape[0]}}
                             labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
                                                 str.encode(json.dumps(content)))
-                    seriesService.update({"series_instance_uid": series_uid}, {SERIES_STATUS.mask_is_ready.value})
+                    seriesService.update({"series_instance_uid": series_uid}, {"status":SERIES_STATUS.mask_is_ready.value})
 
         elif load_type == 'mhd':
             raise NotImplementedError()

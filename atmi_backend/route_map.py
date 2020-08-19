@@ -7,6 +7,7 @@ from threading import Thread
 from flask import render_template, Response, send_from_directory, jsonify, send_file, request, session, redirect, json, \
     Flask
 
+from atmi_backend import config
 from atmi_backend.config import REGISTER_MAX_HOURS, SERIES_STATUS, STUDY_STATUS, INSTANCE_STATUS
 from atmi_backend.db_interface.InitialService import InitialService
 from atmi_backend.db_interface.InstanceService import InstanceService
@@ -423,6 +424,25 @@ def setup_route_map(app, app_path):  # noqa: C901
         thread_import_dcm.start()
 
         return jsonify({'result': 'thread import data'}), 201
+
+    @app.route('/import_label', methods=['GET'])
+    def load_label():
+        """
+        Load Label data for the instance. given the path of the label folder.
+        :return:
+        """
+        data_path = request.args.get('data_path', default=None)
+        real_data_path = os.path.join(config.OUTPUT_ROOT, data_path)
+
+        if data_path is None or not os.path.exists(real_data_path):
+            return jsonify({}), 404
+        ini_service = InitialService()
+        import_service = ImportService(ini_service.get_connection())
+        import_service.import_annotations("h5", real_data_path)
+
+        return jsonify({'result':'thread imported label.'}), 201
+
+
 
     @app.route('/export/instance/<instance_id>', methods=['GET'])
     def export_all_label(instance_id):
