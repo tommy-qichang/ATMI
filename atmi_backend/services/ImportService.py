@@ -101,18 +101,19 @@ class ImportService:
                     content_3D = labeldb[f"study:{study_uid}-series:{series_uid}/label"][()]
                     app.logger.info(f"Import label for: study:{study_uid}-series:{series_uid}/")
                     for i in range(len(slice_file_name)):
-                        content_2D = content_3D[:, :, i]
-                        x_dim = content_2D.shape[0]
-                        y_dim = content_2D.shape[1]
-                        content_1D = np.reshape(content_2D, x_dim * y_dim)
+                        if i < len(content_3D.shape[2]):
+                            content_2D = content_3D[:, :, i]
+                            x_dim = content_2D.shape[0]
+                            y_dim = content_2D.shape[1]
+                            content_1D = np.reshape(content_2D, x_dim * y_dim)
 
-                        unique_id = np.unique(content_1D).tolist()
-                        compressed_content_1D = LabelService.compress_content(content_1D)
-                        content = {
-                            "labelmap2D": {"pixelData": compressed_content_1D, "segmentsOnLabelmap": unique_id,
-                                           "dataLength": content_1D.shape[0]}}
-                        labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
-                                            str.encode(json.dumps(content)))
+                            unique_id = np.unique(content_1D).tolist()
+                            compressed_content_1D = LabelService.compress_content(content_1D)
+                            content = {
+                                "labelmap2D": {"pixelData": compressed_content_1D, "segmentsOnLabelmap": unique_id,
+                                               "dataLength": content_1D.shape[0]}}
+                            labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
+                                                str.encode(json.dumps(content)))
                     seriesService.update({"series_instance_uid": series_uid}, {SERIES_STATUS.mask_is_ready.value})
 
         elif load_type == 'mhd':
@@ -124,7 +125,7 @@ if __name__ == "__main__":
     importService = ImportService(ini_service.get_connection())
     # importService.import_annotations("h5", "/Users/qichang/PycharmProjects/pytorch-template/data/ACDC/processed/Export-1-Cardial_MRI_DB-0-predict-final-x4.h5")
     importService.import_annotations("h5",
-                                     "/ajax/users/qc58/work/projects/pytorch-template/saved/test_results/ACDC_segmentation_exp1/test_result-ACDC_segmentation_exp1_512x512_smooth.h5")
+                                     "/Users/qichang/PycharmProjects/ATMI/data/test3/3891405-1_0.85528576_new.h5")
 
 # http://127.0.0.1:5000/load_data/2/NYU_CMR_Raw
 # http://127.0.0.1:5000/export_label/studies/2
