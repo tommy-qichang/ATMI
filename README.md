@@ -22,9 +22,9 @@ The following features will be implemented in this system:
 You need to install Python3 and Nodejs(v10) first.
 1. <option> Setup an virtual environment for python 3 like [conda](https://docs.conda.io/en/latest/miniconda.html), and activate. 
 2. Unzip/clone the ATMI code folder.   
-3. `pip install` under ATMI folder.
-4. `cd atmi; npm install`   
-6. `cd ..; sh run_flask.sh`
+3. `pip install -r requirements.txt` #under ATMI folder.
+4. `cd atmi; npm install;npx webpack`  #build JS files
+5. `sh run_flask.sh` #start flask server.
 
 
 ## Steps to setup development environment.
