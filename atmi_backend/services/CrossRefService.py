@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import numpy as np
 import pydicom
@@ -76,7 +77,7 @@ class CrossRefService:
                             frame_series_info.append({})
 
                         file_path = ["assets", "ref_cache"] + files_path[idx].replace("_HD","").split("/")[2:-1]
-                        filename = files_path[idx].split("/")[-1]+ "_thumb.jpg"
+                        filename = files_path[idx].split("/")[-1]+"_thumb.jpg?t="+str(datetime.timestamp(datetime.now()))
                         url_path = "/".join(file_path)
 
                         frame_contours[idx].append({"data": new_contour.tolist(),

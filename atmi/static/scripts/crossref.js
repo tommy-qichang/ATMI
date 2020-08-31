@@ -209,10 +209,10 @@ let Crossview = class {
         for (var len = contour.length, i = 0; i < len; i++) {
             if (contour[i]['series_id'] === sax_idx) {
                 sax_url = contour[i]['file_path'];
-                this.sax_img.attr("src", sax_url + "?" + Math.random());
+                this.sax_img.attr("src", sax_url );
             } else if (contour[i]['series_id'] === lax_idx) {
                 lax_url = contour[i]['file_path'];
-                this.lax_img.attr("src", lax_url + "?" + Math.random());
+                this.lax_img.attr("src", lax_url);
             }
         }
 
