@@ -120,12 +120,12 @@ class ImportService:
             raise NotImplementedError()
 
 
-if __name__ == "__main__":
-    ini_service = InitialService()
-    importService = ImportService(ini_service.get_connection())
-    # importService.import_annotations("h5", "/Users/qichang/PycharmProjects/pytorch-template/data/ACDC/processed/Export-1-Cardial_MRI_DB-0-predict-final-x4.h5")
-    importService.import_annotations("h5",
-                                     "/Users/qichang/PycharmProjects/ATMI/data/test3/3891405-1_0.85528576_new.h5")
+# if __name__ == "__main__":
+#     ini_service = InitialService()
+#     importService = ImportService(ini_service.get_connection())
+#     # importService.import_annotations("h5", "/Users/qichang/PycharmProjects/pytorch-template/data/ACDC/processed/Export-1-Cardial_MRI_DB-0-predict-final-x4.h5")
+#     importService.import_annotations("h5",
+#                                      "/Users/qichang/PycharmProjects/ATMI/data/test3/3891405-1_0.85528576_new.h5")
 
 # http://127.0.0.1:5000/load_data/2/NYU_CMR_Raw
 # http://127.0.0.1:5000/export_label/studies/2

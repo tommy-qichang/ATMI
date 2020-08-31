@@ -525,9 +525,13 @@ def setup_route_map(app, app_path):  # noqa: C901
         # labels gen 31.750854 seconds.
         crossref_service = CrossRefService()
         label_list = crossref_service.accumulate_contours(labels)
+
         # t.toc("label_list", restart=True)
         # label_list 32.659566 seconds.
-        result = crossref_service.merge_dicom_orientation(label_list)
+        world_contours, frame_series_info = crossref_service.merge_dicom_orientation(label_list)
+
+        crossref_service.projection_sax_lax(frame_series_info)
+
         # t.toc("merge dicom", restart=True)
         # merge dicom 8.348602 seconds.
-        return jsonify(result), 200
+        return jsonify(world_contours), 200

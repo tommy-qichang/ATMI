@@ -42,7 +42,7 @@
             </select>
             <img class="loading invisible" src="/assets/static/img/loading.gif" alt="">
             <button type="button" class="btn btn-primary btn-sm render-btn" id="render">Render</button>
-            <button type="button" class="btn btn-primary btn-sm render-btn" id="render-co" >Render(corrected)</button>
+            <button type="button" class="btn btn-primary btn-sm render-btn" id="render-co">Render(corrected)</button>
         </div>
     </div>
     <!-- /#sidebar-wrapper -->
@@ -58,15 +58,34 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col">
-                    <canvas id="wireframe"></canvas>
+                    <div>
+                        <canvas id="wireframe"></canvas>
+                    </div>
+                    <div class="titles_3d">
+                        <div><h5>3D View</h5></div>
+                        <span id="wireframe-toggle">
+                            <i class="fas fa-play"></i>
+                        </span>
+                        <span>Current index: <span id="cur_idx">0</span></span>
+                    </div>
+                </div>
+                <div class="col">
+                    <div id="lax_div">
+                        <img id="lax_img" src="#" alt="">
+                        <div class="titles">
+                            <h5>LAX View</h5>
+                        </div>
+                    </div>
+                    <div id="sax_div">
+                        <img id="sax_img" src="#" alt="">
+                        <div class="titles">
+                            <h5>SAX View</h5>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <div id="wireframe-toggle">
-
-                        <i class="fas fa-play"></i>
-                    </div>
                 </div>
             </div>
 

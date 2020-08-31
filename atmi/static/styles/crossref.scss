@@ -4,6 +4,7 @@
  * Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-simple-sidebar/blob/master/LICENSE)
  */
 
+
  #wrapper {
     overflow-x: hidden;
  }
@@ -69,7 +70,37 @@
     margin: 0.3rem auto;
 }
 .loading{
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     margin:0.3rem auto;
+}
+#lax_img, #sax_img{
+    max-width:400px;
+    max-height:300px;
+}
+#lax_div, #sax_div{
+    width:400px;
+    height:350px;
+    margin-top:10px;
+    border: 1px solid #eee;
+}
+.titles_3d{
+    background-color: #eee;
+    width: 400px;
+    font-family: "Helvetica Neue";
+    padding: 2px;
+    text-align: center;
+}
+.titles{
+    background-color: #eee;
+    width: 400px;
+    height: 50px;
+    font-family: "Helvetica Neue";
+    padding: 2px;
+    text-align: center;
+}
+.titles_3d .fa-play{
+    width: 1em !important;
+    height: 1em !important;
+    margin: 0;
 }
