@@ -3,7 +3,7 @@ from datetime import datetime
 
 import numpy as np
 import pydicom
-from atmi_backend.utils import remove_small_3d, extract_contours, prep_transfer_data, vox2world, world2vox, \
+from atmi_backend.util.utils import remove_small_3d, extract_contours, prep_transfer_data, vox2world, world2vox, \
     save_thumnail
 from flask import Flask
 
@@ -12,7 +12,7 @@ app = Flask("atmi.app")
 
 class CrossRefService:
 
-    def accumulate_contours(self, labels, scale=4):  # noqa: C901
+    def accumulate_contours(self, labels, instance_id, scale=4):  # noqa: C901
 
         label_list = {}
         for label_obj in labels:
@@ -36,7 +36,10 @@ class CrossRefService:
                 "ImagePositionPatient": dcm.ImagePositionPatient,
                 "PixelSpacing": dcm.PixelSpacing,
                 "FilesPath": files_path,
-                "label": lv_label
+                "label": lv_label,
+                "instance_id": instance_id,
+                "study_id":label_obj['study_id'],
+                "series_id":label_obj['series_id']
             }
             if "SpacingBetweenSlices" in dcm:
                 SpacingDistance = dcm.SpacingBetweenSlices
@@ -56,12 +59,15 @@ class CrossRefService:
         frame_series_info = []
         mean = []
         std = []
-        for series_id in label_list:
-            series = label_list[series_id]
+        for series_uid in label_list:
+            series = label_list[series_uid]
             conf = prep_transfer_data(series)
 
             contours = series['contours']
             files_path = series['FilesPath']
+            instance_id = series['instance_id']
+            study_id = series['study_id']
+            series_id = series['series_id']
             for idx, value in enumerate(contours):
                 if idx > len(frame_contours):
                     frame_contours.append([])
@@ -83,7 +89,8 @@ class CrossRefService:
                         frame_contours[idx].append({"data": new_contour.tolist(),
                                                     "desc": sub_contour['desc'],
                                                     "file_path": "/"+os.path.join(url_path,filename),
-                                                    "series_id": series_id})
+                                                    "series_id": series_uid,
+                                                    "workbench":f"/workbench/instance/{instance_id}/study/{study_id}/series/{series_id}"})
                         key = "unknown"
                         if "ch" in sub_contour['desc'].lower():
                             # Long Axis Series
@@ -99,7 +106,7 @@ class CrossRefService:
                         frame_series_info[idx][key].append({"data": new_contour,
                                                             "desc": sub_contour['desc'],
                                                             "transfer_conf": conf,
-                                                            "series_id": series_id,
+                                                            "series_id": series_uid,
                                                             "file_path": files_path[idx]})
 
         mean = np.array(mean).mean(axis=0)
@@ -164,10 +171,10 @@ class CrossRefService:
                     lax_coord1 = np.round(world2vox(lax_transfer_conf, coord1)).astype('int')
                     lax_coord2 = np.round(world2vox(lax_transfer_conf, coord2)).astype('int')
 
-                    # sax_img[sax_coord1[1] - 1:sax_coord1[1] + 1, sax_coord1[0] - 1:sax_coord1[0] + 1, 3] = 1
-                    # sax_img[sax_coord2[1] - 1:sax_coord2[1] + 1, sax_coord2[0] - 1:sax_coord2[0] + 1, 3] = 1
-                    # lax_img[lax_coord1[1] - 1:lax_coord1[1] + 1, lax_coord1[0] - 1:lax_coord1[0] + 1, 3] = 1
-                    # lax_img[lax_coord2[1] - 1:lax_coord2[1] + 1, lax_coord2[0] - 1:lax_coord2[0] + 1, 3] = 1
+                    sax_img[sax_coord1[1] - 1:sax_coord1[1] + 1, sax_coord1[0] - 1:sax_coord1[0] + 1, 3] = 1
+                    sax_img[sax_coord2[1] - 1:sax_coord2[1] + 1, sax_coord2[0] - 1:sax_coord2[0] + 1, 3] = 1
+                    lax_img[lax_coord1[1] - 1:lax_coord1[1] + 1, lax_coord1[0] - 1:lax_coord1[0] + 1, 3] = 1
+                    lax_img[lax_coord2[1] - 1:lax_coord2[1] + 1, lax_coord2[0] - 1:lax_coord2[0] + 1, 3] = 1
 
                     sax_img[sax_coord1[1], sax_coord1[0], 3] = 1
                     sax_img[sax_coord2[1], sax_coord2[0], 3] = 1

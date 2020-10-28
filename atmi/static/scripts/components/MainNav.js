@@ -48,9 +48,27 @@ class MainNav extends React.Component {
         cornerstoneWrapper.undoSegment()
     };
     propagate = () => {
-        cornerstoneWrapper.replaceSegments(this.state.prevImageIdIndex, this.state.currentImageIdIndex);
-        cornerstoneWrapper.saveSegments(this.props.stack.seriesId,
-            this.props.stack.imageIds[this.props.stack.currentImageIdIndex])
+        fetch(`/propagation/${this.props.stack.seriesId}/${this.state.prevImageIdIndex}/${this.state.currentImageIdIndex}`, {
+            method: "GET",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(data =>{
+            return data.json()
+        }).then(data=>{
+            cornerstoneWrapper.replaceSegmentsByLabelmaps(this.state.currentImageIdIndex, data["labelmap2D"]);
+            cornerstoneWrapper.saveSegments(this.props.stack.seriesId,
+                this.props.stack.imageIds[this.props.stack.currentImageIdIndex])
+
+        });
+
+        // cornerstoneWrapper.replaceSegments(this.state.prevImageIdIndex, this.state.currentImageIdIndex);
+        // cornerstoneWrapper.saveSegments(this.props.stack.seriesId,
+        //     this.props.stack.imageIds[this.props.stack.currentImageIdIndex])
+
+
+
     };
 
     activateTool = (e) => {

@@ -36,3 +36,8 @@ SECRET_KEY = "dbe924ec-7767-4186-ad8a-b68face4a8fa"
 INSTANCE_STATUS = Enum("INSTANCE_STATUS", "init importing_dicom ready_to_annotate annotating finished auditing")
 STUDY_STATUS = Enum("STUDY_STATUS", "ready_to_annotate annotating finished auditing")
 SERIES_STATUS = Enum("SERIES_STATUS", "init mask_is_ready annotating finished auditing")
+
+VXM_MODEL_PATH = "atmi_backend/model/cmr-voxelmorph-100-0.0005.hdf5"
+VOL_SHAPE = [256,256]
+
+

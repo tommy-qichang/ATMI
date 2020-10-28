@@ -1,2 +1,3 @@
-from atmi.app import create_app
+from atmi import create_app
+
 app = create_app()

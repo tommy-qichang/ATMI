@@ -62,7 +62,7 @@
     height:2em!important;
     margin: 1em 1em;
 }
-.fa-play:hover{
+.fa-play:hover,.fa-caret-square-left:hover,.fa-caret-square-right:hover{
     cursor: pointer;
 }
 .render-btn{
@@ -94,7 +94,7 @@
 .titles{
     background-color: #eee;
     width: 400px;
-    height: 50px;
+//     height: 50px;
     font-family: "Helvetica Neue";
     padding: 2px;
     text-align: center;

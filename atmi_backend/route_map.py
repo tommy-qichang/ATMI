@@ -19,7 +19,8 @@ from atmi_backend.db_interface.UserService import UserService
 from atmi_backend.services.CrossRefService import CrossRefService
 from atmi_backend.services.ExportService import ExportService
 from atmi_backend.services.ImportService import ImportService
-from atmi_backend.utils import to_bool_or_none
+from atmi_backend.services.SmartPropagation import SmartPropagation
+from atmi_backend.util.utils import to_bool_or_none
 
 app = Flask("atmi.app")
 def setup_route_map(app, app_path):  # noqa: C901
@@ -409,6 +410,13 @@ def setup_route_map(app, app_path):  # noqa: C901
             import_service.import_dcm(self.instance_id, self.data_path)
             app.logger.info("End importing process")
 
+    @app.route('/propagation/<int:series_id>/<int:from_file_id>/<int:to_file_id>', methods=['GET'])
+    def smart_propagation(series_id, from_file_id, to_file_id):
+        prop = SmartPropagation(get_conn())
+        to_label_result = prop.propagate(series_id, from_file_id, to_file_id)
+        return jsonify(to_label_result), 200
+
+
     @app.route('/import/instance/<instance_id>', methods=['GET'])
     def load_data(instance_id):
         """
@@ -524,7 +532,7 @@ def setup_route_map(app, app_path):  # noqa: C901
         # t.toc("labels gen", restart=True)
         # labels gen 31.750854 seconds.
         crossref_service = CrossRefService()
-        label_list = crossref_service.accumulate_contours(labels)
+        label_list = crossref_service.accumulate_contours(labels, instance_id)
 
         # t.toc("label_list", restart=True)
         # label_list 32.659566 seconds.

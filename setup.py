@@ -21,6 +21,7 @@ setup(
         'pillow==6.2.1',
         'codecov==2.1',
         'pytictoc==1.5.0',
-        'opencv-python==4.0.1.24'
+        'opencv-python==4.0.1.24',
+        'tensorflow>=2.0'
     ]
 )

@@ -2,6 +2,7 @@ import sqlite3
 
 import numpy as np
 
+from atmi_backend.db_interface.SeriesService import SeriesService
 from atmi_backend.db_interface.utils import prepare_query, prepare_insert, prepare_delete, prepare_update, \
     prepare_exists
 
@@ -109,6 +110,31 @@ class LabelService:
             return False
 
         return True
+
+    def get_label(self, series_id, file_id):
+        series_service = SeriesService(self.sql_connection)
+        series = series_service.query({"series_id": series_id})
+        if len(series) != 1:
+            return None
+        series = series[0]
+        x_dim = int(series['x_dimension'])
+        y_dim = int(series['y_dimension'])
+
+
+        label = self.query({"series_id":series_id, "file_id":file_id})
+        if len(label) == 0:
+            return None
+        content = eval(label[0]['content'])
+        pixel_data = content['labelmap2D']['pixelData']
+
+        pixel_data_xy = np.zeros((x_dim * y_dim))
+        for label_data in pixel_data:
+            label_int = int(float(label_data))
+            # content_1D = np.reshape(pixel_data_xy, x_dim * y_dim)
+            pixel_data_xy[pixel_data[label_data]] = label_int
+        pixel_data_xy = np.reshape(pixel_data_xy, (x_dim, y_dim))
+        return pixel_data_xy
+
 
     @staticmethod
     def compress_content(content):

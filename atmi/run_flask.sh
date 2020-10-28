@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export FLASK_ENV=development
+export FLASK_ENV=production
 mydir=$(dirname "${BASH_SOURCE}")
 cd $mydir
 cd ..

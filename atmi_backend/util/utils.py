@@ -2,7 +2,10 @@ import os
 
 import numpy as np
 from cv2 import cv2
+from scipy.ndimage import interpolation
+from scipy.ndimage.filters import gaussian_filter
 from skimage import morphology
+from skimage.transform import resize
 
 
 def to_bool_or_none(bool_str):
@@ -156,3 +159,50 @@ def save_thumnail(desire_size, orig_img, orig_path):
 
     cv2.imwrite(thumb_img_path, new_img)
     return thumb_img_path
+
+
+def square_img(img):
+    h, w = img.shape
+    if h > w:
+        pad = (h - w) // 2
+        result = np.pad(img, ((0, 0), (pad, h - w - pad)))
+    else:
+        pad = (w - h) // 2
+        result = np.pad(img, ((pad, w - h - pad), (0, 0)))
+    return result
+
+
+def zoom(img, fixed_size, order=3):
+    h, w = img.shape
+    rate = fixed_size / h
+    result = interpolation.zoom(img, rate, order=order)
+    return result
+
+
+def smooth_obj_one_case(orig_array):
+    """
+    Smooth label array[x, y, z], with scale or size settings.
+    :param orig_array:
+    :param resize_type:
+    :param scale:
+    :return:
+    """
+    scale_array = []
+    for i in range(orig_array.shape[-1]):
+        slice = orig_array[:, :, i]
+        final_mask = np.zeros_like(slice)
+        unique_id = np.unique(slice)[1:].tolist()
+        if len(unique_id) == 0:
+            scale_array.append(slice)
+            continue
+        for label_id in unique_id:
+            show_img = np.zeros_like(slice)
+            show_img[slice == label_id] = 1
+
+            blurred_img = gaussian_filter(show_img, sigma=4)
+            blurred_img[blurred_img > 0.5] = 1
+            blurred_img[blurred_img <= 0.5] = 0
+            final_mask[blurred_img == 1] = label_id
+        scale_array.append(final_mask)
+
+    return np.stack(scale_array, axis=-1)

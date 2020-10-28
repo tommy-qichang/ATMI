@@ -108,49 +108,64 @@ function renderWireframe(data) {
 
 var playWirefrmae = null;
 
+function move_slices(frame_idx) {
+    cur_idx_indicator.html(frame_idx);
+    for (let len = lines.length, i = 0; i < len; i++) {
+        line = lines.pop();
+        line.dispose();
+    }
+
+    let frame_contour = contours[frame_idx];
+    for (let len = frame_contour.length, i = 0; i < len; i++) {
+        var myPoints = frame_contour[i].data.map((vector) => new BABYLON.Vector3((vector[0] - mean[0]) / std[0], (vector[1] - mean[1]) / std[1], (vector[2] - mean[2]) / std[2]));
+        var desc = frame_contour[i].desc;
+        for (let len = desc_color_mapping.length, i = 0; i < len; i++) {
+            if (desc_color_mapping[i].reg.test(desc)) {
+                default_color = desc_color_mapping[i].color;
+                break;
+            }
+        }
+        var series_id = frame_contour[i].series_id;
+        var desc = frame_contour[i].desc;
+        let line_id = frame_idx + "|";
+        if (/sax/ig.test(desc)) {
+            line_id += ("sax|" + series_id);
+        } else {
+            line_id += ("lax|" + series_id);
+        }
+
+
+        var line_color = default_color;
+
+        var line = BABYLON.MeshBuilder.CreateLines(line_id, {points: myPoints}, scene);
+        line.color = line_color;
+        //line.enableEdgesRendering();
+        //line.edgesWidth = 5;
+        lines.push(line);
+    }
+
+    crossview.render_cross(frame_idx, cur_sax_lax_idx['sax'], cur_sax_lax_idx['lax'])
+
+}
+
+
+$("#wireframe-prev").click(function () {
+    frame_idx = (frame_idx - 1)<0?(frame_len-1):(frame_idx - 1);
+
+    move_slices(frame_idx)
+});
+$("#wireframe-next").click(function () {
+    frame_idx = (frame_idx + 1) % frame_len;
+    move_slices(frame_idx)
+})
+
+
 $("#wireframe-toggle").click(
     function () {
         if (playWirefrmae === null) {
             playWirefrmae = setInterval(function () {
                 frame_idx = (frame_idx + 1) % frame_len;
-
-                cur_idx_indicator.html(frame_idx);
-                for (let len = lines.length, i = 0; i < len; i++) {
-                    line = lines.pop();
-                    line.dispose();
-                }
-
-                let frame_contour = contours[frame_idx];
-                for (let len = frame_contour.length, i = 0; i < len; i++) {
-                    var myPoints = frame_contour[i].data.map((vector) => new BABYLON.Vector3((vector[0] - mean[0]) / std[0], (vector[1] - mean[1]) / std[1], (vector[2] - mean[2]) / std[2]));
-                    var desc = frame_contour[i].desc;
-                    for (let len = desc_color_mapping.length, i = 0; i < len; i++) {
-                        if (desc_color_mapping[i].reg.test(desc)) {
-                            default_color = desc_color_mapping[i].color;
-                            break;
-                        }
-                    }
-                    var series_id = frame_contour[i].series_id;
-                    var desc = frame_contour[i].desc;
-                    let line_id = frame_idx + "|";
-                    if (/sax/ig.test(desc)) {
-                        line_id += ("sax|" + series_id);
-                    } else {
-                        line_id += ("lax|" + series_id);
-                    }
-
-
-                    var line_color = default_color;
-
-                    var line = BABYLON.MeshBuilder.CreateLines(line_id, {points: myPoints}, scene);
-                    line.color = line_color;
-                    //line.enableEdgesRendering();
-                    //line.edgesWidth = 5;
-                    lines.push(line);
-                }
-
-                crossview.render_cross(frame_idx, cur_sax_lax_idx['sax'], cur_sax_lax_idx['lax'])
-
+                move_slices(frame_idx)
 
             }, 200);
         } else {
@@ -182,7 +197,9 @@ let Crossview = class {
         this.contours = data.contours;
         this.cur_frame_idx = 0;
         this.sax_img = $("#sax_img");
+        this.sax_workbench = $("#sax_url");
         this.lax_img = $("#lax_img");
+        this.lax_workbench = $("#lax_url")
     }
 
     render_cross(frame_idx, sax_idx, lax_idx) {
@@ -209,10 +226,16 @@ let Crossview = class {
         for (var len = contour.length, i = 0; i < len; i++) {
             if (contour[i]['series_id'] === sax_idx) {
                 sax_url = contour[i]['file_path'];
-                this.sax_img.attr("src", sax_url );
+                this.sax_img.attr("src", sax_url);
+                let sax_workbench = contour[i]['workbench'];
+                this.sax_workbench.attr("href", sax_workbench);
+                console.log(sax_workbench)
             } else if (contour[i]['series_id'] === lax_idx) {
                 lax_url = contour[i]['file_path'];
                 this.lax_img.attr("src", lax_url);
+                let lax_workbench = contour[i]['workbench'];
+                this.lax_workbench.attr("href", lax_workbench);
+                console.log(lax_workbench)
             }
         }
 

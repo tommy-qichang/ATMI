@@ -151,6 +151,9 @@ class ExportService:
                 label_db.attrs['series_id'] = i['series_id']
                 label_db.attrs['study_id'] = i['study_id']
                 label_db.attrs['description'] = i["series_description"]
+                label_db.attrs['image_orientation_patient'] = i['image_orientation_patient']
+                label_db.attrs['image_position_patient'] = i['image_position_patient']
+
                 app.logger.debug(f"Save one series label - path:{i['series_path']}, series_id:{i['series_id']}, "
                                  f"h5path: study:{study['suid']}/series:{series_uuid}/label")
                 msg_box.append(f"Save one series - path:{i['series_path']}, series_id:{i['series_id']}, "

@@ -333,6 +333,26 @@ let cornerstoneWrapper = {
             cornerstone.updateImage(this.element);
         }
     },
+    replaceSegmentsByLabelmaps: function(curIdx, labelmaps2d){
+
+        const {configuration, getters, setters, state} = cornerstoneTools.getModule(
+            'segmentation'
+        );
+        let labelmap3D = getters.labelmap3D(this.element);
+        let real_mask = Array(labelmaps2d['dataLength']).fill(0);
+        let pixelIndex = labelmaps2d['pixelData'];
+        for(let j in pixelIndex){
+            let indexes = pixelIndex[j];
+            for(let k=0;k<indexes.length;k++){
+                real_mask[indexes[k]] = parseInt(j);
+            }
+        }
+        labelmaps2d['pixelData'] = real_mask;
+
+        labelmap3D.labelmaps2D[curIdx] = labelmaps2d;
+        setters.updateSegmentsOnLabelmap2D(labelmap3D.labelmaps2D[curIdx]);
+        cornerstone.updateImage(this.element);
+    },
     loadSegments: function (seriesId) {
         const {configuration, getters, setters, state} = cornerstoneTools.getModule(
             'segmentation'
