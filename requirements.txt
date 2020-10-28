@@ -4,35 +4,61 @@
 #
 #    pip-compile --no-index --no-emit-trusted-host --output-file requirements.txt setup.py
 #
+absl-py==0.11.0           # via tensorboard, tensorflow
+astunparse==1.6.3         # via tensorflow
+cachetools==4.1.1         # via google-auth
 certifi==2020.6.20        # via requests
 chardet==3.0.4            # via requests
 click==7.1.2              # via flask
 codecov==2.1
-coverage==5.2.1           # via codecov
+coverage==5.3             # via codecov
 cycler==0.10.0            # via matplotlib
 decorator==4.4.2          # via networkx
 flask-webpack==0.1.0
 flask==1.1.2
+gast==0.3.3               # via tensorflow
+google-auth-oauthlib==0.4.1  # via tensorboard
+google-auth==1.22.1       # via google-auth-oauthlib, tensorboard
+google-pasta==0.2.0       # via tensorflow
+grpcio==1.33.1            # via tensorboard, tensorflow
 h5py==2.10.0
 idna==2.10                # via requests
 imageio==2.9.0            # via scikit-image
+importlib-metadata==2.0.0  # via markdown
 itsdangerous==1.1.0       # via flask
 jinja2==2.11.2            # via flask
-kiwisolver==1.2.0         # via matplotlib
+keras-preprocessing==1.1.2  # via tensorflow
+kiwisolver==1.3.0         # via matplotlib
+markdown==3.3.3           # via tensorboard
 markupsafe==1.1.1         # via jinja2
 matplotlib==3.1.2
-networkx==2.4             # via scikit-image
-numpy==1.19.1             # via h5py, imageio, matplotlib, opencv-python, pywavelets, scipy
+networkx==2.5             # via scikit-image
+numpy==1.18.5             # via h5py, imageio, keras-preprocessing, matplotlib, opencv-python, opt-einsum, pywavelets, scipy, tensorboard, tensorflow
+oauthlib==3.1.0           # via requests-oauthlib
 opencv-python==4.0.1.24
+opt-einsum==3.3.0         # via tensorflow
 pillow==6.2.1
+protobuf==3.13.0          # via tensorboard, tensorflow
+pyasn1-modules==0.2.8     # via google-auth
+pyasn1==0.4.8             # via pyasn1-modules, rsa
 pydicom==1.3.0
 pyparsing==2.4.7          # via matplotlib
 python-dateutil==2.8.1    # via matplotlib
 pytictoc==1.5.0
 pywavelets==1.1.1         # via scikit-image
-requests==2.24.0          # via codecov
+requests-oauthlib==1.3.0  # via google-auth-oauthlib
+requests==2.24.0          # via codecov, requests-oauthlib, tensorboard
+rsa==4.6                  # via google-auth
 scikit-image==0.16.2
-scipy==1.5.2
-six==1.15.0               # via cycler, h5py, python-dateutil
-urllib3==1.25.10          # via requests
-werkzeug==1.0.1           # via flask
+scipy==1.5.3
+six==1.15.0               # via absl-py, astunparse, cycler, google-auth, google-pasta, grpcio, h5py, keras-preprocessing, protobuf, python-dateutil, tensorboard, tensorflow
+tensorboard-plugin-wit==1.7.0  # via tensorboard
+tensorboard==2.3.0        # via tensorflow
+tensorflow-estimator==2.3.0  # via tensorflow
+tensorflow==2.3.1
+termcolor==1.1.0          # via tensorflow
+urllib3==1.25.11          # via requests
+werkzeug==1.0.1           # via flask, tensorboard
+wheel==0.35.1             # via astunparse, tensorboard, tensorflow
+wrapt==1.12.1             # via tensorflow
+zipp==3.4.0               # via importlib-metadata
