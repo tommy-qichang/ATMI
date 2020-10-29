@@ -38,30 +38,31 @@ class ImportService:
             folder_name_arr = []
             for series_path in series:
                 folder_name_arr.append(series_path)
-                one_series = series[series_path][0]
-                patient_uid = one_series.info.PatientID
-                study_uid = one_series.info.StudyID
-                if patient_uid == "" or study_uid == "":
-                    patient_uid = ""
-                    study_uid = suid
-                # disp_name = "pid:" + one_series.info.PatientID + "_sid:" + one_series.info.StudyID
-                total_files_number += one_series.length
-                series_info = one_series.info
-                if len(one_series.shape) == 2:
-                    z_dim = 1
-                    x_dim = one_series.shape[0]
-                    y_dim = one_series.shape[1]
-                else:
-                    z_dim = one_series.shape[0]
-                    x_dim = one_series.shape[1]
-                    y_dim = one_series.shape[2]
+                for one_series in series[series_path]:
+                # one_series = series[series_path][0]
+                    patient_uid = one_series.info.PatientID
+                    study_uid = one_series.info.StudyID
+                    if patient_uid == "" or study_uid == "":
+                        patient_uid = ""
+                        study_uid = suid
+                    # disp_name = "pid:" + one_series.info.PatientID + "_sid:" + one_series.info.StudyID
+                    total_files_number += one_series.length
+                    series_info = one_series.info
+                    if len(one_series.shape) == 2:
+                        z_dim = 1
+                        x_dim = one_series.shape[0]
+                        y_dim = one_series.shape[1]
+                    else:
+                        z_dim = one_series.shape[0]
+                        x_dim = one_series.shape[1]
+                        y_dim = one_series.shape[2]
 
-                series_service.insert(study['study_id'], one_series.description, series_path, one_series.filenames,
-                                      one_series.length, series_info.get("WindowWidth"),
-                                      series_info.get("WindowCenter"), one_series.sampling[1], one_series.sampling[1],
-                                      one_series.sampling[0], x_dim, y_dim, z_dim, series_info.get("PatientID"),
-                                      series_info.get("SeriesInstanceUID"), series_info.get("StudyDate") or "", "",
-                                      "", SERIES_STATUS.init.value)
+                    series_service.insert(study['study_id'], one_series.description, series_path, one_series.filenames,
+                                          one_series.length, series_info.get("WindowWidth"),
+                                          series_info.get("WindowCenter"), one_series.sampling[1], one_series.sampling[1],
+                                          one_series.sampling[0], x_dim, y_dim, z_dim, series_info.get("PatientID"),
+                                          series_info.get("SeriesInstanceUID"), series_info.get("StudyDate") or "", "",
+                                          "", SERIES_STATUS.init.value)
 
             study_service.update({"instance_id": instance_id, "suid": suid},
                                  {"total_files_number": total_files_number, "patient_uid": patient_uid,

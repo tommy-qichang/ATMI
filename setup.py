@@ -22,6 +22,7 @@ setup(
         'codecov==2.1',
         'pytictoc==1.5.0',
         'opencv-python==4.0.1.24',
-        'tensorflow>=2.0'
+        'tensorflow>=2.0',
+        'voxelmorph==0.1'
     ]
 )

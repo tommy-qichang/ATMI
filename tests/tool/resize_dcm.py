@@ -2,6 +2,7 @@ import glob
 import os
 import sys
 
+import cv2
 import pydicom
 from PIL import Image
 from scipy import ndimage
@@ -57,7 +58,7 @@ def resize_dcm(source_path, target_path, factor=2):
             dcm = ds.pixel_array
             print(f"resize dcm: {filename}, in path: {path}")
             sup_dcm = ndimage.interpolation.zoom(dcm, factor)
-            ds.PixelData = Image.fromarray(sup_dcm).tobytes()
+            ds.PixelData = sup_dcm.tobytes()
             ds.Rows = dcm.shape[0] * factor
             ds.Columns = dcm.shape[1] * factor
             ds.save_as(os.path.join(target_path, target_sub_path, filename))
@@ -65,8 +66,8 @@ def resize_dcm(source_path, target_path, factor=2):
 
 # resize_dcm("/Users/qichang/CBIM/data/NYU_CMR_Raw", "/Users/qichang/CBIM/data/NYU_CMR_Raw_HD", 4)
 # resize_dcm("/Users/qichang/PycharmProjects/ATMI/data/NYU_CMR_Raw", "/Users/qichang/PycharmProjects/ATMI/data/NYU_CMR_Raw_HD", 4)
-resize_dcm("/research/cbim/vast/qc58/private-db/cardiac/derivate/Derivate1","/research/cbim/vast/qc58/private-db/cardiac/derivate_hd/Derivate1", 4)
-
+resize_dcm("/research/cbim/vast/qc58/private-db/cardiac/derivate/Derivate3","/research/cbim/vast/qc58/private-db/cardiac/derivate_hd/Derivate3", 4)
+# resize_dcm("/Users/qichang/PycharmProjects/medical_dataset/tmp/sd","/Users/qichang/PycharmProjects/medical_dataset/tmp/hd_tmp",4)
 
 # for i in range(1, 26):
 #     id = ("0 " + str(i))[-2:]
