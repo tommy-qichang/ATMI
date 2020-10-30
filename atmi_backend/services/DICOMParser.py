@@ -46,9 +46,12 @@ class DICOMParser:
                 log.warning(f"some other kind of dicom file: {file_name}")
                 continue
 
-            if suid not in series_map:
-                series_map[suid] = DicomSeries(suid)
-            series_map[suid].append(dcm, file_name)
+            slice_location = str(dcm.SliceLocation)
+
+            complex_id = suid+"_"+slice_location
+            if complex_id not in series_map:
+                series_map[complex_id] = DicomSeries(complex_id)
+            series_map[complex_id].append(dcm, file_name)
 
         # Make a list and sort, so that the order is deterministic
         series = list(series_map.values())
