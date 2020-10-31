@@ -47,8 +47,10 @@ class DICOMParser:
                 continue
 
             slice_location = str(dcm.SliceLocation)
+            complex_id = suid
+            if len(file_list)>50:
+                complex_id = suid+"_"+slice_location
 
-            complex_id = suid+"_"+slice_location
             if complex_id not in series_map:
                 series_map[complex_id] = DicomSeries(complex_id)
             series_map[complex_id].append(dcm, file_name)

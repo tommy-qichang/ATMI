@@ -171,6 +171,7 @@ class ExportService:
         for i in series:
             # Load DICOM data.
             series_uuid = i['series_instance_uid']
+            first_series_file_name = eval(i['series_files_list'])[0]
             file_list = [os.path.join(i['series_path'], file_name) for file_name in eval(i['series_files_list'])]
             series_dcm = []
             try:
@@ -188,7 +189,7 @@ class ExportService:
             # if series_dcm.shape != series_label.shape:
             #     app.logger.warn(
             #         f"The original DICOM shape({series_dcm.shape}) mismatch with the label's shape({series_label.shape})")
-            dcm = study_h5.create_dataset(f"{store_type}/study:{study['suid']}-series:{series_uuid}/data",
+            dcm = study_h5.create_dataset(f"{store_type}/study:{study['suid']}-series:{series_uuid}[{first_series_file_name}]/data",
                                           data=series_dcm, compression=compression)
             dcm.attrs['x_spacing'] = i['x_spacing']
             dcm.attrs['y_spacing'] = i['y_spacing']
