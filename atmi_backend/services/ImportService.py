@@ -94,28 +94,36 @@ class ImportService:
 
                 split_str = study_and_series_id.split("-")
                 study_uid = split_str[0][6:]
-                series_uid = split_str[1][7:]
+                series_uid_with_imgid = split_str[1][7:]
+
+                series_split_str = series_uid_with_imgid.split("[")
+                series_uid = series_split_str[0]
+                img_id = None
+                if len(series_split_str) == 2:
+                    img_id = series_split_str[1][:-1]
 
                 series = seriesService.query({"series_instance_uid": series_uid})
-                if len(series) > 0:
-                    slice_file_name = eval(series[0]['series_files_list'])
-                    content_3D = labeldb[f"study:{study_uid}-series:{series_uid}/label"][()]
-                    app.logger.info(f"Import label for: study:{study_uid}-series:{series_uid}/")
-                    for i in range(len(slice_file_name)):
-                        if i < content_3D.shape[2]:
-                            content_2D = content_3D[:, :, i]
-                            x_dim = content_2D.shape[0]
-                            y_dim = content_2D.shape[1]
-                            content_1D = np.reshape(content_2D, x_dim * y_dim)
 
-                            unique_id = np.unique(content_1D).tolist()
-                            compressed_content_1D = LabelService.compress_content(content_1D)
-                            content = {
-                                "labelmap2D": {"pixelData": compressed_content_1D, "segmentsOnLabelmap": unique_id,
-                                               "dataLength": content_1D.shape[0]}}
-                            labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
-                                                str.encode(json.dumps(content)))
-                    seriesService.update({"series_instance_uid": series_uid}, {"status":SERIES_STATUS.mask_is_ready.value})
+                for series_idx in series:
+                    slice_file_name = eval(series[series_idx]['series_files_list'])
+                    if img_id is None or img_id == slice_file_name[0]:
+                        content_3D = labeldb[f"study:{study_uid}-series:{series_uid}/label"][()]
+                        app.logger.info(f"Import label for: study:{study_uid}-series:{series_uid}/, with imgid start from:{img_id}")
+                        for i in range(len(slice_file_name)):
+                            if i < content_3D.shape[2]:
+                                content_2D = content_3D[:, :, i]
+                                x_dim = content_2D.shape[0]
+                                y_dim = content_2D.shape[1]
+                                content_1D = np.reshape(content_2D, x_dim * y_dim)
+
+                                unique_id = np.unique(content_1D).tolist()
+                                compressed_content_1D = LabelService.compress_content(content_1D)
+                                content = {
+                                    "labelmap2D": {"pixelData": compressed_content_1D, "segmentsOnLabelmap": unique_id,
+                                                   "dataLength": content_1D.shape[0]}}
+                                labelService.insert(series[0]['series_id'], 1, slice_file_name[i],
+                                                    str.encode(json.dumps(content)))
+                        seriesService.update({"series_instance_uid": series_uid}, {"status":SERIES_STATUS.mask_is_ready.value})
 
         elif load_type == 'mhd':
             raise NotImplementedError()
