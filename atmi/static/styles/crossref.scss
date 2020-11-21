@@ -80,7 +80,7 @@
 }
 #lax_div, #sax_div{
     width:400px;
-    height:350px;
+    min-height:300px;
     margin-top:10px;
     border: 1px solid #eee;
 }
@@ -103,4 +103,17 @@
     width: 1em !important;
     height: 1em !important;
     margin: 0;
+}
+#triggerContainer{
+    position: absolute;
+    top:0px;
+    left:410px;
+    min-width:250px;
+    flex-grow:unset;
+}
+.disp-item{
+    margin: 0.3rem auto;
+}
+.left-pannel{
+    min-width:550px;
 }

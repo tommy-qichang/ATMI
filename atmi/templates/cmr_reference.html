@@ -58,8 +58,11 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col">
-                    <div>
+                    <div class="left-pannel">
                         <canvas id="wireframe"></canvas>
+                        <div class="col-3" id="triggerContainer">
+                    </div>
+
                     </div>
                     <div class="titles_3d">
                         <div><h5>3D View</h5></div>
@@ -76,12 +79,15 @@
 
                         <span>Current index: <span id="cur_idx">0</span></span>
                     </div>
+
+
                 </div>
                 <div class="col">
                     <div id="lax_div">
                         <img id="lax_img" src="#" alt="">
                         <div class="titles">
                             <span>LAX View</span>
+                            <span id="lax_desc"></span>
                             <a id="lax_url" target="_blank" href="#"><i class="fas fa-external-link-alt"></i></a>
                         </div>
                     </div>
@@ -89,6 +95,7 @@
                         <img id="sax_img" src="#" alt="">
                         <div class="titles">
                             <span>SAX View</span>
+                            <span id="sax_desc"></span>
                             <a id="sax_url" target="_blank" href="#"><i class="fas fa-external-link-alt"></i></a>
                         </div>
                     </div>

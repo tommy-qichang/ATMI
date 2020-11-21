@@ -32,7 +32,8 @@ class CornerstoneElement extends React.Component {
             stack: props.stack,
             viewport: cornerstoneWrapper.viewport,
             imageId: props.stack.currentImageIdIndex,
-            activeLabels: []
+            activeLabels: [],
+            playing: false
         };
 
     }
@@ -57,7 +58,7 @@ class CornerstoneElement extends React.Component {
                         {(this.state.viewport.voi.windowCenter || 0).toFixed(0)}
                     </div>
                 </div>
-                <MainLabel stack={{...this.state.stack}} activeLabels={this.state.activeLabels}/>
+                <MainLabel stack={{...this.state.stack}} activeLabels={this.state.activeLabels} playing={this.state.playing}/>
             </div>
         )
     }
@@ -112,9 +113,11 @@ class CornerstoneElement extends React.Component {
         } else if (e.keyCode === 80) {
             if (this.playHook === undefined) {
                 this.play();
+                this.setState({"playing":true})
             } else {
                 clearInterval(this.playHook);
                 this.playHook = undefined;
+                this.setState({"playing":false})
             }
         }else if (e.keyCode === 40) {
             //arrow down. Switch to the next series.

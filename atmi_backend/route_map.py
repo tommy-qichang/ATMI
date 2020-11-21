@@ -532,7 +532,7 @@ def setup_route_map(app, app_path):  # noqa: C901
         # t.toc("labels gen", restart=True)
         # labels gen 31.750854 seconds.
         crossref_service = CrossRefService()
-        label_list = crossref_service.accumulate_contours(labels, instance_id)
+        label_list = crossref_service.accumulate_contours(labels, instance_id, scale=1)
 
         # t.toc("label_list", restart=True)
         # label_list 32.659566 seconds.

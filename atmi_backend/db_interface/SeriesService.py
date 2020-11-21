@@ -26,8 +26,6 @@ class SeriesService:
                              'intercept', 'slop', 'status'])
 
         cur = self.sql_connection.cursor()
-
-        print(sql)
         cur.execute(sql)
         result = cur.fetchall()
         result = [dict(item) for item in result]

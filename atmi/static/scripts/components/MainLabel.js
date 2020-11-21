@@ -16,7 +16,7 @@ class MainLabel extends React.Component {
             hiddenLabels: Array(props.stack.labels.length).fill(1).join(""),
             selectValue: {},
             hideAll:false,
-            autosave:true,
+            autosave:1,
             savetime : '',
             seriesFinished : data.series_detail.status === 4
         };
@@ -136,6 +136,15 @@ class MainLabel extends React.Component {
         })
 
     };
+    saveStatusUpdate = (status) =>{
+        if(status === 0){
+            return <span>saving...</span>
+        }else if(status === 1){
+            return <span>saved({this.state.savetime})</span>
+        }else if(status === 2){
+            return <span>error</span>
+        }
+    };
     activateTool = (e) => {
         if (e.keyCode === 83) {
             this.onSelectLabel((this.state.currentLabel+1)%this.labelCount)
@@ -166,16 +175,53 @@ class MainLabel extends React.Component {
     };
 
     render() {
-        let saveStyle = this.state.autosave?style.autosave_ok:style.autosave_err;
+        let saveStyle = this.state.autosave<2?style.autosave_ok:style.autosave_err;
         return (
             <div className="mainlabel">
-                <div className={style.title}>
+                <div className={style.title}>Navigations</div>
+                <div>
+                    <span
+                        className={` ${this.state.currentTool === "Play" ? style.active : ""} ${style.autosave}`}
+                        onClick={(e) => navSlice({'keyCode': 80})}><i
+                        className={`fas ${(this.props.playing) ? "fa-pause-circle" : "fa-play-circle"} ${style.i}`}/>Play(p)
+                    </span>
+
+                    <span
+                        className={` ${style.autosave}`}
+                        onClick={(e) => navSlice({'keyCode': 37})}><i
+                        className={`fas fa-caret-square-left ${style.i}`}/>
+                    </span>
+                    <span
+                        className={` ${style.autosave}`}
+                        onClick={(e) => navSlice({'keyCode': 39})}><i
+                        className={`fas fa-caret-square-right ${style.i}`}/>
+                    </span>
+                    <span
+                        className={` ${style.autosave}`}
+                        onClick={(e) => navSlice({'keyCode': 38})}><i
+                        className={`fas fa-caret-square-up ${style.i}`}/>
+                    </span>
+                    <span
+                        className={` ${style.autosave}`}
+                        onClick={(e) => navSlice({'keyCode': 40})}><i
+                        className={`fas fa-caret-square-down ${style.i}`}/>
+                    </span>
+
+                    <span
+                        className={` ${style.autosave}`}>
+                        <a target="_blank" href={`/crossref/instance/${this.state.stack.instanceId}`}>Cross Reference Platform</a>
+                    </span>
+                </div>
+
+                <div className={style.title}>Save and Finish</div>
+                <div>
                     <div onClick={this.onSaveLabel} className={`${style.autosave} ${saveStyle}`}>
-                        {this.state.autosave?(
-                            <span>saved({this.state.savetime})</span>
-                        ):(
-                            <span>saving...</span>
-                        )}
+                        {this.saveStatusUpdate(this.state.autosave)}
+                        {/*{this.state.autosave==1?(*/}
+                        {/*    <span>saved({this.state.savetime})</span>*/}
+                        {/*):(*/}
+                        {/*    <span>saving...</span>*/}
+                        {/*)}*/}
                     </div>
 
                     <div className={`${style.autosave} ${style.finished} ${this.state.seriesFinished?style.disable:""}`} onClick={this.onFinished}>Finished</div>

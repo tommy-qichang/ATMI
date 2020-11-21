@@ -184,11 +184,11 @@ class MainNav extends React.Component {
                     </div>
 
                     <div className={style.navlist}/>
-                    <div
-                        className={`${style.navlist} ${this.state.currentTool === "Play" ? style.active : ""}`}
-                        onClick={(e) => navSlice({'keyCode': 80})}><i
-                        className={`fas fa-play-circle ${style.i}`}/><br/>Play(p)
-                    </div>
+                    {/*<div*/}
+                    {/*    className={`${style.navlist} ${this.state.currentTool === "Play" ? style.active : ""}`}*/}
+                    {/*    onClick={(e) => navSlice({'keyCode': 80})}><i*/}
+                    {/*    className={`fas fa-play-circle ${style.i}`}/><br/>Play(p)*/}
+                    {/*</div>*/}
 
                     <div
                         className={`${style.navlist} `}

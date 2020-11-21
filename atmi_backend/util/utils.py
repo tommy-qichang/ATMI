@@ -1,11 +1,14 @@
 import os
 
 import numpy as np
+import skimage
 from cv2 import cv2
 from scipy.ndimage import interpolation
-from scipy.ndimage.filters import gaussian_filter
+# from scipy.ndimage.filters import gaussian_filter
 from skimage import morphology
 from skimage.transform import resize
+
+from atmi_backend.util.clean_noise import CleanNoise
 
 
 def to_bool_or_none(bool_str):
@@ -78,7 +81,7 @@ def extract_contours(lv_label, scale, dcm):
             if len(contours) > 0:
                 if contours[-1].shape[0] > 30:
                     append_list = [{"data": contours[-1], "desc": dcm.SeriesDescription}]
-                    if "SAX" in dcm.SeriesDescription and len(contours) > 1 and contours[-2].shape[0] > 30:
+                    if "sax" in dcm.SeriesDescription.lower() and len(contours) > 1 and contours[-2].shape[0] > 30:
                         # print(f"SAX, and include the contour.")
                         append_list.append({"data": contours[-2], "desc": "INNER_" + dcm.SeriesDescription})
                         # append_list.append(contours[-2])
@@ -178,8 +181,21 @@ def zoom(img, fixed_size, order=3):
     result = interpolation.zoom(img, rate, order=order)
     return result
 
+def remove_small_obj_one_case(orig_array):
+    """
+    Remove small objects for each label type and each slice.
+    :param orig_array:
+    :param keep_num:
+    :return:
+    """
+    clean = CleanNoise(top_num=1)
+    for i in range(orig_array.shape[-1]):
+        slice = orig_array[:, :, i]
+        clean_slice = clean.clean_small_obj(slice)
+        orig_array[:, :, i] = clean_slice
+    return orig_array
 
-def smooth_obj_one_case(orig_array):
+def smooth_obj_one_case(orig_array, filter_type='g'):
     """
     Smooth label array[x, y, z], with scale or size settings.
     :param orig_array:
@@ -199,10 +215,35 @@ def smooth_obj_one_case(orig_array):
             show_img = np.zeros_like(slice)
             show_img[slice == label_id] = 1
 
-            blurred_img = gaussian_filter(show_img, sigma=4)
+            if filter_type == "g":
+                blurred_img = cv2.GaussianBlur(show_img.astype('float'), (11, 11), 0)
+            else:
+                blurred_img = cv2.blur(show_img, (10,10))
+            # blurred_img = skimage.filters.gaussian_filter(show_img, sigma=4)
+            # blurred_img = cv2.blur(show_img, (10,10))
+
             blurred_img[blurred_img > 0.5] = 1
             blurred_img[blurred_img <= 0.5] = 0
             final_mask[blurred_img == 1] = label_id
+
+
         scale_array.append(final_mask)
 
     return np.stack(scale_array, axis=-1)
+
+def is_qualified_series(type, desc):
+    desc = desc.lower()
+    if type == "sax":
+        matches = ['sax', 'b-tfe', 'cine', 'funzione', 'secondarycapture']
+        exclude_matches = ['tag', 'ao', 'ir', 'pa', "stress", "mde", "perfusion", "loc"]
+    elif type == "lax":
+        matches = ['lax', 'b-tfe', 'funzione', 'secondarycapture']
+        exclude_matches = ['tag', 'ao', 'ir', 'pa', "stress", "mde", "perfusion", "loc"]
+    else:
+        raise RuntimeError("type is wrong.")
+    if (not any(x in desc for x in matches)) or (any(y in desc for y in exclude_matches)):
+        return False
+    return True
+
+
+

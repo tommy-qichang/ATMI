@@ -8,6 +8,9 @@
 .status{
     float: left;
 }
+.active{
+    color: tomato;
+}
 
 .autosave{
     color: #fff;
@@ -20,7 +23,7 @@
     user-select: none;
     border: 1px solid transparent;
     padding: .175rem .55rem;
-    margin-right: 1rem;
+    margin: .5rem;
     font-size: 1rem;
     line-height: 1.5;
     border-radius: .25rem;
@@ -73,7 +76,7 @@
     background-color: #28a745;
 }
 .autosave_err{
-    background-color: #aaa;
+    background-color: tomato;
 }
 
 .labelitem {

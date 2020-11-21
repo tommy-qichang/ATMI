@@ -100,11 +100,9 @@ class LabelService:
         sql, v_tuple = prepare_update("labels", update_condition, modify_obj,
                                       ["label_id", "candidate_id", "series_id", "user_id", "file_id", "content"])
         cur = self.sql_connection.cursor()
-
         try:
             cur.execute(sql, v_tuple)
             self.sql_connection.commit()
-
         except Exception:
             self.sql_connection.rollback()
             return False

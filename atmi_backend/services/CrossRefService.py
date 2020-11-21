@@ -4,7 +4,7 @@ from datetime import datetime
 import numpy as np
 import pydicom
 from atmi_backend.util.utils import remove_small_3d, extract_contours, prep_transfer_data, vox2world, world2vox, \
-    save_thumnail
+    save_thumnail, is_qualified_series
 from flask import Flask
 
 app = Flask("atmi.app")
@@ -12,10 +12,19 @@ app = Flask("atmi.app")
 
 class CrossRefService:
 
+    # def __init__(self):
+    #     # self.matches = ["ch", "lv sax", "lv lax"]
+
     def accumulate_contours(self, labels, instance_id, scale=4):  # noqa: C901
 
         label_list = {}
         for label_obj in labels:
+
+            desc = label_obj['description'].lower()
+            if not (is_qualified_series("sax", desc) or is_qualified_series("lax", desc)):
+            # if (not any(x in desc for x in self.matches)):
+                app.logger.debug(f"skip unqualified series: {desc}")
+                continue
             files = eval(label_obj['files'])
             path = label_obj['path']
             if not os.path.exists(os.path.join(path, files[0])):
@@ -30,7 +39,8 @@ class CrossRefService:
             study_uid = label_obj['study']
             app.logger.info(f"load dcm:{os.path.join(path, files[0])}")
 
-            label_list[series_uid] = {
+            label_id = f"{series_uid}[{files[0]}]"
+            label_list[label_id] = {
                 "SeriesDescription": label_obj['description'],
                 "ImageOrientationPatient": dcm.ImageOrientationPatient,
                 "ImagePositionPatient": dcm.ImagePositionPatient,
@@ -47,7 +57,7 @@ class CrossRefService:
                 f"desc:{dcm.SeriesDescription}, position:{dcm.ImagePositionPatient}, orientation:{dcm.ImageOrientationPatient}, study uid:{study_uid}, series uid:{series_uid}")
 
             contours_list = extract_contours(lv_label, scale, dcm)
-            label_list[series_uid]['contours'] = contours_list
+            label_list[label_id]['contours'] = contours_list
 
         for serie in label_list:
             label_list[serie]['SliceDistance'] = SpacingDistance
@@ -92,17 +102,21 @@ class CrossRefService:
                                                     "series_id": series_uid,
                                                     "workbench":f"/workbench/instance/{instance_id}/study/{study_id}/series/{series_id}"})
                         key = "unknown"
-                        if "ch" in sub_contour['desc'].lower():
+                        if is_qualified_series("lax", sub_contour['desc']):
+                        # if "lv lax" in sub_contour['desc'].lower():
                             # Long Axis Series
                             if "lax" not in frame_series_info[idx]:
                                 frame_series_info[idx]["lax"] = []
                             key = "lax"
-                        elif "sax" in sub_contour['desc'].lower():
+                        elif is_qualified_series("sax", sub_contour['desc']):
+                        # elif "lv sax" in sub_contour['desc'].lower():
                             # Short Axis Series
                             if "sax" not in frame_series_info[idx]:
                                 frame_series_info[idx]["sax"] = []
                             key = "sax"
 
+                        if key == "unknown":
+                            continue
                         frame_series_info[idx][key].append({"data": new_contour,
                                                             "desc": sub_contour['desc'],
                                                             "transfer_conf": conf,
@@ -117,7 +131,11 @@ class CrossRefService:
 
     def projection_sax_lax(self, frame_series_info):
         desire_size = 400
-        for frame in frame_series_info:
+
+        for idx, frame in enumerate(frame_series_info):
+            if 'lax' not in frame or 'sax' not in frame:
+                app.logger.warning(f"The current frame don't have LAX or SAX annotation...,({idx})")
+                continue
             lax_series = frame['lax']
             sax_series = frame['sax']
 
@@ -182,14 +200,16 @@ class CrossRefService:
                     lax_img[lax_coord2[1], lax_coord2[0], 3] = 1
 
         for frame in frame_series_info:
+            if 'lax' not in frame or 'sax' not in frame:
+                continue
             lax_series = frame['lax']
-            sax_series = frame['sax']
             for one_lax in lax_series:
                 lax_file_path = one_lax['file_path']
-                lax_file_path = lax_file_path.replace("_HD", "")
+                # lax_file_path = lax_file_path.replace("_HD", "")
                 lax_img = one_lax['file_img']
                 save_thumnail(desire_size, lax_img, lax_file_path)
 
+            sax_series = frame['sax']
             deduplicted_sax_series = []
             for idx, one_sax in enumerate(sax_series):
                 if "INNER_" in one_sax['desc']:
@@ -206,3 +226,6 @@ class CrossRefService:
                 sax_file_path = sax_file_path.replace("_HD", "")
                 sax_img = one_sax['file_img']
                 save_thumnail(desire_size, sax_img, sax_file_path)
+
+
+

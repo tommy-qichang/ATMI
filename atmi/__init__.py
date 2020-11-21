@@ -12,8 +12,8 @@ def create_app():
     # __version__ = pkg_resources.require("atmi")[0].version
 
     flask_app = Flask(__name__)
-    # flask_app.debug = (('FLASK_ENV' in environ) and (environ['FLASK_ENV'] == 'development'))
-    flask_app.debug = False
+    flask_app.debug = (('FLASK_ENV' in environ) and (environ['FLASK_ENV'] == 'development'))
+    # flask_app.debug = False
     webpack = Webpack()
     # flask_app.config.from_object(config)
     flask_app.config["WEBPACK_MANIFEST_PATH"] = path.join(here, "manifest.json")

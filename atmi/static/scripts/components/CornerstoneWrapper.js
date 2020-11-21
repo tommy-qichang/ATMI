@@ -261,7 +261,7 @@ let cornerstoneWrapper = {
 
     _saveSegments: function (seriesId, fileId, imageIdx) {
         this.updateLabelLock = true;
-        this.autosaveCallback(false);
+        this.autosaveCallback(0);
         const {getters} = cornerstoneTools.getModule(
             'segmentation'
         );
@@ -307,12 +307,17 @@ let cornerstoneWrapper = {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(postContent)
-        }).then(function(){
+        }).then(function(response){
+            if(response.status>=200 && response.status<300){
+                _this.updateLabelLock = false;
+                _this.autosaveCallback(1);
+            }else{
+                _this.updateLabelLock = false;
+                _this.autosaveCallback(2);
+            }
+        }).catch(function(response){
             _this.updateLabelLock = false;
-            _this.autosaveCallback(true)
-        }).catch(function(){
-            _this.updateLabelLock = false;
-            _this.autosaveCallback(false)
+            _this.autosaveCallback(2)
         });
 
         // delete this.updatelist[seriesId+"*-$"+fileId];
