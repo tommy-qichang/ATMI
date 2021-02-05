@@ -1000,7 +1000,7 @@ export default class List extends React.Component {
                         <Col span={6}>
                             <a href="javascript:;"><img src="./assets/static/img/details.png" title='Show studies list'
                                 alt='Show studies list' style={{ width: 18, height: 18 }}
-                                onClick={this.onInstanceDetailClick} data-instancename={text}
+                                onClick={this.onInstanceDetailClick} data-instancename={record.name}
                                 data-instanceid={record.instanceid} /></a>
                         </Col>
                         <Col span={6}>
@@ -1979,11 +1979,6 @@ export default class List extends React.Component {
                     ]}
                     bodyStyle={{ marginTop: 6, paddingTop: 6 }}
                 >
-                    {/*                     <Row type="flex" justify="start">
-                        <Col span={24}>
-                            批量输入申报名称
-                    </Col>
-                    </Row> */}
                     {/*                     <div style={{ height: 3 }} /> */}
                     <Row type="flex" justify="start">
                         <Col span={24}>
