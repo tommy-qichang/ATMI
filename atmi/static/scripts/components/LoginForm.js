@@ -45,7 +45,7 @@ class LoginForm extends React.Component {
                 this.username = values.username;
                 this.checkLogin();
             } else {
-                message.error('Username and password do not match, login failed！');
+                message.error('Username and password do not match, login failed!');
             }
         }).catch(error => {
             message.error('Login failed, please contact admin.');
@@ -86,7 +86,7 @@ class LoginForm extends React.Component {
           message.success('Successfully logged in！', 2);
           this.props.onLoginSuccess();
         } */
-        message.success('Successfully logged in！', 2);
+        message.success('Successfully logged in!', 2);
         this.props.onLoginSuccess(this.username);
     }
 
