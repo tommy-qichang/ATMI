@@ -50,16 +50,17 @@ export default class IndexPage extends React.PureComponent {
                     <Col span={8}>
                     </Col>
                     <Col span={8}>
-                        <h1 className={styles.font}>Annotation Tool for Medical Image</h1>
+                        <h1 className={styles.titleFont}>Annotation Tool for Medical Image</h1>
                     </Col>
                     <Col span={1}>
                     </Col>
                     <Col span={5}>
-                        <label /* className={styles.font} */ style={{color: "#ffffff"}}
+                        <label /* className={styles.font} */ className={styles.welcomeText}
                                                              hidden={!this.state.loggedIn}>{`Welcome，${this.state.username}`}</label>
                     </Col>
                     <Col span={2}>
-                        <Button size="small" /* type="primary" */ ghost onClick={this.onLogoutButtonClick}
+                        <Button size="small" /* type="primary" */ 
+                        ghost onClick={this.onLogoutButtonClick}
                                 hidden={!this.state.loggedIn}>Log out</Button>
                     </Col>
                 </Row>

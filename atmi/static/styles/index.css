@@ -5,15 +5,26 @@
 }
 
 .canvas {
-    background: #4d4d4d;
+    /* background: #4d4d4d; */
+    background: transparent;
+    width: 100%;
     height: 100vh; 
+    background-image: url(/assets/static/img/bioTech3.jpg);
+    background-repeat: repeat;
+    background-size: 100% auto;
     /* height: 100%; */
     /* display: -webkit-flex;
     -webkit-flex-direction: column; */
 }
 
-.font {
-    color: #ccc
+.welcomeText{
+    color: #ffffff;
+    word-wrap: break-word;
+}
+
+.titleFont {
+    color: #ccc;
+    /* font-family: "BalboaLight"; */
 }
 body {
     font-family: "Segoe UI";
