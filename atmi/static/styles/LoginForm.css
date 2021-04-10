@@ -1,8 +1,9 @@
 .background {
     width: 110%;
     height: 100%;
-    background-color: #4d4d4d;
-    display: flex
+    /* background-color: #4d4d4d; */
+    background: transparent;
+    /* display: flex */
   } 
   
   .loginForm {
