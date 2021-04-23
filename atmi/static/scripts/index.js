@@ -47,14 +47,14 @@ export default class IndexPage extends React.PureComponent {
             <div /* style={{ height: "auto", width: "99%" }} */ className={styles.canvas}>
                 <br/>
                 <Row type="flex" justify="center" align="middle">
-                    <Col span={8}>
+                    <Col span={7}>
                     </Col>
-                    <Col span={8}>
+                    <Col span={10}>
                         <h1 className={styles.titleFont}>Annotation Tool for Medical Image</h1>
                     </Col>
                     <Col span={1}>
                     </Col>
-                    <Col span={5}>
+                    <Col span={4}>
                         <label /* className={styles.font} */ className={styles.welcomeText}
                                                              hidden={!this.state.loggedIn}>{`Welcome，${this.state.username}`}</label>
                     </Col>
