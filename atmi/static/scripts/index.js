@@ -52,9 +52,9 @@ export default class IndexPage extends React.PureComponent {
                     <Col span={10}>
                         <h1 className={styles.titleFont}>Annotation Tool for Medical Image</h1>
                     </Col>
-                    <Col span={1}>
-                    </Col>
-                    <Col span={4}>
+                    {/* <Col span={1}>
+                    </Col> */}
+                    <Col span={5}>
                         <label /* className={styles.font} */ className={styles.welcomeText}
                                                              hidden={!this.state.loggedIn}>{`Welcome，${this.state.username}`}</label>
                     </Col>

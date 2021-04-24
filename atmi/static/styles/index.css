@@ -22,6 +22,7 @@
 .welcomeText{
     color: #ffffff;
     word-wrap: break-word;
+    margin-left: 16px;
 }
 
 .titleFont {
