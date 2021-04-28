@@ -574,12 +574,33 @@ export default class List extends React.Component {
                     modality: res.data.modality,
                     description: res.data.description,
                     has_audit: res.data.has_audit,
-                    annotator_id: res.data.annotator_id,
-                    auditor_id: res.data.auditor_id,
+                    //annotator_id: res.data.annotator_id,
+                    annotator_id: "",
+                    //auditor_id: res.data.auditor_id,
+                    auditor_id: "",
                     label_candidates: res.data.label_candidates,
                     status: res.data.status
                 };
 
+
+                if(res.data.instance_users.length > 0) {
+                    res.data.instance_users.forEach(userRecord => {
+                        if (userRecord.is_auditor === 1) {
+                            this.auditor_id.push(userRecord.user_id);
+                        }
+                        else if(userRecord.is_auditor === 0) {
+                            this.annotator_id.push(userRecord.user_id);
+                        }
+                    });
+                    this.originalInstanceData.annotator_id = 
+                    (this.annotator_id.length > 0) ? this.annotator_id.join("|") : "";
+                    this.originalInstanceData.auditor_id = 
+                    (this.auditor_id.length > 0) ? this.auditor_id.join("|") : "";
+                }
+
+                //console.log("this.originalInstanceData.annotator_id: ", this.originalInstanceData.annotator_id);
+                //console.log("this.originalInstanceData.auditor_id: ", this.originalInstanceData.auditor_id);
+              
                 this.currentModifiedInstanceId = record.instanceid;
                 this.modifiedInstanceModality = this.originalInstanceData.modality;
 
@@ -597,7 +618,7 @@ export default class List extends React.Component {
                 });
                 this.existingMaxLabelValue = existingMaxLabelValue;
 
-                let annotator_id = [];
+                /* let annotator_id = [];
                 let auditor_id = [];
                 if (this.originalInstanceData.annotator_id) {
                     annotator_id = this.originalInstanceData.annotator_id.split("|");
@@ -610,9 +631,10 @@ export default class List extends React.Component {
                     auditor_id.forEach(element => {
                         element = parseInt(element);
                     });
-                }
+                } */
 
                 let userRightsMatrix = [];
+
                 this.state.userTableData.forEach(userRecord => {
                     userRightsMatrix.push({
                         username: userRecord.username,
@@ -622,19 +644,20 @@ export default class List extends React.Component {
                     });
                 });
 
-                annotator_id.forEach(id => {
-                    let index = userRightsMatrix.findIndex((record, index, arr) => {
+                let index = -1;
+                this.annotator_id.forEach(id => {
+                    index = userRightsMatrix.findIndex((record, index, arr) => {
                         return id === record.userid;
                     });
-                    if (index > 0) {
+                    if (index >= 0) {
                         userRightsMatrix[index].isAnnotator = true;
                     }
                 });
-                auditor_id.forEach(id => {
-                    let index = userRightsMatrix.findIndex((record, index, arr) => {
+                this.auditor_id.forEach(id => {
+                    index = userRightsMatrix.findIndex((record, index, arr) => {
                         return id === record.userid;
                     });
-                    if (index > 0) {
+                    if (index >= 0) {
                         userRightsMatrix[index].isAuditor = true;
                     }
                 });
@@ -704,11 +727,11 @@ export default class List extends React.Component {
             this.annotator_id.push(record.userid);
         }
         else {
-            let spliceIndex = annotator_id.findIndex((element, index, arr) => {
+            let spliceIndex = this.annotator_id.findIndex((element, index, arr) => {
                 return element === record.userid;
             });
             if (spliceIndex > -1) {
-                annotator_id.splice(spliceIndex, 1);
+                this.annotator_id.splice(spliceIndex, 1);
             }
         }
         //console.log("userRightsMatrix: ", this.state.userRightsMatrix);
@@ -722,11 +745,11 @@ export default class List extends React.Component {
             this.auditor_id.push(record.userid);
         }
         else {
-            let spliceIndex = auditor_id.findIndex((element, index, arr) => {
+            let spliceIndex = this.auditor_id.findIndex((element, index, arr) => {
                 return element === record.userid;
             });
             if (spliceIndex > -1) {
-                auditor_id.splice(spliceIndex, 1);
+                this.auditor_id.splice(spliceIndex, 1);
             }
         }
         //console.log("userRightsMatrix: ", this.state.userRightsMatrix);
