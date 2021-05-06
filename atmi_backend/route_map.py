@@ -204,6 +204,9 @@ def setup_route_map(app, app_path):  # noqa: C901
             json_result = instance_info[0]
             json_result['label_candidates'] = label_candidates
 
+            instance_users = instance_service.list_users_in_instance(instance_id)
+            json_result['instance_users'] = instance_users
+
             return jsonify(json_result), 200
         elif request.method == "DELETE":
             status = instance_service.delete({"instance_id": instance_id})
@@ -226,7 +229,9 @@ def setup_route_map(app, app_path):  # noqa: C901
             # data_path = ""  # Set the data_path as default now.
             has_audit = False
             annotator_id = list(filter(None, str.split(data.get("annotator_id", ""), "|")))
+            #annotator_id = list(filter(None, data.get("annotator_id", "").split("|")))
             auditor_id = list(filter(None, str.split(data.get("auditor_id", ""), "|")))
+            #auditor_id = list(filter(None, data.get("auditor_id", "").split("|")))
             label_candidates = data.get("label_candidates", [])
 
             instance_service.update({"instance_id": instance_id}, {

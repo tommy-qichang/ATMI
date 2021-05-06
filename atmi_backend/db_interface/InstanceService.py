@@ -97,6 +97,7 @@ class InstanceService:
         cur = self.sql_connection.cursor()
         cur.execute(sql)
         result = cur.fetchall()
+        result = [dict(item) for item in result]
         self.sql_connection.commit()
         return result
 
