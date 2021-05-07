@@ -42,7 +42,8 @@ export default class List extends React.Component {
         modifiedInstanceDescription: "",
         hideProgressBar: true,
         showImportdcm: false,
-        importingInstanceName: ""
+        importingInstanceName: "",
+        //addAnnotatorTableLoading: false
     };
 
     newUserName = null;
@@ -722,9 +723,24 @@ export default class List extends React.Component {
     onAddAnnotatorCheckboxChange = (e, record, index) => {
         //console.log("e: ", e.target.checked);
         //console.log("record: ", record.username);
-        this.state.userRightsMatrix[index].isAnnotator = !this.state.userRightsMatrix[index].isAnnotator;
-        if (this.state.userRightsMatrix[index].isAnnotator) {
+        //this.state.userRightsMatrix[index].isAnnotator = !this.state.userRightsMatrix[index].isAnnotator;
+        let userRightsMatrix = this.state.userRightsMatrix;
+        userRightsMatrix[index].isAnnotator = !userRightsMatrix[index].isAnnotator;
+        this.setState({
+            userRightsMatrix
+        });
+        this.afterAddAnnotatorCheckboxChange(record, index);
+        /* if (this.state.userRightsMatrix[index].isAnnotator) {
             this.annotator_id.push(record.userid);
+            if(this.state.userRightsMatrix[index].isAuditor) {
+                //this.state.userRightsMatrix[index].isAuditor = false;
+                let userRightsMatrix = this.state.userRightsMatrix;
+                userRightsMatrix[index].isAuditor = false;
+                this.setState({
+                    userRightsMatrix
+                });                      
+                this.afterAddAuditorCheckboxChange(record, index);
+            }
         }
         else {
             let spliceIndex = this.annotator_id.findIndex((element, index, arr) => {
@@ -733,15 +749,21 @@ export default class List extends React.Component {
             if (spliceIndex > -1) {
                 this.annotator_id.splice(spliceIndex, 1);
             }
-        }
+        } */
         //console.log("userRightsMatrix: ", this.state.userRightsMatrix);
     }
 
     onAddAuditorCheckboxChange = (e, record, index) => {
         //console.log("e: ", e.target.checked);
         //console.log("record: ", record.username);
-        this.state.userRightsMatrix[index].isAuditor = !this.state.userRightsMatrix[index].isAuditor;
-        if (this.state.userRightsMatrix[index].isAuditor) {
+        //this.state.userRightsMatrix[index].isAuditor = !this.state.userRightsMatrix[index].isAuditor;
+        let userRightsMatrix = this.state.userRightsMatrix;
+        userRightsMatrix[index].isAuditor = !userRightsMatrix[index].isAuditor;
+        this.setState({
+            userRightsMatrix
+        });
+        this.afterAddAuditorCheckboxChange(record, index);
+     /*    if (this.state.userRightsMatrix[index].isAuditor) {
             this.auditor_id.push(record.userid);
         }
         else {
@@ -751,8 +773,66 @@ export default class List extends React.Component {
             if (spliceIndex > -1) {
                 this.auditor_id.splice(spliceIndex, 1);
             }
-        }
+        } */
         //console.log("userRightsMatrix: ", this.state.userRightsMatrix);
+    }
+
+    afterAddAuditorCheckboxChange = (record, index) => {
+        if (this.state.userRightsMatrix[index].isAuditor) {
+            this.auditor_id.push(record.userid);
+            if(this.state.userRightsMatrix[index].isAnnotator) {
+                /* this.setState({
+                    addAnnotatorTableLoading: true
+                });  */
+                //this.state.userRightsMatrix[index].isAnnotator = false;
+                let userRightsMatrix = this.state.userRightsMatrix;
+                userRightsMatrix[index].isAnnotator = false;
+                this.setState({
+                    userRightsMatrix
+                }); 
+                /* this.setState({
+                    addAnnotatorTableLoading: false
+                });    */             
+                this.afterAddAnnotatorCheckboxChange(record, index);
+            }
+        }
+        else {
+            let spliceIndex = this.auditor_id.findIndex((element, index, arr) => {
+                return element === record.userid;
+            });
+            if (spliceIndex > -1) {
+                this.auditor_id.splice(spliceIndex, 1);
+            }
+        }
+    }
+
+    afterAddAnnotatorCheckboxChange = (record, index) => {
+        if (this.state.userRightsMatrix[index].isAnnotator) {
+            this.annotator_id.push(record.userid);
+            if(this.state.userRightsMatrix[index].isAuditor) {
+                /* this.setState({
+                    addAnnotatorTableLoading: true
+                });  */
+                //this.state.userRightsMatrix[index].isAuditor = false;
+                let userRightsMatrix = this.state.userRightsMatrix;
+                userRightsMatrix[index].isAuditor = false;
+                this.setState({
+                    userRightsMatrix
+                }); 
+                /* this.setState({
+                    addAnnotatorTableLoading: false
+                });  */                     
+                this.afterAddAuditorCheckboxChange(record, index);
+            }
+        }
+        else {
+            let spliceIndex = this.annotator_id.findIndex((element, index, arr) => {
+                return element === record.userid;
+            });
+            if (spliceIndex > -1) {
+                this.annotator_id.splice(spliceIndex, 1);
+            }
+        }
     }
 
     onModifiedInstanceNameChange = e => {
@@ -1118,6 +1198,7 @@ export default class List extends React.Component {
                     <Checkbox
                         defaultChecked={record.isAnnotator}
                         onChange={(e) => this.onAddAnnotatorCheckboxChange(e, record, index)}
+                        checked={record.isAnnotator}
                     />
                 </div>
             )
@@ -1133,6 +1214,7 @@ export default class List extends React.Component {
                     <Checkbox
                         defaultChecked={record.isAuditor}
                         onChange={(e) => this.onAddAuditorCheckboxChange(e, record, index)}
+                        checked={record.isAuditor}
                     />
                 </div>
             )
@@ -1878,10 +1960,10 @@ export default class List extends React.Component {
                                             dataSource={this.state.userRightsMatrix}
                                             /* bordered  */
                                             size="small"
-                                            //loading={this.state.instanceTableLoading}
                                             //actionToken={this.state.instanceTableActionToken}
                                             //onRow={this.onInstanceTableRow}
                                             //rowClassName={this.setRowClassName}
+                                            //loading={this.state.addAnnotatorTableLoading}
                                             pagination={{
                                                 current: this.state.currentInstanceTablePage,
                                                 onChange: this.onInstanceTablePageChange,

@@ -428,8 +428,9 @@ def setup_route_map(app, app_path):  # noqa: C901
         data_path = request.args.get('data_path', default=None)
         if data_path is None:
             return jsonify({}), 404
-        thread_import_dcm = ImportDcm(instance_id, data_path)
-        thread_import_dcm.start()
+        thread_import_dcm = ImportDcm(instance_id, data_path) 
+        #thread_import_dcm.start()
+        thread_import_dcm.run()
 
         return jsonify({'result': 'thread import data'}), 201
 
