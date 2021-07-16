@@ -90,6 +90,7 @@ class ExportService:
         for i in series:
             series_id = i['series_id']
             labels = label_service.query({"series_id": series_id})
+
             if len(labels) == 0:
                 app.logger.debug(f"The current series don't have labels:{i['series_id']}")
                 continue
@@ -101,12 +102,17 @@ class ExportService:
             y_dim = int(i['y_dimension'])
             z_dim = int(i['z_dimension'])
             series_files_list = eval(i['series_files_list'])
+            first_series_file_name = series_files_list[0]
             series_label = np.zeros((x_dim, y_dim, z_dim))
 
             # t.toc("before label iter", restart=True)
             for label in labels:
                 file_id = label['file_id']
-                content = eval(label['content'])
+                try:
+                    content = eval(label['content'])
+                except ValueError:
+                    app.logger.debug(f"label content error,series_id:{i['series_id']}, file_id:{file_id}")
+                    continue
                 pixel_data = content['labelmap2D']['pixelData']
                 # t.tic()
                 for label_data in pixel_data:
@@ -130,35 +136,38 @@ class ExportService:
                 "x_spacing": i['x_spacing'],
                 "y_spacing": i['y_spacing'],
                 "z_spacing": i['z_spacing'],
-                "patient_id": i['patient_id'],
-                "files": i['series_files_list'],
-                "path": i['series_path'],
-                "series_id": i['series_id'],
-                "study_id": i['study_id'],
-                "description": i["series_description"]
+                "patient_id": i['patient_id'] or "",
+                "files": i['series_files_list'] or "",
+                "path": i['series_path'] or "",
+                "series_id": i['series_id'] or "",
+                "study_id": i['study_id'] or "",
+                "description": i["series_description"]or ""
             }
             labels_list.append(label_obj)
 
             if study_h5 is not None:
-                label_db = study_h5.create_dataset(f"{store_type}/study:{study['suid']}-series:{series_uuid}/label",
-                                                   data=series_label, compression=compression)
-                label_db.attrs['x_spacing'] = i['x_spacing']
-                label_db.attrs['y_spacing'] = i['y_spacing']
-                label_db.attrs['z_spacing'] = i['z_spacing']
-                label_db.attrs['patient_id'] = i['patient_id']
-                label_db.attrs['files'] = i['series_files_list']
-                label_db.attrs['path'] = i['series_path']
-                label_db.attrs['series_id'] = i['series_id']
-                label_db.attrs['study_id'] = i['study_id']
-                label_db.attrs['description'] = i["series_description"]
-                label_db.attrs['image_orientation_patient'] = i['image_orientation_patient']
-                label_db.attrs['image_position_patient'] = i['image_position_patient']
+                try:
+                    label_db = study_h5.create_dataset(f"{store_type}/study:{study['suid']}-series:{series_uuid}[{first_series_file_name}]/label",
+                                                       data=series_label, compression=compression)
+                    label_db.attrs['x_spacing'] = i['x_spacing']
+                    label_db.attrs['y_spacing'] = i['y_spacing']
+                    label_db.attrs['z_spacing'] = i['z_spacing']
+                    label_db.attrs['patient_id'] = i['patient_id'] or ""
+                    label_db.attrs['files'] = i['series_files_list'] or ""
+                    label_db.attrs['path'] = i['series_path'] or ""
+                    label_db.attrs['series_id'] = i['series_id'] or ""
+                    label_db.attrs['study_id'] = i['study_id'] or ""
+                    label_db.attrs['description'] = i["series_description"] or ""
+                    # label_db.attrs['image_orientation_patient'] = i['image_orientation_patient'] or ""
+                    # label_db.attrs['image_position_patient'] = i['image_position_patient'] or ""
 
-                app.logger.debug(f"Save one series label - path:{i['series_path']}, series_id:{i['series_id']}, "
-                                 f"h5path: study:{study['suid']}/series:{series_uuid}/label")
-                msg_box.append(f"Save one series - path:{i['series_path']}, series_id:{i['series_id']}, "
-                               f"h5path: study:{store_type}/{study['suid']}-series:{series_uuid}/label")
-
+                    app.logger.debug(f"Save one series label - path:{i['series_path']}, series_id:{i['series_id']}, "
+                                     f"h5path: study:{study['suid']}/series:{series_uuid}/label")
+                    msg_box.append(f"Save one series - path:{i['series_path']}, series_id:{i['series_id']}, "
+                                   f"h5path: study:{store_type}/{study['suid']}-series:{series_uuid}/label")
+                except RuntimeError as e:
+                    app.logger.debug(f"Error when save one series label:{store_type}/study:{study['suid']}-series:{series_uuid}[{first_series_file_name}]/label.")
+                    app.logger.warning(e)
         return msg_box, labeled_series_list, labels_list
 
     def save_onestudy_dcm(self, study_id, study, study_h5, msg_box, store_type="train", compression=None,
@@ -189,17 +198,18 @@ class ExportService:
             # if series_dcm.shape != series_label.shape:
             #     app.logger.warn(
             #         f"The original DICOM shape({series_dcm.shape}) mismatch with the label's shape({series_label.shape})")
+            # print(f"study:{study['suid']}-series:{series_uuid}[{first_series_file_name}]")
             dcm = study_h5.create_dataset(f"{store_type}/study:{study['suid']}-series:{series_uuid}[{first_series_file_name}]/data",
                                           data=series_dcm, compression=compression)
             dcm.attrs['x_spacing'] = i['x_spacing']
             dcm.attrs['y_spacing'] = i['y_spacing']
             dcm.attrs['z_spacing'] = i['z_spacing']
-            dcm.attrs['patient_id'] = i['patient_id']
-            dcm.attrs['files'] = i['series_files_list']
-            dcm.attrs['path'] = i['series_path']
-            dcm.attrs['series_id'] = i['series_id']
-            dcm.attrs['study_id'] = i['study_id']
-            dcm.attrs['description'] = i["series_description"]
+            dcm.attrs['patient_id'] = i['patient_id'] or ""
+            dcm.attrs['files'] = i['series_files_list'] or ""
+            dcm.attrs['path'] = i['series_path'] or ""
+            dcm.attrs['series_id'] = i['series_id'] or ""
+            dcm.attrs['study_id'] = i['study_id'] or ""
+            dcm.attrs['description'] = i["series_description"] or ""
 
             app.logger.debug(f"Save one series dcm- path:{i['series_path']}, series_id:{i['series_id']}, "
                              f"h5path: {store_type}/study:{study['suid']}-series:{series_uuid}/data")

@@ -23,7 +23,7 @@ def insert_label(dcm_file_path, seg_file_path):
     dcm_h5.close()
     seg_h5.close()
 
-insert_label("/research/cbim/vast/qc58/private-db/cardiac/derivate_export_data/DyssynchronyProjectDcmFiltered-LAX-Nov17.h5","/research/cbim/vast/qc58/work/projects/pytorch-template/saved/test_results/CAP_LA_segmentation_exp1/test_result-CAP_LA_segmentation_exp1.h5")
+# insert_label("/research/cbim/vast/qc58/private-db/cardiac/derivate_export_data/DyssynchronyProjectDcmFiltered-LAX-Nov17.h5","/research/cbim/vast/qc58/work/projects/pytorch-template/saved/test_results/CAP_LA_segmentation_exp1/test_result-CAP_LA_segmentation_exp1.h5")
 
 def create_sax_pred(seg_file_path, dcm_file_path, target):
     seg_h5 = h5py.File(seg_file_path,'r')
@@ -91,12 +91,17 @@ def create_sax_pred(seg_file_path, dcm_file_path, target):
 # target_seg_file_path = "/research/cbim/vast/qc58/work/projects/pytorch-template/saved/test_results/Derivate_test/test_result-ACDC_segmentation_exp6_clean.h5"
 # create_sax_pred(seg_file_path, dcm_file_path, target_seg_file_path)
 #
-# print("process 7")
+# # print("process 7")
 # seg_file_path = "/research/cbim/vast/qc58/work/projects/pytorch-template/saved/test_results/ACDC_segmentation_evaluation_derivate2_4/test_result-ACDC_segmentation_evaluation_derivate2_4.h5"
 # dcm_file_path = "/research/cbim/vast/qc58/private-db/cardiac/derivate_export_data/Export-1-Dyssynchrony Project-1604525068-4.h5"
 # target_seg_file_path = "/research/cbim/vast/qc58/work/projects/pytorch-template/saved/test_results/Derivate_test/test_result-ACDC_segmentation_exp7_clean.h5"
 # create_sax_pred(seg_file_path, dcm_file_path, target_seg_file_path)
 
+print("process 1")
+seg_file_path = "/dresden/users/qc58/work/ATMI/output/1/test_result-ACDC_segmentation_derivate_apr19_new.h5"
+dcm_file_path = "/research/cbim/vast/qc58/private-db/cardiac/derivate_export_data/DyssynchronyProjectDcmFiltered-sax-apr18.h5"
+target_seg_file_path = "/dresden/users/qc58/work/ATMI/output/1/test_result-ACDC_segmentation_derivate_apr19_new_clean.h5"
+create_sax_pred(seg_file_path, dcm_file_path, target_seg_file_path)
 
 
 def vis_imgs(seg_file_path):

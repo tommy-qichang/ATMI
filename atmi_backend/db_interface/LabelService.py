@@ -42,9 +42,10 @@ class LabelService:
         result = [dict(item) for item in result]
         for record in result:
             if isinstance(record['content'], bytes):
-                record['content'] = record['content'].decode('utf-8')
+                record['content'] = record['content'].decode('utf-8', errors='replace')
             else:
                 record['content'] = record['content']
+
         return result
 
     def insert(self, series_id, user_id, file_id, content):

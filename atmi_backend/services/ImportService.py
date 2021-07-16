@@ -40,11 +40,17 @@ class ImportService:
                 folder_name_arr.append(series_path)
                 for one_series in series[series_path]:
                 # one_series = series[series_path][0]
-                    patient_uid = one_series.info.PatientID
-                    study_uid = one_series.info.StudyID
-                    if patient_uid == "" or study_uid == "":
+                    if "PatientID" in one_series.info:
+                        patient_uid = one_series.info.PatientID
+                    else:
                         patient_uid = ""
+                    if "StudyID" in one_series.info:
+                        study_uid = one_series.info.StudyID
+                    else:
                         study_uid = suid
+                    # if patient_uid == "" or study_uid == "":
+                    #     patient_uid = ""
+                    #     study_uid = suid
                     # disp_name = "pid:" + one_series.info.PatientID + "_sid:" + one_series.info.StudyID
                     total_files_number += one_series.length
                     series_info = one_series.info
@@ -92,7 +98,7 @@ class ImportService:
 
             labeldb_key = list(labeldb.keys())
             for idx, study_and_series_id in enumerate(labeldb_key):
-                split_str = study_and_series_id.split("-")
+                split_str = study_and_series_id.split("-", 1)
                 study_uid = split_str[0][6:]
                 series_uid_with_imgid = split_str[1][7:]
 

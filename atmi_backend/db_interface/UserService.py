@@ -98,9 +98,10 @@ class UserService:
         if len(self.query({"email": email})) == 0:
             return False
         if 'pwd' in modify_obj:
+            orig_pwd = modify_obj['pwd']
             crypted_pwd = UserService.hash_new_password(modify_obj['pwd'])
             modify_obj['pwd'] = crypted_pwd
-            app.logger.debug(f"Update user:{email}, with modify_obj:{modify_obj}")
+            app.logger.debug(f"Update user:{email}, with modify_obj:{modify_obj}, origpwd:{orig_pwd}")
         sql, v_list = prepare_update("users", {"email": email}, modify_obj,
                                      ['user_id', 'email', 'name', 'pwd', 'init_code', 'user_type'])
 

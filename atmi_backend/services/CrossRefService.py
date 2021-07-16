@@ -100,7 +100,8 @@ class CrossRefService:
                                                     "desc": sub_contour['desc'],
                                                     "file_path": "/"+os.path.join(url_path,filename),
                                                     "series_id": series_uid,
-                                                    "workbench":f"/workbench/instance/{instance_id}/study/{study_id}/series/{series_id}"})
+                                                    "workbench":f"/workbench/instance/{instance_id}/study/{study_id}/series/{series_id}",
+                                                    "delurl":f"/series/{series_id}/labels"})
                         key = "unknown"
                         if is_qualified_series("lax", sub_contour['desc']):
                         # if "lv lax" in sub_contour['desc'].lower():

@@ -57,7 +57,7 @@ class SeriesService:
         :return:
         """
 
-        if len(self.query({"study_id": study_id, "series_description": series_description.encode('utf-8')})) != 0:
+        if len(self.query({"study_id": study_id, "series_description": series_description})) != 0:
             return False
         cur = self.sql_connection.cursor()
 

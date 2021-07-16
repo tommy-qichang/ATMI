@@ -42,14 +42,15 @@ class DICOMParser:
             # Get SUID and register the file with an existing or new series object
             try:
                 suid = dcm.SeriesInstanceUID
+                # slice_location = str(dcm.SliceLocation)
             except AttributeError:
                 log.warning(f"some other kind of dicom file: {file_name}")
                 continue
 
-            slice_location = str(dcm.SliceLocation)
             complex_id = suid
-            if len(file_list)>50:
-                complex_id = suid+"_"+slice_location
+            # TODO: we should setup the ability to config series sorting arguments.
+            # if len(file_list)>50:
+            #     complex_id = suid+"_"+slice_location
 
             if complex_id not in series_map:
                 series_map[complex_id] = DicomSeries(complex_id)

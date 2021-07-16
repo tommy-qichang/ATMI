@@ -398,6 +398,16 @@ def setup_route_map(app, app_path):  # noqa: C901
             return jsonify([]), 200
         return jsonify(result), 200
 
+    @app.route('/series/<int:series_id>/labels', methods=['DELETE'])
+    def del_labels(series_id):
+        # Temporary mock the user Id.
+        user_id = 1
+        label_service = LabelService(get_conn())
+        status = label_service.delete({"series_id": series_id})
+        if status:
+            return jsonify([]), 200
+        return jsonify(status), 500
+
     class ImportDcm(Thread):
         def __init__(self, instance_id, data_path):
             Thread.__init__(self)

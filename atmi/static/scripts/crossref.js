@@ -261,6 +261,34 @@ $('#render').click(function () {
     }
 });
 
+$('#lax_del').click(function(){
+    let delurl = $('#lax_del').attr('delurl')
+    let confirm_status = confirm("Delete current series")
+    if(confirm_status === true){
+        $.ajax({
+            url: delurl,
+            type: "DELETE",
+            success: function(result){
+                $('#lax_del').addClass("disabled")
+            }
+        })
+    }
+})
+
+$('#sax_del').click(function(){
+    let delurl = $('#sax_del').attr('delurl')
+    let confirm_status = confirm("Delete current series")
+    if(confirm_status === true){
+        $.ajax({
+            url: delurl,
+            type: "DELETE",
+            success: function(result){
+                $('#sax_del').addClass("disabled")
+            }
+        })
+    }
+})
+
 
 let Crossview = class {
     constructor(data) {
@@ -268,10 +296,12 @@ let Crossview = class {
         this.cur_frame_idx = 0;
         this.sax_img = $("#sax_img");
         this.sax_workbench = $("#sax_url");
+        this.sax_del = $("#sax_del")
         this.sax_desc = $("#sax_desc");
 
         this.lax_img = $("#lax_img");
         this.lax_workbench = $("#lax_url");
+        this.lax_del = $("#lax_del")
         this.lax_desc = $("#lax_desc");
 
     }
@@ -304,6 +334,8 @@ let Crossview = class {
                 this.sax_img.attr("src", sax_url);
                 let sax_workbench = contour[i]['workbench'];
                 this.sax_workbench.attr("href", sax_workbench);
+                this.sax_del.attr("delurl", contour[i]['delurl'])
+                $('#sax_del').removeClass("disabled")
                 this.sax_desc.html(contour[i]['desc']);
 
             } else if (contour[i]['series_id'] === lax_idx) {
@@ -311,6 +343,8 @@ let Crossview = class {
                 this.lax_img.attr("src", lax_url);
                 let lax_workbench = contour[i]['workbench'];
                 this.lax_workbench.attr("href", lax_workbench);
+                this.lax_del.attr("delurl", contour[i]['delurl'])
+                $('#lax_del').removeClass("disabled")
                 this.lax_desc.html(contour[i]['desc']);
             }
         }
