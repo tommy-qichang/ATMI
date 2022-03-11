@@ -20,7 +20,8 @@ The following features will be implemented in this system:
 
 # Demo
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/e57JhhMpdKg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![ATMI Demo](http://img.youtube.com/vi/e57JhhMpdKg/0.jpg)](http://www.youtube.com/watch?v=e57JhhMpdKg "ATMI demo")
+    
     
     
 ## How to install ATMI.
